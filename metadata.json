@@ -1,0 +1,6 @@
+{
+  "name": "KSA Classic & Project Cars",
+  "description": "Bespoke marketplace for legendary classic cars and raw project cars in Vancouver, BC. Browse pristine survivors, rare barn finds, and restoration projects.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
