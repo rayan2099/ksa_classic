@@ -16,22 +16,22 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
         <img
           src="https://i.imgur.com/wokOdvh.jpg"
           alt="Vintage Classic Car"
-          className="w-full h-full object-cover object-bottom opacity-85 scale-100 transform transition duration-1000 max-sm:blur-[12px] max-sm:opacity-40"
+          className="w-full h-full object-cover object-bottom opacity-85 scale-100 transform transition duration-1000"
           onError={(e) => {
             e.currentTarget.src = "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=2000";
           }}
         />
         {/* Black to lighter dark gradient overlay for supreme visual appeal and legibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/80 via-neutral-950/45 to-neutral-950/15 max-sm:from-neutral-950/95 max-sm:via-neutral-950/80 max-sm:to-neutral-950/60"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/80 via-neutral-950/45 to-neutral-950/15"></div>
         <div className="absolute inset-0 bg-gradient-to-tr from-accent/5 via-transparent to-accent/20 mix-blend-color-dodge"></div>
         {/* Dark radial glow behind the text */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-accent/5 blur-[140px] pointer-events-none"></div>
         {/* Elegant bottom blending mask (softened and shortened to prevent eating the bottom of the car) */}
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-neutral-950/50 to-transparent max-sm:h-12"></div>
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-neutral-950/50 to-transparent"></div>
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col justify-between sm:h-full h-auto">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col justify-between h-full">
         <div className="max-w-4xl space-y-6">
           {/* Marketplace Pill Badge */}
           <div className="inline-flex items-center space-x-2 bg-neutral-900/80 backdrop-blur-md border border-accent/30 rounded-full px-4 py-1.5 shadow-lg shadow-black/35 animate-pulse">
@@ -62,22 +62,6 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </button>
           </div>
-        </div>
-
-        {/* Mobile Showcase Card - displays the full vintage Corvette without side-cropping */}
-        <div className="sm:hidden w-full aspect-[16/10] rounded-sm overflow-hidden border border-neutral-800/60 shadow-2xl relative my-6 group animate-fade-in">
-          <img
-            src="https://i.imgur.com/wokOdvh.jpg"
-            alt="Vintage Classic Car Showcase"
-            className="w-full h-full object-cover object-center"
-            onError={(e) => {
-              e.currentTarget.src = "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=2000";
-            }}
-          />
-          {/* Subtle elegant gradient overlay for text readability & polished aesthetic */}
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-neutral-950 to-transparent"></div>
-          {/* Accent light glow border */}
-          <div className="absolute inset-0 border border-accent/10 pointer-events-none rounded-sm"></div>
         </div>
 
         {/* Visual Marketplace Metrics (Bento-lite row) */}
