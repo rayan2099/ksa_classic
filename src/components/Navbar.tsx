@@ -105,9 +105,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onScrollToSection }) => {
             ) : (
               <Link
                 to="/admin/login"
-                className="font-heading text-xs tracking-wider text-neutral-400 hover:text-accent font-semibold uppercase transition-colors"
+                className="text-neutral-400 hover:text-accent transition-colors p-1"
+                title="Portal Login"
+                aria-label="Portal Login"
               >
-                Portal Login
+                <Shield className="w-4 h-4" />
               </Link>
             )}
           </div>
