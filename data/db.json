@@ -1,0 +1,187 @@
+{
+  "cars": [
+    {
+      "id": "car-id-1",
+      "title": "1967 Chevrolet Corvette Stingray",
+      "make": "Chevrolet",
+      "model": "Corvette Stingray",
+      "year": 1967,
+      "price": 129000,
+      "mileage": 45000,
+      "location": "Vancouver, BC",
+      "description": "Stunning numbers-matching 1967 Stingray in Tuxedo Black. Features a 427/435hp V8 engine with a 4-speed manual transmission. Fully restored to absolute concours standards. A true classic collector's dream.",
+      "condition": "new_arrival",
+      "images": [
+        "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1200"
+      ],
+      "contact_phone": "+1 604-555-0199",
+      "created_at": "2026-06-23T19:37:58.420Z",
+      "type": "classic"
+    },
+    {
+      "id": "car-id-2",
+      "title": "1973 Porsche 911 Carrera RS",
+      "make": "Porsche",
+      "model": "911 Carrera RS",
+      "year": 1973,
+      "price": 345000,
+      "mileage": 82000,
+      "location": "Vancouver, BC",
+      "description": "An legendary lightweight masterpiece. Finished in Grand Prix White with Viper Green lettering. Matching numbers 2.7L flat-six engine. Meticulously maintained with full historical documentation.",
+      "condition": "available",
+      "images": [
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1200"
+      ],
+      "contact_phone": "+1 604-555-0199",
+      "created_at": "2026-06-22T19:37:58.420Z",
+      "type": "classic"
+    },
+    {
+      "id": "car-id-3",
+      "title": "1965 Shelby Cobra 427 S/C",
+      "make": "Shelby",
+      "model": "Cobra 427 S/C",
+      "year": 1965,
+      "price": 185000,
+      "mileage": 12000,
+      "location": "Vancouver, BC",
+      "description": "Exquisite Shelby Cobra finished in iconic Guardsman Blue with Wimbledon White stripes. Powered by a thunderous 427ci V8 engine. Side pipes, chrome roll bar, and pristine leather interior. Fast, loud, and breathtaking.",
+      "condition": "available",
+      "images": [
+        "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=1200"
+      ],
+      "contact_phone": "+1 604-555-0199",
+      "created_at": "2026-06-21T19:37:58.420Z",
+      "type": "classic"
+    },
+    {
+      "id": "car-id-4",
+      "title": "1969 Ford Mustang Boss 429",
+      "make": "Ford",
+      "model": "Mustang Boss 429",
+      "year": 1969,
+      "price": 260000,
+      "mileage": 31000,
+      "location": "Vancouver, BC",
+      "description": "Ultra-rare, highly coveted Boss 429. Finished in Royal Maroon. Fully documented history, numbers-matching powertrain. This vehicle represents the absolute pinnacle of the classic American muscle era.",
+      "condition": "sold",
+      "images": [
+        "https://images.unsplash.com/photo-1612466285769-ac9380c5780d?auto=format&fit=crop&q=80&w=1200"
+      ],
+      "contact_phone": "+1 604-555-0199",
+      "created_at": "2026-06-20T19:37:58.420Z",
+      "type": "classic"
+    },
+    {
+      "id": "car-id-5",
+      "title": "1971 Datsun 240Z Series I",
+      "make": "Datsun",
+      "model": "240Z",
+      "year": 1971,
+      "price": 18500,
+      "mileage": 142000,
+      "location": "Vancouver, BC",
+      "description": "Exceptional Series I 240Z project candidate. Sourced from dry indoor storage. Minimal surface rust, complete matching-numbers L24 engine, and 4-speed manual gearbox. Perfect for a highly rewarding ground-up restoration or a custom performance restomod project.",
+      "condition": "available",
+      "type": "project",
+      "images": [
+        "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=1200"
+      ],
+      "contact_phone": "+1 604-555-0199",
+      "created_at": "2026-06-19T19:44:10.066Z"
+    },
+    {
+      "id": "car-id-6",
+      "title": "1968 Dodge Charger R/T 440",
+      "make": "Dodge",
+      "model": "Charger R/T",
+      "year": 1968,
+      "price": 34000,
+      "mileage": 115000,
+      "location": "Vancouver, BC",
+      "description": "Ultimate muscle project! Authentic 1968 Dodge Charger R/T project. Includes a period-correct 440 Big Block V8 (currently disassembled for machining) and 727 Torqueflite automatic transmission. Highly solid floor and frame rails, needs rear quarter panel work.",
+      "condition": "new_arrival",
+      "type": "project",
+      "images": [
+        "https://images.unsplash.com/photo-1616422285623-13ff0162193c?auto=format&fit=crop&q=80&w=1200"
+      ],
+      "contact_phone": "+1 604-555-0199",
+      "created_at": "2026-06-18T19:44:10.066Z"
+    },
+    {
+      "id": "car-id-7",
+      "title": "1979 Volkswagen Beetle Convertible",
+      "make": "Volkswagen",
+      "model": "Beetle Convertible",
+      "year": 1979,
+      "price": 6800,
+      "mileage": 180000,
+      "location": "Vancouver, BC",
+      "description": "A delightful, highly original classic Super Beetle convertible project. Runs and drives smoothly but requires a fresh coat of paint, new soft-top vinyl, and moderate interior upholstery work. Great entry-level vintage restoration project.",
+      "condition": "available",
+      "type": "project",
+      "images": [
+        "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=1200"
+      ],
+      "contact_phone": "+1 604-555-0199",
+      "created_at": "2026-06-17T19:44:10.066Z"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "admin-id-1",
+      "full_name": "KSA Classic Admin",
+      "role": "super_admin",
+      "email": "helpooclassmate@gmail.com",
+      "created_at": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "subadmin-id-1",
+      "full_name": "KSA Sub Admin",
+      "role": "sub_admin",
+      "email": "subadmin@ksaclassic.com",
+      "created_at": "2026-02-01T00:00:00.000Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "msg-id-1",
+      "car_id": "car-id-1",
+      "buyer_name": "John Doe",
+      "buyer_email": "john.doe@example.com",
+      "buyer_phone": "604-555-9011",
+      "message": "Hi, is this 1967 Corvette still available? I would like to schedule a private viewing this Saturday. I have my financing pre-arranged.",
+      "is_read": false,
+      "created_at": "2026-06-23T18:37:58.420Z"
+    },
+    {
+      "id": "msg-id-2",
+      "car_id": "car-id-3",
+      "buyer_name": "Sarah Jenkins",
+      "buyer_email": "sjenkins@example.com",
+      "buyer_phone": "778-555-4321",
+      "message": "Absolutely gorgeous Shelby Cobra. Is the price firm, and can you provide the engine build details and restoration documentation? Thank you.",
+      "is_read": true,
+      "created_at": "2026-06-23T15:37:58.420Z"
+    },
+    {
+      "id": "msg-mock-reply-test",
+      "car_id": "car-id-1",
+      "buyer_name": "Marcus Brody",
+      "buyer_email": "mbrody@classicmuseum.org",
+      "buyer_phone": "236-555-1200",
+      "message": "Hello, I am interested in negotiating a deal for the 1967 Corvette. We would love to feature this in our heritage display collection. Let me know if we can set up a custom viewing.",
+      "is_read": false,
+      "created_at": "2026-06-23T20:11:58.748Z",
+      "replies": [
+        {
+          "id": "rep-initial-mock",
+          "sender_name": "System Auto-Response",
+          "sender_email": "no-reply@ksaclassic.com",
+          "message": "Thank you for your interest in KSA Classics. Our curators are reviewing your inquiry.",
+          "created_at": "2026-06-23T19:41:58.748Z"
+        }
+      ]
+    }
+  ]
+}

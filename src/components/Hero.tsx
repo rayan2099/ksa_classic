@@ -16,13 +16,13 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
         <img
           src="https://i.imgur.com/wokOdvh.jpg"
           alt="Vintage Classic Car"
-          className="w-full h-full object-cover object-center opacity-65 scale-100 transform transition duration-1000"
+          className="w-full h-full object-cover object-center opacity-85 scale-100 transform transition duration-1000"
           onError={(e) => {
             e.currentTarget.src = "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=2000";
           }}
         />
         {/* Black to lighter dark gradient overlay for supreme visual appeal and legibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/75 to-neutral-950/30"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/80 via-neutral-950/45 to-neutral-950/15"></div>
         <div className="absolute inset-0 bg-gradient-to-tr from-accent/5 via-transparent to-accent/20 mix-blend-color-dodge"></div>
         {/* Dark radial glow behind the text */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-accent/5 blur-[140px] pointer-events-none"></div>

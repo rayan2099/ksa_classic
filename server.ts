@@ -162,7 +162,7 @@ const defaultCars: Car[] = [
     description: 'A delightful, highly original classic Super Beetle convertible project. Runs and drives smoothly but requires a fresh coat of paint, new soft-top vinyl, and moderate interior upholstery work. Great entry-level vintage restoration project.',
     condition: 'available',
     type: 'project',
-    images: ['https://images.unsplash.com/photo-1525609004556-c46c7d6cf0a3?auto=format&fit=crop&q=80&w=1200'],
+    images: ['https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=1200'],
     contact_phone: '+1 604-555-0199',
     created_at: new Date(Date.now() - 518400000).toISOString()
   }
