@@ -11,21 +11,21 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
   return (
     <div
       id="hero"
-      className="relative min-h-[100vh] sm:min-h-[90vh] flex flex-col justify-center bg-neutral-950 overflow-hidden pt-28 pb-16"
+      className="relative min-h-screen sm:min-h-[90vh] flex flex-col justify-center bg-neutral-950 overflow-hidden pt-36 pb-12 sm:pt-28 sm:pb-16"
     >
       {/* Background Image with Rich Multi-Layered Gradients */}
       <div className="absolute inset-0 z-0">
         <img
           src={classicCarSunsetBg}
           alt="Vintage Classic Car"
-          className="w-full h-full object-cover object-bottom opacity-85 scale-100 transform transition duration-1000"
+          className="w-full h-full object-cover object-[75%_bottom] opacity-85 scale-100 transform transition duration-1000"
           referrerPolicy="no-referrer"
           onError={(e) => {
             e.currentTarget.src = "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=2000";
           }}
         />
         {/* Black to lighter dark gradient overlay for supreme visual appeal and legibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/80 via-neutral-950/45 to-neutral-950/15"></div>
+        <div className="absolute inset-0 bg-gradient-to-b sm:bg-gradient-to-r from-neutral-950/90 via-neutral-950/50 sm:via-neutral-950/45 to-neutral-950/20 sm:to-neutral-950/15"></div>
         <div className="absolute inset-0 bg-gradient-to-tr from-accent/5 via-transparent to-accent/20 mix-blend-color-dodge"></div>
         {/* Dark radial glow behind the text */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-accent/5 blur-[140px] pointer-events-none"></div>
@@ -45,17 +45,17 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
           </div>
 
           {/* Majestic Heading */}
-          <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold font-heading text-white uppercase tracking-tight leading-[1.05] sm:leading-[0.95]">
+          <h1 className="text-4xl sm:text-7xl md:text-8xl font-bold font-heading text-white uppercase tracking-tight leading-[1.05] sm:leading-[0.95]">
             KSA <span className="text-accent text-glow">CLASSICS</span>
           </h1>
 
           {/* Responsive Description */}
-          <p className="max-w-2xl text-sm sm:text-base md:text-lg text-neutral-300 font-sans tracking-wide leading-relaxed">
+          <p className="max-w-2xl text-xs sm:text-base md:text-lg text-neutral-300 font-sans tracking-wide leading-relaxed">
             Discover collector cars and restoration projects, from carefully preserved classics to promising builds ready for their next chapter.
           </p>
 
           {/* Action Call to Actions */}
-          <div className="flex pt-4">
+          <div className="flex pt-2 sm:pt-4">
             <button
               onClick={onBrowseClick}
               id="hero-cta-browse"
@@ -68,50 +68,50 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
         </div>
 
         {/* Visual Marketplace Metrics (Bento-lite row) */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-20 pt-10 border-t border-neutral-800/60">
+        <div className="flex sm:grid sm:grid-cols-4 gap-4 mt-8 sm:mt-20 pt-6 sm:pt-10 border-t border-neutral-800/60 overflow-x-auto sm:overflow-x-visible scrollbar-none snap-x snap-mandatory pb-4 sm:pb-0">
           {/* Metric 1 */}
-          <div className="bg-neutral-950/50 backdrop-blur-md border border-neutral-900 p-5 rounded-sm hover:border-accent/20 transition-all group">
+          <div className="bg-neutral-950/60 backdrop-blur-md border border-neutral-900/80 p-4 sm:p-5 rounded-sm hover:border-accent/20 transition-all group w-[220px] sm:w-auto shrink-0 snap-start">
             <div className="flex items-center space-x-3 mb-2">
               <div className="p-2 bg-accent/10 rounded-sm text-accent group-hover:bg-accent group-hover:text-neutral-950 transition-colors">
                 <Trophy className="w-4 h-4" />
               </div>
-              <span className="text-2xl sm:text-3xl font-bold font-heading text-white tracking-tight">120+</span>
+              <span className="text-xl sm:text-3xl font-bold font-heading text-white tracking-tight">120+</span>
             </div>
             <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-heading font-bold">Pristine Classics</p>
             <p className="text-[10px] text-neutral-500 font-sans mt-1">Concours & survivor condition</p>
           </div>
 
           {/* Metric 2 */}
-          <div className="bg-neutral-950/50 backdrop-blur-md border border-neutral-900 p-5 rounded-sm hover:border-accent/20 transition-all group">
+          <div className="bg-neutral-950/60 backdrop-blur-md border border-neutral-900/80 p-4 sm:p-5 rounded-sm hover:border-accent/20 transition-all group w-[220px] sm:w-auto shrink-0 snap-start">
             <div className="flex items-center space-x-3 mb-2">
               <div className="p-2 bg-accent/10 rounded-sm text-accent group-hover:bg-accent group-hover:text-neutral-950 transition-colors">
                 <Wrench className="w-4 h-4" />
               </div>
-              <span className="text-2xl sm:text-3xl font-bold font-heading text-white tracking-tight">85+</span>
+              <span className="text-xl sm:text-3xl font-bold font-heading text-white tracking-tight">85+</span>
             </div>
             <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-heading font-bold">Project Builds</p>
             <p className="text-[10px] text-neutral-500 font-sans mt-1">Barn-finds & rolling restorations</p>
           </div>
 
           {/* Metric 3 */}
-          <div className="bg-neutral-950/50 backdrop-blur-md border border-neutral-900 p-5 rounded-sm hover:border-accent/20 transition-all group">
+          <div className="bg-neutral-950/60 backdrop-blur-md border border-neutral-900/80 p-4 sm:p-5 rounded-sm hover:border-accent/20 transition-all group w-[220px] sm:w-auto shrink-0 snap-start">
             <div className="flex items-center space-x-3 mb-2">
               <div className="p-2 bg-accent/10 rounded-sm text-accent group-hover:bg-accent group-hover:text-neutral-950 transition-colors">
                 <ShieldCheck className="w-4 h-4" />
               </div>
-              <span className="text-2xl sm:text-3xl font-bold font-heading text-white tracking-tight">100%</span>
+              <span className="text-xl sm:text-3xl font-bold font-heading text-white tracking-tight">100%</span>
             </div>
             <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-heading font-bold">Verified Listings</p>
             <p className="text-[10px] text-neutral-500 font-sans mt-1">Reviewed vehicle details</p>
           </div>
 
           {/* Metric 4 */}
-          <div className="bg-neutral-950/50 backdrop-blur-md border border-neutral-900 p-5 rounded-sm hover:border-accent/20 transition-all group">
+          <div className="bg-neutral-950/60 backdrop-blur-md border border-neutral-900/80 p-4 sm:p-5 rounded-sm hover:border-accent/20 transition-all group w-[220px] sm:w-auto shrink-0 snap-start">
             <div className="flex items-center space-x-3 mb-2">
               <div className="p-2 bg-accent/10 rounded-sm text-accent group-hover:bg-accent group-hover:text-neutral-950 transition-colors">
                 <MapPin className="w-4 h-4" />
               </div>
-              <span className="text-2xl sm:text-3xl font-bold font-heading text-white tracking-tight">KSA Wide</span>
+              <span className="text-xl sm:text-3xl font-bold font-heading text-white tracking-tight">KSA Wide</span>
             </div>
             <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-heading font-bold">Kingdom Coverage</p>
             <p className="text-[10px] text-neutral-500 font-sans mt-1">Viewings & transport support</p>
