@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.js';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import {
@@ -28,7 +28,8 @@ import {
   Phone,
   FolderOpen,
   RefreshCw,
-  Settings
+  Settings,
+  ArrowLeft
 } from 'lucide-react';
 import { Car, Profile, Message } from '../types.js';
 import { AdminSettings } from '../components/AdminSettings.js';
@@ -543,6 +544,13 @@ export const AdminDashboard: React.FC = () => {
         {/* Topbar / Header */}
         <header className="bg-neutral-950 border-b border-neutral-800 h-16 px-6 flex items-center justify-between sticky top-0 z-40">
           <div className="flex items-center space-x-4">
+            <Link
+              to="/"
+              className="mr-2 text-neutral-400 hover:text-accent transition-colors flex items-center space-x-1"
+              title="Return to Showroom"
+            >
+              <ArrowLeft className="w-5 h-5 text-accent" />
+            </Link>
             <h1 className="font-heading text-sm font-bold uppercase tracking-wider text-neutral-200">
               KSA Classic CRM — {activeTab}
             </h1>
@@ -574,14 +582,13 @@ export const AdminDashboard: React.FC = () => {
             >
               <LogOut className="w-5 h-5" />
             </button>
-            <a
-              href="/"
-              target="_blank"
+            <Link
+              to="/"
               className="bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 hover:border-neutral-600 text-white px-3 py-1.5 rounded-sm text-xs font-heading font-bold uppercase tracking-wider flex items-center space-x-1.5 transition-colors"
             >
-              <span>View Site</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+              <ArrowLeft className="w-3.5 h-3.5 text-accent" />
+              <span>Showroom</span>
+            </Link>
           </div>
         </header>
 

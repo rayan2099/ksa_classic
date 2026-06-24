@@ -43,11 +43,21 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
         className="relative bg-white text-neutral-900 w-full max-w-4xl rounded-sm overflow-hidden shadow-2xl flex flex-col md:flex-row my-8"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Back Button */}
+        <button
+          onClick={onClose}
+          id="back-detail-modal-btn"
+          className="absolute top-4 left-4 z-30 bg-neutral-900/90 hover:bg-neutral-800 text-white px-3 py-1.5 rounded-sm text-xs font-heading font-bold uppercase tracking-wider flex items-center space-x-1.5 transition-colors border border-neutral-700 shadow-lg"
+        >
+          <ChevronLeft className="w-4 h-4 text-accent" />
+          <span>Back</span>
+        </button>
+
         {/* Close Button */}
         <button
           onClick={onClose}
           id="close-detail-modal-btn"
-          className="absolute top-4 right-4 z-30 bg-neutral-900/85 hover:bg-neutral-800 text-white p-2 rounded-full transition-colors border border-neutral-700"
+          className="absolute top-4 right-4 z-30 bg-neutral-900/85 hover:bg-neutral-800 text-white p-2 rounded-full transition-colors border border-neutral-700 shadow-lg"
         >
           <X className="w-5 h-5" />
         </button>
@@ -80,14 +90,14 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
               </>
             )}
 
-            {/* Badge overlay */}
+            {/* Badge overlay - Offset to top-16 to avoid overlapping the Back Button */}
             {car.condition === 'sold' && (
-              <div className="absolute top-4 left-4 bg-red-600 text-white font-heading font-bold text-xs uppercase tracking-widest px-4 py-1.5 shadow-lg border border-white">
+              <div className="absolute top-16 left-4 bg-red-600 text-white font-heading font-bold text-xs uppercase tracking-widest px-4 py-1.5 shadow-lg border border-white z-20 animate-pulse">
                 SOLD
               </div>
             )}
             {car.condition === 'new_arrival' && (
-              <div className="absolute top-4 left-4 bg-emerald-600 text-white font-heading font-bold text-xs uppercase tracking-widest px-4 py-1.5 shadow-lg">
+              <div className="absolute top-16 left-4 bg-emerald-600 text-white font-heading font-bold text-xs uppercase tracking-widest px-4 py-1.5 shadow-lg z-20">
                 New Arrival
               </div>
             )}
@@ -202,6 +212,14 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
               <ShieldCheck className="w-3.5 h-3.5 text-accent mr-1" />
               Secure transaction guaranteed via KSA Classic Vancouver.
             </p>
+
+            <button
+              onClick={onClose}
+              className="w-full text-center text-xs font-heading font-bold uppercase tracking-wider text-neutral-500 hover:text-accent transition-colors py-2 mt-2 flex items-center justify-center space-x-1 border-t border-neutral-100 pt-3"
+            >
+              <ChevronLeft className="w-4 h-4 text-accent" />
+              <span>Back to Showroom</span>
+            </button>
           </div>
         </div>
       </div>

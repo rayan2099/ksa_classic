@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { X, Send, Mail, User, Phone, MessageSquare, Loader2 } from 'lucide-react';
+import { X, Send, Mail, User, Phone, MessageSquare, Loader2, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Car } from '../types.js';
 
@@ -76,13 +76,23 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
       >
         {/* Header */}
         <div className="bg-neutral-900 p-6 text-white flex justify-between items-center">
-          <div>
-            <span className="text-[10px] uppercase tracking-wider text-accent font-bold font-heading">
-              Inquire About Vehicle
-            </span>
-            <h3 className="text-sm font-heading font-bold uppercase tracking-tight text-neutral-200 mt-1">
-              {car.title}
-            </h3>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={onClose}
+              id="back-message-modal-btn"
+              className="bg-neutral-800 hover:bg-neutral-700 text-white p-2 rounded-sm transition-colors border border-neutral-700"
+              title="Back"
+            >
+              <ChevronLeft className="w-4 h-4 text-accent" />
+            </button>
+            <div>
+              <span className="text-[10px] uppercase tracking-wider text-accent font-bold font-heading">
+                Inquire About Vehicle
+              </span>
+              <h3 className="text-sm font-heading font-bold uppercase tracking-tight text-neutral-200 mt-1">
+                {car.title}
+              </h3>
+            </div>
           </div>
           <button
             onClick={onClose}

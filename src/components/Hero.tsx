@@ -8,119 +8,379 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
-    <div
-      id="hero"
-      className="relative min-h-screen sm:min-h-[90vh] flex flex-col justify-center bg-neutral-950 overflow-hidden pt-36 pb-12 sm:pt-28 sm:pb-16"
-    >
-      {/* Background Image with Rich Multi-Layered Gradients */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src={classicCarSunsetBg}
-          alt="Vintage Classic Car"
-          className="w-full h-full object-cover object-[75%_bottom] opacity-85 scale-100 transform transition duration-1000"
-          referrerPolicy="no-referrer"
-          onError={(e) => {
-            e.currentTarget.src = "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=2000";
-          }}
-        />
-        {/* Black to lighter dark gradient overlay for supreme visual appeal and legibility */}
-        <div className="absolute inset-0 bg-gradient-to-b sm:bg-gradient-to-r from-neutral-950/90 via-neutral-950/50 sm:via-neutral-950/45 to-neutral-950/20 sm:to-neutral-950/15"></div>
-        <div className="absolute inset-0 bg-gradient-to-tr from-accent/5 via-transparent to-accent/20 mix-blend-color-dodge"></div>
-        {/* Dark radial glow behind the text */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-accent/5 blur-[140px] pointer-events-none"></div>
-        {/* Elegant bottom blending mask (softened and shortened to prevent eating the bottom of the car) */}
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-neutral-950/70 to-transparent"></div>
-      </div>
+    <>
+      <div
+        id="hero"
+        style={isMobile ? {
+          position: 'relative',
+          overflow: 'hidden',
+          height: '100vh',
+          backgroundColor: '#0a0a0a'
+        } : {}}
+        className={isMobile ? "" : "relative min-h-screen flex flex-col justify-between bg-neutral-950 overflow-hidden"}
+      >
+        {/* Spacer to start below the fixed 56px navbar */}
+        <div className="h-[56px] shrink-0" />
 
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col justify-between h-full">
-        <div className="max-w-4xl space-y-6">
-          {/* Marketplace Pill Badge */}
-          <div className="inline-flex items-center space-x-2 bg-neutral-900/80 backdrop-blur-md border border-accent/30 rounded-full px-4 py-1.5 shadow-lg shadow-black/35">
-            <Sparkles className="w-3.5 h-3.5 text-accent animate-pulse" />
-            <span className="text-[10px] uppercase tracking-widest text-neutral-200 font-bold font-heading">
-              Classic &amp; Project Car Marketplace
-            </span>
-          </div>
-
-          {/* Majestic Heading */}
-          <h1 className="text-4xl sm:text-7xl md:text-8xl font-bold font-heading text-white uppercase tracking-tight leading-[1.05] sm:leading-[0.95]">
-            KSA <span className="text-accent text-glow">CLASSICS</span>
-          </h1>
-
-          {/* Responsive Description */}
-          <p className="max-w-2xl text-xs sm:text-base md:text-lg text-neutral-300 font-sans tracking-wide leading-relaxed">
-            Discover collector cars and restoration projects, from carefully preserved classics to promising builds ready for their next chapter.
-          </p>
-
-          {/* Action Call to Actions */}
-          <div className="flex pt-2 sm:pt-4">
-            <button
-              onClick={onBrowseClick}
-              id="hero-cta-browse"
-              className="w-full sm:w-auto bg-accent hover:bg-accent-hover text-neutral-950 font-heading font-bold text-xs uppercase tracking-widest py-4 px-10 rounded-sm transition-all duration-300 hover:shadow-xl hover:shadow-accent/25 flex items-center justify-center space-x-2.5 border border-accent cursor-pointer group"
-            >
-              <span>Browse Inventory</span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </button>
-          </div>
+        {/* Background Image with Rich Multi-Layered Gradients */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src={classicCarSunsetBg}
+            alt="Vintage Classic Car"
+            style={isMobile ? {
+              objectFit: 'cover',
+              objectPosition: '70% center',
+              width: '100%',
+              height: '100%',
+              position: 'absolute',
+              top: 0,
+              left: 0
+            } : {}}
+            className={isMobile ? "opacity-85" : "w-full h-full object-cover object-right opacity-85 scale-100 transform transition duration-1000"}
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              e.currentTarget.src = "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=2000";
+            }}
+          />
+          {/* Black to lighter dark gradient overlay for supreme visual appeal and legibility */}
+          <div 
+            style={isMobile ? {
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 38%, rgba(0,0,0,0.15) 65%, rgba(0,0,0,0.4) 100%)',
+              zIndex: 2
+            } : {}}
+            className={isMobile ? "" : "absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"}
+          ></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-accent/5 via-transparent to-accent/20 mix-blend-color-dodge"></div>
+          {/* Dark radial glow behind the text */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-accent/5 blur-[140px] pointer-events-none"></div>
+          {/* Elegant bottom blending mask */}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-neutral-950/70 to-transparent"></div>
         </div>
 
-        {/* Visual Marketplace Metrics (Bento-lite row) */}
-        <div className="flex sm:grid sm:grid-cols-4 gap-4 mt-8 sm:mt-20 pt-6 sm:pt-10 border-t border-neutral-800/60 overflow-x-auto sm:overflow-x-visible scrollbar-none snap-x snap-mandatory pb-4 sm:pb-0">
-          {/* Metric 1 */}
-          <div className="bg-neutral-950/60 backdrop-blur-md border border-neutral-900/80 p-4 sm:p-5 rounded-sm hover:border-accent/20 transition-all group w-[220px] sm:w-auto shrink-0 snap-start">
-            <div className="flex items-center space-x-3 mb-2">
-              <div className="p-2 bg-accent/10 rounded-sm text-accent group-hover:bg-accent group-hover:text-neutral-950 transition-colors">
-                <Trophy className="w-4 h-4" />
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col justify-between flex-grow pt-8 sm:pt-16 pb-0">
+          <div 
+            style={isMobile ? {
+              position: 'absolute',
+              top: '10%',
+              left: '0',
+              right: '0',
+              padding: '0 20px',
+              zIndex: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            } : {}}
+            className={isMobile ? "" : "max-w-[55%] w-full space-y-6"}
+          >
+            {isMobile ? (
+              <div
+                style={{
+                  background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0) 100%)',
+                  padding: '20px 16px 40px 16px',
+                  borderRadius: '0',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}
+              >
+                {/* Marketplace Pill Badge */}
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    border: '1px solid rgba(201,168,76,0.5)',
+                    borderRadius: '999px',
+                    padding: '6px 14px',
+                    fontSize: '10px',
+                    letterSpacing: '0.15em',
+                    color: 'rgba(255,255,255,0.9)',
+                    backgroundColor: 'rgba(0,0,0,0.4)',
+                    backdropFilter: 'blur(4px)',
+                    width: 'fit-content'
+                  }}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#C9A84C] animate-pulse" />
+                  <span className="text-[8px] uppercase tracking-widest text-neutral-200 font-bold font-heading">
+                    Classic &amp; Project Car Marketplace
+                  </span>
+                </div>
+
+                {/* Majestic Heading */}
+                <h1
+                  style={{
+                    fontSize: '36px',
+                    fontWeight: '900',
+                    lineHeight: '1',
+                    whiteSpace: 'nowrap',
+                    margin: 0
+                  }}
+                >
+                  <span style={{ color: '#ffffff' }}>KSA </span>
+                  <span style={{ color: '#C9A84C' }}>CLASSICS</span>
+                </h1>
+
+                {/* Responsive Description */}
+                <p
+                  style={{
+                    fontSize: '12px',
+                    lineHeight: '1.6',
+                    color: 'rgba(255,255,255,0.8)',
+                    maxWidth: '75%',
+                    margin: 0
+                  }}
+                  className="font-sans tracking-wide"
+                >
+                  Discover collector cars and restoration projects, from carefully preserved classics to promising builds ready for their next chapter.
+                </p>
+
+                {/* Browse Inventory Button */}
+                <div>
+                  <button
+                    onClick={onBrowseClick}
+                    id="hero-cta-browse"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      backgroundColor: '#C9A84C',
+                      color: '#111111',
+                      fontWeight: '800',
+                      fontSize: '12px',
+                      letterSpacing: '0.12em',
+                      padding: '13px 24px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      textTransform: 'uppercase',
+                      whiteSpace: 'nowrap',
+                      width: 'fit-content'
+                    }}
+                    className="rounded-sm"
+                  >
+                    <span>Browse Inventory</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <span className="text-xl sm:text-3xl font-bold font-heading text-white tracking-tight">120+</span>
+            ) : (
+              <div className="space-y-6">
+                {/* Marketplace Pill Badge */}
+                <div className="inline-flex items-center space-x-2 bg-neutral-900/80 backdrop-blur-md border border-[#C9A84C]/30 rounded-full px-4 py-1.5 shadow-lg shadow-black/35">
+                  <Sparkles className="w-3.5 h-3.5 text-[#C9A84C] animate-pulse" />
+                  <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-200 font-bold font-heading">
+                    Classic &amp; Project Car Marketplace
+                  </span>
+                </div>
+
+                {/* Majestic Heading */}
+                <h1 className="text-3xl sm:text-7xl md:text-8xl font-bold font-heading text-white uppercase tracking-tight leading-[1.05] sm:leading-[0.95]">
+                  KSA <span className="text-[#C9A84C] text-glow">CLASSICS</span>
+                </h1>
+
+                {/* Responsive Description */}
+                <p className="max-w-2xl text-[10px] sm:text-base md:text-lg text-neutral-300 font-sans tracking-wide leading-relaxed">
+                  Discover collector cars and restoration projects, from carefully preserved classics to promising builds ready for their next chapter.
+                </p>
+
+                {/* Action Call to Actions */}
+                <div className="flex pt-2 sm:pt-4">
+                  <button
+                    onClick={onBrowseClick}
+                    id="hero-cta-browse"
+                    className="w-[280px] max-w-full bg-[#C9A84C] hover:bg-[#B09038] text-neutral-950 font-heading font-bold text-xs uppercase tracking-widest py-4 px-10 rounded-sm transition-all duration-300 hover:shadow-xl hover:shadow-[#C9A84C]/25 flex items-center justify-center space-x-2.5 border border-[#C9A84C] cursor-pointer group"
+                  >
+                    <span>Browse Inventory</span>
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {!isMobile && (
+            /* Visual Marketplace Metrics - Desktop */
+            <div className="flex w-full h-[72px] bg-black/75 border-t border-neutral-800/60 rounded-none overflow-hidden select-none">
+              {/* Metric 1 */}
+              <div className="w-1/4 shrink-0 grow-0 overflow-hidden h-full px-1 sm:px-4 py-1 sm:py-2 flex flex-col justify-center transition-all group">
+                <div className="flex items-start space-x-1 sm:space-x-3 mb-0.5 sm:mb-1 whitespace-nowrap">
+                  <div className="p-0.5 sm:p-1 bg-[#C9A84C]/10 rounded-sm text-[#C9A84C] shrink-0">
+                    <Trophy className="w-[14px] h-[14px] sm:w-5 sm:h-5" />
+                  </div>
+                  <span className="text-[15px] sm:text-3xl font-bold font-heading text-white tracking-tight leading-none">120+</span>
+                </div>
+                <p className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-300 font-heading font-bold whitespace-nowrap overflow-hidden text-ellipsis">Pristine Classics</p>
+                <p className="hidden sm:block text-[10px] text-neutral-500 font-sans whitespace-nowrap overflow-hidden text-ellipsis">Concours & survivor condition</p>
+              </div>
+
+              {/* Metric 2 */}
+              <div className="w-1/4 shrink-0 grow-0 overflow-hidden h-full px-1 sm:px-4 py-1 sm:py-2 flex flex-col justify-center transition-all group">
+                <div className="flex items-start space-x-1 sm:space-x-3 mb-0.5 sm:mb-1 whitespace-nowrap">
+                  <div className="p-0.5 sm:p-1 bg-[#C9A84C]/10 rounded-sm text-[#C9A84C] shrink-0">
+                    <Wrench className="w-[14px] h-[14px] sm:w-5 sm:h-5" />
+                  </div>
+                  <span className="text-[15px] sm:text-3xl font-bold font-heading text-white tracking-tight leading-none">85+</span>
+                </div>
+                <p className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-300 font-heading font-bold whitespace-nowrap overflow-hidden text-ellipsis">Project Builds</p>
+                <p className="hidden sm:block text-[10px] text-neutral-500 font-sans whitespace-nowrap overflow-hidden text-ellipsis">Barn-finds & restorations</p>
+              </div>
+
+              {/* Metric 3 */}
+              <div className="w-1/4 shrink-0 grow-0 overflow-hidden h-full px-1 sm:px-4 py-1 sm:py-2 flex flex-col justify-center transition-all group">
+                <div className="flex items-start space-x-1 sm:space-x-3 mb-0.5 sm:mb-1 whitespace-nowrap">
+                  <div className="p-0.5 sm:p-1 bg-[#C9A84C]/10 rounded-sm text-[#C9A84C] shrink-0">
+                    <ShieldCheck className="w-[14px] h-[14px] sm:w-5 sm:h-5" />
+                  </div>
+                  <span className="text-[15px] sm:text-3xl font-bold font-heading text-white tracking-tight leading-none">100%</span>
+                </div>
+                <p className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-300 font-heading font-bold whitespace-nowrap overflow-hidden text-ellipsis">Verified Listings</p>
+                <p className="hidden sm:block text-[10px] text-neutral-500 font-sans whitespace-nowrap overflow-hidden text-ellipsis">Reviewed vehicle details</p>
+              </div>
+
+              {/* Metric 4 */}
+              <div className="w-1/4 shrink-0 grow-0 overflow-hidden h-full px-1 sm:px-4 py-1 sm:py-2 flex flex-col justify-center transition-all group">
+                <div className="flex items-start space-x-1 sm:space-x-3 mb-0.5 sm:mb-1 whitespace-nowrap">
+                  <div className="p-0.5 sm:p-1 bg-[#C9A84C]/10 rounded-sm text-[#C9A84C] shrink-0">
+                    <MapPin className="w-[14px] h-[14px] sm:w-5 sm:h-5" />
+                  </div>
+                  <span className="text-[15px] sm:text-3xl font-bold font-heading text-white tracking-tight leading-none">Canada &amp; US</span>
+                </div>
+                <p className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-300 font-heading font-bold whitespace-nowrap overflow-hidden text-ellipsis">Canada &amp; US Wide</p>
+                <p className="hidden sm:block text-[10px] text-neutral-500 font-sans whitespace-nowrap overflow-hidden text-ellipsis">Viewings &amp; transport support</p>
+              </div>
             </div>
-            <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-heading font-bold">Pristine Classics</p>
-            <p className="text-[10px] text-neutral-500 font-sans mt-1">Concours & survivor condition</p>
+          )}
+        </div>
+
+        {/* Subtle Bottom Accent Bar */}
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent/40 to-transparent"></div>
+      </div>
+
+      {isMobile && (
+        /* Visual Marketplace Metrics - Mobile (completely below the hero container, separate block) */
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            width: '100%',
+            backgroundColor: '#1A1A1A',
+            borderTop: '2px solid #C9A84C'
+          }}
+        >
+          {/* Metric 1 */}
+          <div
+            style={{
+              width: '25%',
+              minWidth: '25%',
+              maxWidth: '25%',
+              flexShrink: 0,
+              flexGrow: 0,
+              padding: '14px 8px',
+              borderRight: '1px solid rgba(255,255,255,0.1)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+              overflow: 'hidden'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+              <div style={{ padding: '2px', backgroundColor: 'rgba(201, 168, 76, 0.1)', borderRadius: '2px', color: '#C9A84C', display: 'flex', alignItems: 'center' }}>
+                <Trophy style={{ width: '14px', height: '14px' }} />
+              </div>
+              <span style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>120+</span>
+            </div>
+            <p style={{ fontSize: '7px', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Pristine</p>
           </div>
 
           {/* Metric 2 */}
-          <div className="bg-neutral-950/60 backdrop-blur-md border border-neutral-900/80 p-4 sm:p-5 rounded-sm hover:border-accent/20 transition-all group w-[220px] sm:w-auto shrink-0 snap-start">
-            <div className="flex items-center space-x-3 mb-2">
-              <div className="p-2 bg-accent/10 rounded-sm text-accent group-hover:bg-accent group-hover:text-neutral-950 transition-colors">
-                <Wrench className="w-4 h-4" />
+          <div
+            style={{
+              width: '25%',
+              minWidth: '25%',
+              maxWidth: '25%',
+              flexShrink: 0,
+              flexGrow: 0,
+              padding: '14px 8px',
+              borderRight: '1px solid rgba(255,255,255,0.1)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+              overflow: 'hidden'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+              <div style={{ padding: '2px', backgroundColor: 'rgba(201, 168, 76, 0.1)', borderRadius: '2px', color: '#C9A84C', display: 'flex', alignItems: 'center' }}>
+                <Wrench style={{ width: '14px', height: '14px' }} />
               </div>
-              <span className="text-xl sm:text-3xl font-bold font-heading text-white tracking-tight">85+</span>
+              <span style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>85+</span>
             </div>
-            <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-heading font-bold">Project Builds</p>
-            <p className="text-[10px] text-neutral-500 font-sans mt-1">Barn-finds & rolling restorations</p>
+            <p style={{ fontSize: '7px', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Projects</p>
           </div>
 
           {/* Metric 3 */}
-          <div className="bg-neutral-950/60 backdrop-blur-md border border-neutral-900/80 p-4 sm:p-5 rounded-sm hover:border-accent/20 transition-all group w-[220px] sm:w-auto shrink-0 snap-start">
-            <div className="flex items-center space-x-3 mb-2">
-              <div className="p-2 bg-accent/10 rounded-sm text-accent group-hover:bg-accent group-hover:text-neutral-950 transition-colors">
-                <ShieldCheck className="w-4 h-4" />
+          <div
+            style={{
+              width: '25%',
+              minWidth: '25%',
+              maxWidth: '25%',
+              flexShrink: 0,
+              flexGrow: 0,
+              padding: '14px 8px',
+              borderRight: '1px solid rgba(255,255,255,0.1)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+              overflow: 'hidden'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+              <div style={{ padding: '2px', backgroundColor: 'rgba(201, 168, 76, 0.1)', borderRadius: '2px', color: '#C9A84C', display: 'flex', alignItems: 'center' }}>
+                <ShieldCheck style={{ width: '14px', height: '14px' }} />
               </div>
-              <span className="text-xl sm:text-3xl font-bold font-heading text-white tracking-tight">100%</span>
+              <span style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>100%</span>
             </div>
-            <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-heading font-bold">Verified Listings</p>
-            <p className="text-[10px] text-neutral-500 font-sans mt-1">Reviewed vehicle details</p>
+            <p style={{ fontSize: '7px', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Verified</p>
           </div>
 
           {/* Metric 4 */}
-          <div className="bg-neutral-950/60 backdrop-blur-md border border-neutral-900/80 p-4 sm:p-5 rounded-sm hover:border-accent/20 transition-all group w-[220px] sm:w-auto shrink-0 snap-start">
-            <div className="flex items-center space-x-3 mb-2">
-              <div className="p-2 bg-accent/10 rounded-sm text-accent group-hover:bg-accent group-hover:text-neutral-950 transition-colors">
-                <MapPin className="w-4 h-4" />
+          <div
+            style={{
+              width: '25%',
+              minWidth: '25%',
+              maxWidth: '25%',
+              flexShrink: 0,
+              flexGrow: 0,
+              padding: '14px 8px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+              overflow: 'hidden'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+              <div style={{ padding: '2px', backgroundColor: 'rgba(201, 168, 76, 0.1)', borderRadius: '2px', color: '#C9A84C', display: 'flex', alignItems: 'center' }}>
+                <MapPin style={{ width: '14px', height: '14px' }} />
               </div>
-              <span className="text-xl sm:text-3xl font-bold font-heading text-white tracking-tight">KSA Wide</span>
+              <span style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>CAN &amp; US</span>
             </div>
-            <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-heading font-bold">Kingdom Coverage</p>
-            <p className="text-[10px] text-neutral-500 font-sans mt-1">Viewings & transport support</p>
+            <p style={{ fontSize: '7px', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Canada &amp; US</p>
           </div>
         </div>
-      </div>
-
-      {/* Subtle Bottom Accent Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent/40 to-transparent"></div>
-    </div>
+      )}
+    </>
   );
 };
