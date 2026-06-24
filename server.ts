@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { createServer as createViteServer } from 'vite';
 import cookieParser from 'cookie-parser';
 import multer from 'multer';
@@ -33,9 +34,21 @@ const DB_FILE = path.join(DATA_DIR, 'db.json');
 
 // Initialize Supabase Client if configured
 const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_ANON_KEY || '';
-const isSupabaseActive = !!(supabaseUrl && supabaseKey);
-const supabase = isSupabaseActive ? createClient(supabaseUrl, supabaseKey) : null;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const isSupabaseActive = !!(supabaseUrl && supabaseAnonKey && supabaseServiceRoleKey);
+const supabaseClientOptions = {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false
+  }
+};
+const supabaseAuth = isSupabaseActive
+  ? createClient(supabaseUrl, supabaseAnonKey, supabaseClientOptions)
+  : null;
+const supabase = isSupabaseActive
+  ? createClient(supabaseUrl, supabaseServiceRoleKey, supabaseClientOptions)
+  : null;
 
 console.log(`Database Connection Status: ${isSupabaseActive ? 'Supabase (Active)' : 'Local Fallback (Active)'}`);
 
@@ -70,7 +83,11 @@ const defaultCars: Car[] = [
     description: 'Stunning numbers-matching 1967 Stingray in Tuxedo Black. Features a 427/435hp V8 engine with a 4-speed manual transmission. Fully restored to absolute concours standards. A true classic collector\'s dream.',
     condition: 'new_arrival',
     type: 'classic',
-    images: ['https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1200'],
+    images: [
+      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1200',
+      'https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&q=80&w=1200',
+      'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&q=80&w=1200'
+    ],
     contact_phone: '+1 604-555-0199',
     created_at: new Date().toISOString()
   },
@@ -310,10 +327,32 @@ const upload = multer({
   }
 });
 
-// Helper to get authenticated user profile
-const getAuthUser = (req: any): Profile | null => {
+const hashSessionToken = (token: string) => crypto.createHash('sha256').update(token).digest('hex');
+
+// Helper to get authenticated user profile.
+const getAuthUser = async (req: any): Promise<Profile | null> => {
   const sessionToken = req.cookies.ksa_session;
   if (!sessionToken) return null;
+
+  if (isSupabaseActive && supabase) {
+    const { data: session, error } = await supabase
+      .from('admin_sessions')
+      .select('profile_id, expires_at')
+      .eq('token_hash', hashSessionToken(sessionToken))
+      .gt('expires_at', new Date().toISOString())
+      .maybeSingle();
+
+    if (error || !session) return null;
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', session.profile_id)
+      .maybeSingle();
+
+    return profile || null;
+  }
+
   const db = getLocalDb();
   return db.profiles.find(p => p.id === sessionToken) || null;
 };
@@ -378,7 +417,7 @@ app.get('/api/cars/:id', async (req, res) => {
 
 // POST /api/cars (Admin only)
 app.post('/api/cars', async (req, res) => {
-  const admin = getAuthUser(req);
+  const admin = await getAuthUser(req);
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized access. Please log in.' });
   }
@@ -445,7 +484,7 @@ app.post('/api/cars', async (req, res) => {
 
 // PUT /api/cars/:id (Admin only)
 app.put('/api/cars/:id', async (req, res) => {
-  const admin = getAuthUser(req);
+  const admin = await getAuthUser(req);
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized access.' });
   }
@@ -503,7 +542,7 @@ app.put('/api/cars/:id', async (req, res) => {
 
 // DELETE /api/cars/:id (Admin only)
 app.delete('/api/cars/:id', async (req, res) => {
-  const admin = getAuthUser(req);
+  const admin = await getAuthUser(req);
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized access.' });
   }
@@ -593,7 +632,7 @@ app.post('/api/messages', async (req, res) => {
 
 // GET /api/messages (Admin only)
 app.get('/api/messages', async (req, res) => {
-  const admin = getAuthUser(req);
+  const admin = await getAuthUser(req);
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized access.' });
   }
@@ -604,7 +643,7 @@ app.get('/api/messages', async (req, res) => {
     if (isSupabaseActive && supabase) {
       const { data: messagesData, error: mError } = await supabase
         .from('messages')
-        .select('*')
+        .select('*, replies:message_replies(*)')
         .order('created_at', { ascending: false });
 
       const { data: carsData, error: cError } = await supabase
@@ -613,25 +652,13 @@ app.get('/api/messages', async (req, res) => {
 
       if (!mError && messagesData) {
         const carMap = new Map((carsData || []).map((c: any) => [c.id, c.title]));
-
-        // Check if mock message is already present, if not, append/unshift it
-        const hasMock = messagesData.some((m: any) => m.id === 'msg-mock-reply-test');
-        if (!hasMock) {
-          const mockMsg = db.messages.find(m => m.id === 'msg-mock-reply-test');
-          if (mockMsg) {
-            messagesData.unshift(mockMsg);
-          }
-        }
-
-        const hydrated = messagesData.map((m: any) => {
-          const localMsg = db.messages.find(lm => lm.id === m.id);
-          const replies = m.replies || localMsg?.replies || [];
-          return {
-            ...m,
-            replies,
-            car_title: carMap.get(m.car_id) || 'Unknown Car'
-          };
-        });
+        const hydrated = messagesData.map((m: any) => ({
+          ...m,
+          replies: [...(m.replies || [])].sort(
+            (a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          ),
+          car_title: carMap.get(m.car_id) || 'Unknown Car'
+        }));
         return res.json(hydrated);
       }
       console.warn('Supabase messages fetch failed, falling back to local database:', mError);
@@ -653,7 +680,7 @@ app.get('/api/messages', async (req, res) => {
 
 // POST /api/messages/mock (Admin only)
 app.post('/api/messages/mock', async (req, res) => {
-  const admin = getAuthUser(req);
+  const admin = await getAuthUser(req);
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized access.' });
   }
@@ -684,8 +711,17 @@ app.post('/api/messages/mock', async (req, res) => {
   try {
     const db = getLocalDb();
     if (isSupabaseActive && supabase) {
-      const inserts = mockMessages.map(m => ({
-        car_id: m.car_id,
+      const { data: availableCars, error: carsError } = await supabase
+        .from('cars')
+        .select('id')
+        .order('created_at', { ascending: false })
+        .limit(2);
+      if (carsError || !availableCars?.length) {
+        return res.status(400).json({ error: 'Add at least one car before generating sample inquiries.' });
+      }
+
+      const inserts = mockMessages.map((m, index) => ({
+        car_id: availableCars[index]?.id || availableCars[0].id,
         buyer_name: m.buyer_name,
         buyer_email: m.buyer_email,
         buyer_phone: m.buyer_phone,
@@ -696,8 +732,9 @@ app.post('/api/messages/mock', async (req, res) => {
         .from('messages')
         .insert(inserts);
       if (error) {
-        console.warn('Supabase mock insert failed, inserting locally:', error);
+        return res.status(400).json({ error: error.message });
       }
+      return res.status(201).json({ success: true, count: inserts.length });
     }
 
     db.messages.push(...mockMessages);
@@ -711,7 +748,7 @@ app.post('/api/messages/mock', async (req, res) => {
 
 // PATCH /api/messages/:id/read (Admin only)
 app.patch('/api/messages/:id/read', async (req, res) => {
-  const admin = getAuthUser(req);
+  const admin = await getAuthUser(req);
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized access.' });
   }
@@ -749,7 +786,7 @@ app.patch('/api/messages/:id/read', async (req, res) => {
 
 // POST /api/messages/:id/reply (Admin only)
 app.post('/api/messages/:id/reply', async (req, res) => {
-  const admin = getAuthUser(req);
+  const admin = await getAuthUser(req);
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized. Admin access only.' });
   }
@@ -762,24 +799,47 @@ app.post('/api/messages/:id/reply', async (req, res) => {
   }
 
   try {
+    if (isSupabaseActive && supabase) {
+      const { error: replyError } = await supabase
+        .from('message_replies')
+        .insert({
+          message_id: id,
+          sender_id: admin.id,
+          sender_name: admin.full_name,
+          sender_email: admin.email,
+          message: message.trim()
+        });
+      if (replyError) {
+        return res.status(400).json({ error: replyError.message });
+      }
+
+      await supabase
+        .from('messages')
+        .update({ is_read: true })
+        .eq('id', id);
+
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*, replies:message_replies(*)')
+        .eq('id', id)
+        .single();
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      return res.status(201).json({
+        ...data,
+        replies: [...(data.replies || [])].sort(
+          (a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        )
+      });
+    }
+
     const db = getLocalDb();
     let targetMsg = db.messages.find(m => m.id === id);
 
-    // Hybrid fallback: If message isn't in local DB but exists on Supabase (or we are replying to one),
-    // we build a local container for it in db.json to track the replies.
     if (!targetMsg) {
-      targetMsg = {
-        id,
-        car_id: 'car-id-1',
-        buyer_name: 'Inquirer',
-        buyer_email: '',
-        buyer_phone: '',
-        message: '',
-        is_read: true,
-        created_at: new Date().toISOString(),
-        replies: []
-      };
-      db.messages.push(targetMsg);
+      return res.status(404).json({ error: 'Message not found.' });
     }
 
     if (!targetMsg.replies) {
@@ -799,25 +859,6 @@ app.post('/api/messages/:id/reply', async (req, res) => {
 
     saveLocalDb(db);
 
-    // If Supabase is active, try to fetch the hydrated parent message from Supabase to return it nicely
-    if (isSupabaseActive && supabase) {
-      try {
-        const { data: sMsg } = await supabase
-          .from('messages')
-          .select('*')
-          .eq('id', id)
-          .single();
-        if (sMsg) {
-          return res.status(201).json({
-            ...sMsg,
-            replies: targetMsg.replies
-          });
-        }
-      } catch (sErr) {
-        console.warn('Could not fetch parent message from Supabase, returning local representation:', sErr);
-      }
-    }
-
     res.status(201).json(targetMsg);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -826,7 +867,7 @@ app.post('/api/messages/:id/reply', async (req, res) => {
 
 // DELETE /api/messages/:id (Admin only)
 app.delete('/api/messages/:id', async (req, res) => {
-  const admin = getAuthUser(req);
+  const admin = await getAuthUser(req);
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized access.' });
   }
@@ -865,7 +906,7 @@ app.delete('/api/messages/:id', async (req, res) => {
 
 // GET /api/profiles (Admin / Super Admin only)
 app.get('/api/profiles', async (req, res) => {
-  const admin = getAuthUser(req);
+  const admin = await getAuthUser(req);
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized access.' });
   }
@@ -888,7 +929,7 @@ app.get('/api/profiles', async (req, res) => {
 
 // POST /api/profiles/invite (Super Admin Only)
 app.post('/api/profiles/invite', async (req, res) => {
-  const admin = getAuthUser(req);
+  const admin = await getAuthUser(req);
   if (!admin || admin.role !== 'super_admin') {
     return res.status(403).json({ error: 'Forbidden. Super Admin access only.' });
   }
@@ -909,22 +950,37 @@ app.post('/api/profiles/invite', async (req, res) => {
 
   try {
     if (isSupabaseActive && supabase) {
-      // In Supabase we could call inviteUserByEmail or create a row in profiles
-      const { data, error } = await supabase
-          .from('profiles')
-          .insert([{
-            id: newProfile.id,
-            full_name: newProfile.full_name,
-            role: 'sub_admin',
-            email: newProfile.email,
-            passcode: newProfile.passcode
-          }])
-          .select()
-          .single();
-      if (!error && data) {
-        return res.status(201).json(data);
+      if (!passcode || String(passcode).length < 8) {
+        return res.status(400).json({ error: 'Temporary password must be at least 8 characters.' });
       }
-      console.warn('Supabase profile creation failed, falling back to local:', error);
+
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email,
+        password: String(passcode),
+        email_confirm: true,
+        user_metadata: { full_name }
+      });
+      if (authError || !authData.user) {
+        return res.status(400).json({ error: authError?.message || 'Could not create administrator.' });
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: authData.user.id,
+          full_name,
+          role: 'sub_admin',
+          email: email.toLowerCase()
+        })
+        .select()
+        .single();
+
+      if (error) {
+        await supabase.auth.admin.deleteUser(authData.user.id);
+        return res.status(400).json({ error: error.message });
+      }
+
+      return res.status(201).json(data);
     }
 
     const db = getLocalDb();
@@ -940,34 +996,138 @@ app.post('/api/profiles/invite', async (req, res) => {
   }
 });
 
+// PUT /api/profiles/:id (Super Admin Only)
+app.put('/api/profiles/:id', async (req, res) => {
+  const admin = await getAuthUser(req);
+  if (!admin || admin.role !== 'super_admin') {
+    return res.status(403).json({ error: 'Forbidden. Super Admin access only.' });
+  }
+
+  const { id } = req.params;
+  const { email, full_name, passcode } = req.body;
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  const normalizedName = String(full_name || '').trim();
+
+  if (!normalizedEmail || !normalizedName) {
+    return res.status(400).json({ error: 'Email and Full Name are required.' });
+  }
+
+  try {
+    if (isSupabaseActive && supabase) {
+      const { data: target, error: targetError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      if (targetError || !target) {
+        return res.status(404).json({ error: 'Profile not found.' });
+      }
+      if (target.role === 'super_admin') {
+        return res.status(400).json({ error: 'The primary admin must be updated from Profile Settings.' });
+      }
+
+      const authUpdates: { email: string; password?: string; user_metadata: { full_name: string } } = {
+        email: normalizedEmail,
+        user_metadata: { full_name: normalizedName }
+      };
+      if (passcode) {
+        if (String(passcode).length < 8) {
+          return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+        }
+        authUpdates.password = String(passcode);
+      }
+
+      const { error: authError } = await supabase.auth.admin.updateUserById(id, authUpdates);
+      if (authError) {
+        return res.status(400).json({ error: authError.message });
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: normalizedName,
+          email: normalizedEmail
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (!error && data) {
+        return res.json(data);
+      }
+      return res.status(400).json({ error: error?.message || 'Could not update administrator.' });
+    }
+
+    const db = getLocalDb();
+    const targetIndex = db.profiles.findIndex(profile => profile.id === id);
+    if (targetIndex === -1) {
+      return res.status(404).json({ error: 'Profile not found.' });
+    }
+
+    const target = db.profiles[targetIndex];
+    if (target.role === 'super_admin') {
+      return res.status(400).json({ error: 'The primary admin must be updated from Profile Settings.' });
+    }
+
+    const duplicateEmail = db.profiles.some(
+      profile => profile.id !== id && profile.email.toLowerCase() === normalizedEmail
+    );
+    if (duplicateEmail) {
+      return res.status(400).json({ error: 'User with this email already exists.' });
+    }
+
+    const updatedProfile: Profile = {
+      ...target,
+      full_name: normalizedName,
+      email: normalizedEmail,
+      ...(passcode ? { passcode: String(passcode) } : {})
+    };
+    db.profiles[targetIndex] = updatedProfile;
+    saveLocalDb(db);
+    res.json(updatedProfile);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // DELETE /api/profiles/:id (Super Admin Only)
 app.delete('/api/profiles/:id', async (req, res) => {
-  const admin = getAuthUser(req);
+  const admin = await getAuthUser(req);
   if (!admin || admin.role !== 'super_admin') {
     return res.status(403).json({ error: 'Forbidden. Super Admin access only.' });
   }
 
   const { id } = req.params;
 
-  // Cannot delete self or the main super_admin
-  const db = getLocalDb();
-  const target = db.profiles.find(p => p.id === id);
-  if (target && target.email === 'helpooclassmate@gmail.com') {
-    return res.status(400).json({ error: 'Super admin user cannot be deleted.' });
+  if (id === admin.id) {
+    return res.status(400).json({ error: 'You cannot delete your own profile.' });
   }
 
   try {
     if (isSupabaseActive && supabase) {
-      const { error } = await supabase
+      const { data: target } = await supabase
         .from('profiles')
-        .delete()
-        .eq('id', id);
+        .select('role')
+        .eq('id', id)
+        .maybeSingle();
+      if (!target) {
+        return res.status(404).json({ error: 'Profile not found.' });
+      }
+      if (target.role === 'super_admin') {
+        return res.status(400).json({ error: 'Super admin users cannot be deleted here.' });
+      }
+
+      const { error } = await supabase.auth.admin.deleteUser(id);
       if (!error) {
-        db.profiles = db.profiles.filter(p => p.id !== id);
-        saveLocalDb(db);
         return res.json({ success: true });
       }
-      console.warn('Supabase profile deletion failed, deleting locally:', error);
+      return res.status(400).json({ error: error.message });
+    }
+
+    const db = getLocalDb();
+    const target = db.profiles.find(p => p.id === id);
+    if (target?.role === 'super_admin') {
+      return res.status(400).json({ error: 'Super admin user cannot be deleted.' });
     }
 
     const initialLength = db.profiles.length;
@@ -993,35 +1153,47 @@ app.post('/api/auth/login', async (req, res) => {
   }
 
   try {
-    // For local fallback, password 'admin123' works for any existing profile email
-    // Or if Supabase is active, we can authenticate via Supabase Auth
-    if (isSupabaseActive && supabase) {
-      const { data, error } = await supabase.auth.signInWithPassword({
+    if (isSupabaseActive && supabase && supabaseAuth) {
+      const { data, error } = await supabaseAuth.auth.signInWithPassword({
         email,
         password
       });
-      if (!error && data.user) {
-        // Authenticated successfully in Supabase!
-        // Now query profiles
-        const { data: profile, error: pError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
-
-        if (!pError && profile) {
-          res.cookie('ksa_session', profile.id, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
-          });
-          return res.json(profile);
-        }
+      if (error || !data.user) {
+        return res.status(401).json({ error: 'Invalid email or password.' });
       }
-      console.warn('Supabase authentication failed/unavailable, trying local fallback credentials...');
+
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+      if (profileError || !profile) {
+        return res.status(403).json({ error: 'This account does not have administrator access.' });
+      }
+
+      const sessionToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const { error: sessionError } = await supabase
+        .from('admin_sessions')
+        .insert({
+          token_hash: hashSessionToken(sessionToken),
+          profile_id: profile.id,
+          expires_at: expiresAt.toISOString()
+        });
+      if (sessionError) {
+        return res.status(500).json({ error: 'Could not create a secure admin session.' });
+      }
+
+      res.cookie('ksa_session', sessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
+      return res.json(profile);
     }
 
+    // Local development fallback only.
     const db = getLocalDb();
     const profile = db.profiles.find(p => p.email.toLowerCase() === email.toLowerCase());
 
@@ -1054,8 +1226,8 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // GET /api/auth/me
-app.get('/api/auth/me', (req, res) => {
-  const profile = getAuthUser(req);
+app.get('/api/auth/me', async (req, res) => {
+  const profile = await getAuthUser(req);
   if (!profile) {
     return res.status(401).json({ error: 'Not authenticated' });
   }
@@ -1064,7 +1236,7 @@ app.get('/api/auth/me', (req, res) => {
 
 // PUT /api/auth/profile
 app.put('/api/auth/profile', async (req, res) => {
-  const profile = getAuthUser(req);
+  const profile = await getAuthUser(req);
   if (!profile) {
     return res.status(401).json({ error: 'Not authenticated' });
   }
@@ -1075,6 +1247,37 @@ app.put('/api/auth/profile', async (req, res) => {
   }
 
   try {
+    if (isSupabaseActive && supabase) {
+      const authUpdates: { email: string; password?: string; user_metadata?: { full_name: string } } = {
+        email
+      };
+      if (full_name) authUpdates.user_metadata = { full_name };
+      if (passcode) {
+        if (String(passcode).length < 8) {
+          return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+        }
+        authUpdates.password = String(passcode);
+      }
+
+      const { error: authError } = await supabase.auth.admin.updateUserById(profile.id, authUpdates);
+      if (authError) {
+        return res.status(400).json({ error: authError.message });
+      }
+
+      const updateData: Record<string, string> = { email: email.toLowerCase() };
+      if (full_name) updateData.full_name = full_name;
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', profile.id)
+        .select()
+        .single();
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+      return res.json(data);
+    }
+
     const db = getLocalDb();
     const targetIdx = db.profiles.findIndex(p => p.id === profile.id);
     if (targetIdx === -1) {
@@ -1090,21 +1293,6 @@ app.put('/api/auth/profile', async (req, res) => {
       db.profiles[targetIdx].passcode = passcode;
     }
 
-    // Update if Supabase is active
-    if (isSupabaseActive && supabase) {
-      const updateData: any = { email };
-      if (full_name) updateData.full_name = full_name;
-      if (passcode) updateData.passcode = passcode;
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update(updateData)
-        .eq('id', profile.id);
-      if (error) {
-        console.error('Supabase profile update failed:', error);
-      }
-    }
-
     saveLocalDb(db);
     res.json(db.profiles[targetIdx]);
   } catch (err: any) {
@@ -1113,14 +1301,21 @@ app.put('/api/auth/profile', async (req, res) => {
 });
 
 // POST /api/auth/logout
-app.post('/api/auth/logout', (req, res) => {
+app.post('/api/auth/logout', async (req, res) => {
+  const sessionToken = req.cookies.ksa_session;
+  if (sessionToken && isSupabaseActive && supabase) {
+    await supabase
+      .from('admin_sessions')
+      .delete()
+      .eq('token_hash', hashSessionToken(sessionToken));
+  }
   res.clearCookie('ksa_session');
   res.json({ success: true });
 });
 
-// POST /api/upload (Supports multiple files up to 10)
+// POST /api/upload (The client sends unlimited galleries in safe batches of 10.)
 app.post('/api/upload', upload.array('files', 10), async (req: any, res) => {
-  const admin = getAuthUser(req);
+  const admin = await getAuthUser(req);
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized upload' });
   }
@@ -1133,17 +1328,31 @@ app.post('/api/upload', upload.array('files', 10), async (req: any, res) => {
     const files = req.files as Express.Multer.File[];
     const urls = await Promise.all(files.map(async (file, index) => {
       const filename = `car-${Date.now()}-${index}-${Math.round(Math.random() * 1E9)}.webp`;
-      const outputPath = path.join(UPLOADS_DIR, filename);
-
-      await sharp(file.buffer)
+      const optimizedImage = await sharp(file.buffer)
         .rotate()
         .resize(VEHICLE_IMAGE_WIDTH, VEHICLE_IMAGE_HEIGHT, {
           fit: 'cover',
           position: 'attention'
         })
         .webp({ quality: 86 })
-        .toFile(outputPath);
+        .toBuffer();
 
+      if (isSupabaseActive && supabase) {
+        const objectPath = `cars/${filename}`;
+        const { error } = await supabase.storage
+          .from('vehicle-images')
+          .upload(objectPath, optimizedImage, {
+            contentType: 'image/webp',
+            cacheControl: '31536000',
+            upsert: false
+          });
+        if (error) throw error;
+
+        return supabase.storage.from('vehicle-images').getPublicUrl(objectPath).data.publicUrl;
+      }
+
+      const outputPath = path.join(UPLOADS_DIR, filename);
+      fs.writeFileSync(outputPath, optimizedImage);
       return `/uploads/${filename}`;
     }));
 

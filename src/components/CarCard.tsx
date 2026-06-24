@@ -1,5 +1,5 @@
-import React from 'react';
-import { Phone, Mail, MapPin, Calendar, Gauge } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Phone, Mail, MapPin, Gauge, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Car } from '../types.js';
 
 interface CarCardProps {
@@ -9,6 +9,57 @@ interface CarCardProps {
 }
 
 export const CarCard: React.FC<CarCardProps> = ({ car, onDetailClick, onMessageClick }) => {
+  const images = car.images && car.images.length > 0
+    ? car.images
+    : ['https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1200'];
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const didSwipe = useRef(false);
+
+  useEffect(() => {
+    setActiveImageIndex((current) => Math.min(current, images.length - 1));
+  }, [images.length]);
+
+  const showPreviousImage = (event?: React.SyntheticEvent) => {
+    event?.stopPropagation();
+    setActiveImageIndex((current) => (current - 1 + images.length) % images.length);
+  };
+
+  const showNextImage = (event?: React.SyntheticEvent) => {
+    event?.stopPropagation();
+    setActiveImageIndex((current) => (current + 1) % images.length);
+  };
+
+  const handleTouchStart = (event: React.TouchEvent) => {
+    touchStartX.current = event.touches[0]?.clientX ?? null;
+    didSwipe.current = false;
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent) => {
+    if (touchStartX.current === null || images.length < 2) return;
+
+    const endX = event.changedTouches[0]?.clientX ?? touchStartX.current;
+    const distance = endX - touchStartX.current;
+    touchStartX.current = null;
+
+    if (Math.abs(distance) < 45) return;
+    didSwipe.current = true;
+
+    if (distance > 0) {
+      showPreviousImage(event);
+    } else {
+      showNextImage(event);
+    }
+  };
+
+  const handleCardClick = () => {
+    if (didSwipe.current) {
+      didSwipe.current = false;
+      return;
+    }
+    onDetailClick(car);
+  };
+
   const formattedPrice = new Intl.NumberFormat('en-CA', {
     style: 'currency',
     currency: 'CAD',
@@ -25,18 +76,68 @@ export const CarCard: React.FC<CarCardProps> = ({ car, onDetailClick, onMessageC
 
   return (
     <div
-      onClick={() => onDetailClick(car)}
+      onClick={handleCardClick}
       id={`car-card-${car.id}`}
       className="group relative bg-white border border-neutral-200 rounded-sm overflow-hidden shadow-sm hover:shadow-md hover:border-accent transition-all duration-300 cursor-pointer flex flex-col h-full transform hover:-translate-y-1"
     >
       {/* Image Gallery Wrapper */}
-      <div className="relative aspect-video w-full bg-neutral-100 overflow-hidden">
+      <div
+        className="relative aspect-video w-full bg-neutral-100 overflow-hidden touch-pan-y"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <img
-          src={car.images && car.images.length > 0 ? car.images[0] : 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1200'}
-          alt={car.title}
+          src={images[activeImageIndex]}
+          alt={`${car.title} view ${activeImageIndex + 1} of ${images.length}`}
           className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-105"
           referrerPolicy="no-referrer"
+          draggable={false}
         />
+
+        {images.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={showPreviousImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 flex items-center justify-center rounded-full bg-black/55 hover:bg-black/80 text-white backdrop-blur-sm transition-colors"
+              aria-label={`Previous image of ${car.title}`}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={showNextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 flex items-center justify-center rounded-full bg-black/55 hover:bg-black/80 text-white backdrop-blur-sm transition-colors"
+              aria-label={`Next image of ${car.title}`}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+
+            {images.length <= 10 && (
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-black/45 px-2 py-1.5 rounded-full backdrop-blur-sm">
+                {images.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setActiveImageIndex(index);
+                    }}
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${
+                      index === activeImageIndex ? 'bg-accent w-4' : 'bg-white/65 hover:bg-white'
+                    }`}
+                    aria-label={`Show image ${index + 1} of ${car.title}`}
+                    aria-current={index === activeImageIndex ? 'true' : undefined}
+                  />
+                ))}
+              </div>
+            )}
+
+            <span className="absolute top-3 right-3 z-20 bg-black/60 text-white text-[9px] font-mono px-2 py-1 rounded-sm backdrop-blur-sm">
+              {activeImageIndex + 1}/{images.length}
+            </span>
+          </>
+        )}
 
         {/* Condition Ribbon / Overlay Badges */}
         {car.condition === 'new_arrival' && (

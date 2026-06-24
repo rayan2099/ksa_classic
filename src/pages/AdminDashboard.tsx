@@ -28,7 +28,9 @@ import {
   FolderOpen,
   RefreshCw,
   Settings,
-  ArrowLeft
+  ArrowLeft,
+  Send,
+  Inbox
 } from 'lucide-react';
 import { Car, Profile, Message } from '../types.js';
 import { AdminSettings } from '../components/AdminSettings.js';
@@ -54,12 +56,14 @@ export const AdminDashboard: React.FC = () => {
   // Message View States
   const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
   const [messageFilter, setMessageFilter] = useState<'all' | 'unread' | 'read'>('all');
+  const [messageSearch, setMessageSearch] = useState('');
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
   const [isSendingReply, setIsSendingReply] = useState<Record<string, boolean>>({});
   const [isGeneratingMock, setIsGeneratingMock] = useState(false);
 
   // Sub-admin Invite States
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
 
   // Drag and Drop State for Uploads
   const [isDragging, setIsDragging] = useState(false);
@@ -68,6 +72,7 @@ export const AdminDashboard: React.FC = () => {
 
   const { register: carRegister, handleSubmit: handleCarSubmit, reset: resetCarForm, setValue: setCarValue, watch: watchCarForm } = useForm();
   const { register: inviteRegister, handleSubmit: handleInviteSubmit, reset: resetInviteForm } = useForm();
+  const { register: editProfileRegister, handleSubmit: handleEditProfileSubmit, reset: resetEditProfileForm } = useForm();
 
   const carFormImages = watchCarForm('images') || [];
 
@@ -131,6 +136,21 @@ export const AdminDashboard: React.FC = () => {
   const newArrivalsCount = cars.filter(c => c.condition === 'new_arrival').length;
   const soldCount = cars.filter(c => c.condition === 'sold').length;
   const unreadMessagesCount = messages.filter(m => !m.is_read).length;
+  const filteredMessages = messages.filter((message) => {
+    if (messageFilter === 'unread' && message.is_read) return false;
+    if (messageFilter === 'read' && !message.is_read) return false;
+
+    const query = messageSearch.trim().toLowerCase();
+    if (!query) return true;
+
+    return [
+      message.buyer_name,
+      message.buyer_email,
+      message.buyer_phone,
+      message.car_title,
+      message.message
+    ].some((value) => value?.toLowerCase().includes(query));
+  });
 
   // ================= CAR ACTIONS =================
 
@@ -243,34 +263,37 @@ export const AdminDashboard: React.FC = () => {
   // Image Upload Logic (supports both click and drag & drop)
   const handleFileUpload = async (files: FileList) => {
     if (files.length === 0) return;
-    if (uploadedImageUrls.length + files.length > 10) {
-      toast.error('Maximum limit of 10 images reached.');
-      return;
-    }
 
     setIsUploading(true);
-    const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      formData.append('files', files[i]);
-    }
-
     try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      });
+      const selectedFiles = Array.from(files);
+      const batchSize = 10;
+      let updatedUrls = [...uploadedImageUrls];
 
-      if (res.ok) {
+      for (let start = 0; start < selectedFiles.length; start += batchSize) {
+        const batch = selectedFiles.slice(start, start + batchSize);
+        const formData = new FormData();
+        batch.forEach((file) => formData.append('files', file));
+
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) {
+          const error = await res.json().catch(() => null);
+          throw new Error(error?.error || 'Failed to upload image assets.');
+        }
+
         const result = await res.json();
-        const updatedUrls = [...uploadedImageUrls, ...result.urls];
+        updatedUrls = [...updatedUrls, ...result.urls];
         setUploadedImageUrls(updatedUrls);
         setCarValue('images', updatedUrls);
-        toast.success(`${files.length} image(s) uploaded successfully!`);
-      } else {
-        throw new Error();
       }
-    } catch (err) {
-      toast.error('Failed to upload image assets.');
+
+      toast.success(`${selectedFiles.length} image(s) uploaded successfully.`);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to upload image assets.');
     } finally {
       setIsUploading(false);
     }
@@ -431,6 +454,39 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleOpenEditProfile = (profile: Profile) => {
+    setEditingProfile(profile);
+    resetEditProfileForm({
+      full_name: profile.full_name,
+      email: profile.email,
+      passcode: ''
+    });
+  };
+
+  const onEditProfileSubmit = async (data: any) => {
+    if (!editingProfile) return;
+
+    try {
+      const res = await fetch(`/api/profiles/${editingProfile.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to update administrator.');
+      }
+
+      const updatedProfile = await res.json();
+      setProfiles(prev => prev.map(profile => profile.id === updatedProfile.id ? updatedProfile : profile));
+      setEditingProfile(null);
+      toast.success('Administrator updated.');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update administrator.');
+    }
+  };
+
   return (
     <div id="admin-workspace-layout" className="min-h-screen bg-neutral-900 text-neutral-100 flex flex-col md:flex-row font-sans">
       {/* Sidebar (Desktop) */}
@@ -441,17 +497,18 @@ export const AdminDashboard: React.FC = () => {
       >
         <div>
           {/* Sidebar Header / Logo */}
-          <div className="p-6 flex items-center justify-between border-b border-neutral-800">
-            <img
-              src="/logo.png"
-              alt="Logo"
-              className={`h-8 object-contain brightness-0 invert transition-all ${isSidebarOpen ? 'block' : 'hidden'}`}
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
+          <div className="p-6 border-b border-neutral-800">
             {isSidebarOpen ? (
-              <span className="font-heading font-bold text-xs uppercase text-accent tracking-widest pl-1">ADMIN</span>
+              <div className="min-w-0">
+                <span className="font-heading font-bold text-lg uppercase text-accent tracking-widest">ADMIN</span>
+                <div className="mt-3 border-l-2 border-accent/60 pl-3">
+                  <span className="block text-[10px] uppercase tracking-wider text-neutral-500">Welcome</span>
+                  <span className="block mt-0.5 text-sm font-bold text-white truncate">{user.full_name}</span>
+                  <span className="block mt-1 text-[10px] font-heading font-bold uppercase tracking-wider text-neutral-400">
+                    {user.role.replace('_', ' ')}
+                  </span>
+                </div>
+              </div>
             ) : (
               <span className="font-heading font-bold text-lg text-accent">K</span>
             )}
@@ -572,9 +629,6 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-            <span className="text-xs text-neutral-400 hidden sm:inline">
-              Welcome, <span className="text-white font-bold">{user.full_name}</span> ({user.role})
-            </span>
             <button
               onClick={handleLogout}
               className="sm:hidden text-neutral-400 hover:text-red-400 transition-colors"
@@ -977,232 +1031,272 @@ export const AdminDashboard: React.FC = () => {
 
               {/* ================= VIEW: MESSAGES INBOX ================= */}
               {activeTab === 'messages' && (
-                <div id="messages-view" className="space-y-6 animate-fade-in">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                      <h2 className="font-heading text-lg font-bold uppercase tracking-wider text-white">
-                        Showroom Message Inbox
-                      </h2>
-                      <button
-                        onClick={handleGenerateMockInquiries}
-                        disabled={isGeneratingMock}
-                        className="w-fit bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-accent text-accent font-heading font-bold text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-sm transition-all cursor-pointer flex items-center space-x-1"
-                      >
-                        <span>{isGeneratingMock ? 'Generating...' : '+ Generate Sample Inquiries'}</span>
-                      </button>
+                <div id="messages-view" className="space-y-5 animate-fade-in">
+                  <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 border-b border-neutral-800 pb-5">
+                    <div>
+                      <div className="flex items-center gap-2.5">
+                        <Inbox className="w-5 h-5 text-accent" />
+                        <h2 className="font-heading text-lg font-bold uppercase tracking-wider text-white">
+                          Showroom Inbox
+                        </h2>
+                      </div>
+                      <p className="mt-2 text-xs text-neutral-500">
+                        {messages.length} {messages.length === 1 ? 'inquiry' : 'inquiries'}
+                        <span className="mx-2 text-neutral-700">•</span>
+                        <span className={unreadMessagesCount > 0 ? 'text-accent font-bold' : ''}>
+                          {unreadMessagesCount} unread
+                        </span>
+                      </p>
                     </div>
 
-                    {/* Filter controls */}
-                    <div className="grid grid-cols-3 bg-neutral-950 p-1 rounded-sm border border-neutral-800 w-full sm:w-auto shrink-0">
-                      <button
-                        onClick={() => setMessageFilter('all')}
-                        className={`px-4 py-1.5 text-[10px] uppercase tracking-wider font-heading font-bold rounded-sm transition-all ${
-                          messageFilter === 'all' ? 'bg-accent text-neutral-950' : 'text-neutral-400'
-                        }`}
-                      >
-                        All ({messages.length})
-                      </button>
-                      <button
-                        onClick={() => setMessageFilter('unread')}
-                        className={`px-4 py-1.5 text-[10px] uppercase tracking-wider font-heading font-bold rounded-sm transition-all ${
-                          messageFilter === 'unread' ? 'bg-accent text-neutral-950' : 'text-neutral-400'
-                        }`}
-                      >
-                        Unread ({messages.filter(m => !m.is_read).length})
-                      </button>
-                      <button
-                        onClick={() => setMessageFilter('read')}
-                        className={`px-4 py-1.5 text-[10px] uppercase tracking-wider font-heading font-bold rounded-sm transition-all ${
-                          messageFilter === 'read' ? 'bg-accent text-neutral-950' : 'text-neutral-400'
-                        }`}
-                      >
-                        Read ({messages.filter(m => m.is_read).length})
-                      </button>
+                    <button
+                      onClick={handleGenerateMockInquiries}
+                      disabled={isGeneratingMock}
+                      className="w-full lg:w-auto bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 hover:border-accent text-neutral-300 hover:text-accent font-heading font-bold text-[10px] uppercase tracking-wider px-4 py-2.5 rounded-sm transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>{isGeneratingMock ? 'Generating...' : 'Generate Sample Inquiries'}</span>
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
+                    <div className="relative w-full lg:max-w-md">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-600 pointer-events-none" />
+                      <input
+                        type="search"
+                        value={messageSearch}
+                        onChange={(event) => setMessageSearch(event.target.value)}
+                        placeholder="Search name, email, vehicle or message"
+                        aria-label="Search inquiries"
+                        className="w-full h-10 bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm pl-10 pr-3 text-xs text-neutral-200 placeholder:text-neutral-600 outline-none transition-colors"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-3 bg-neutral-950 p-1 rounded-sm border border-neutral-800 w-full lg:w-auto shrink-0">
+                      {([
+                        ['all', `All ${messages.length}`],
+                        ['unread', `Unread ${unreadMessagesCount}`],
+                        ['read', `Read ${messages.length - unreadMessagesCount}`]
+                      ] as const).map(([filter, label]) => (
+                        <button
+                          key={filter}
+                          onClick={() => setMessageFilter(filter)}
+                          className={`min-h-8 px-3 sm:px-4 text-[10px] uppercase tracking-wider font-heading font-bold rounded-sm transition-colors ${
+                            messageFilter === filter
+                              ? 'bg-accent text-neutral-950'
+                              : 'text-neutral-500 hover:text-white'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
                   {messages.length === 0 ? (
-                    <div className="text-center py-20 bg-neutral-950 border border-neutral-800 rounded-sm space-y-4">
-                      <Mail className="w-12 h-12 text-neutral-800 mx-auto" />
+                    <div className="text-center py-20 border-y border-neutral-800 space-y-4">
+                      <Mail className="w-10 h-10 text-neutral-700 mx-auto" />
                       <div className="space-y-1">
-                        <p className="font-heading text-sm font-bold uppercase tracking-wider text-neutral-400">
-                          No inquiries received yet
+                        <p className="font-heading text-sm font-bold uppercase tracking-wider text-neutral-300">
+                          Inbox is clear
                         </p>
-                        <p className="text-xs text-neutral-600 font-sans">
-                          Generate sample inquiries to review the inbox and reply workflow.
-                        </p>
+                        <p className="text-xs text-neutral-600">New showroom inquiries will appear here.</p>
                       </div>
+                    </div>
+                  ) : filteredMessages.length === 0 ? (
+                    <div className="text-center py-16 border-y border-neutral-800">
+                      <Search className="w-8 h-8 text-neutral-700 mx-auto mb-3" />
+                      <p className="font-heading text-xs font-bold uppercase tracking-wider text-neutral-400">
+                        No matching inquiries
+                      </p>
                       <button
-                        onClick={handleGenerateMockInquiries}
-                        disabled={isGeneratingMock}
-                        className="bg-accent hover:bg-accent-hover text-neutral-950 font-heading font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-sm transition-all cursor-pointer inline-flex items-center space-x-2"
+                        onClick={() => {
+                          setMessageSearch('');
+                          setMessageFilter('all');
+                        }}
+                        className="mt-3 text-[10px] uppercase font-heading font-bold tracking-wider text-accent hover:text-white"
                       >
-                        <span>{isGeneratingMock ? 'Generating Sample Inquiries...' : 'Generate Sample Inquiries'}</span>
+                        Clear search and filters
                       </button>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      {messages
-                        .filter(m => {
-                          if (messageFilter === 'unread') return !m.is_read;
-                          if (messageFilter === 'read') return m.is_read;
-                          return true;
-                        })
-                        .map(msg => (
+                    <div className="border border-neutral-800 bg-neutral-950 rounded-sm overflow-hidden divide-y divide-neutral-800">
+                      {filteredMessages.map(msg => {
+                        const initials = msg.buyer_name
+                          .split(/\s+/)
+                          .filter(Boolean)
+                          .slice(0, 2)
+                          .map(part => part[0])
+                          .join('')
+                          .toUpperCase();
+
+                        return (
                           <div
                             key={msg.id}
-                            className={`border rounded-sm transition-all overflow-hidden ${
-                              msg.is_read
-                                ? 'bg-neutral-950 border-neutral-800/80 opacity-75'
-                                : 'bg-neutral-950 border-accent/30 shadow-lg border-l-4 border-l-accent'
+                            className={`transition-colors ${
+                              expandedMessageId === msg.id
+                                ? 'bg-neutral-900/50'
+                                : msg.is_read
+                                  ? 'bg-neutral-950 hover:bg-neutral-900/35'
+                                  : 'bg-accent/[0.035] hover:bg-accent/[0.06]'
                             }`}
                           >
-                            {/* Summary row */}
-                            <div
+                            <button
                               onClick={() => setExpandedMessageId(expandedMessageId === msg.id ? null : msg.id)}
-                              className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:bg-neutral-900/40"
+                              className="w-full p-4 sm:p-5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 sm:gap-4 text-left"
+                              aria-expanded={expandedMessageId === msg.id}
                             >
-                              <div className="space-y-1.5">
-                                <div className="flex items-center space-x-2">
-                                  <span className="font-bold text-white text-sm">{msg.buyer_name}</span>
-                                  {!msg.is_read && (
-                                    <span className="bg-accent text-neutral-950 font-heading font-bold text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-sm">
-                                      NEW
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="text-[11px] text-accent font-heading font-semibold uppercase tracking-tight flex items-center">
-                                  <CarIcon className="w-3.5 h-3.5 mr-1.5" />
-                                  Re: {msg.car_title || 'Unknown Model'}
-                                </div>
-                                <p className="text-xs text-neutral-400 leading-relaxed max-w-2xl line-clamp-1 font-sans">
-                                  {msg.message}
-                                </p>
-                              </div>
+                              <span
+                                className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-[11px] font-heading font-bold border ${
+                                  msg.is_read
+                                    ? 'bg-neutral-900 border-neutral-800 text-neutral-400'
+                                    : 'bg-accent text-neutral-950 border-accent'
+                                }`}
+                              >
+                                {initials || '?'}
+                              </span>
 
-                              <div className="flex items-center space-x-3 justify-end text-right">
-                                <div className="text-neutral-500 text-[10px] font-mono">
-                                  {new Date(msg.created_at).toLocaleDateString()}
-                                  <span className="block mt-0.5">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                </div>
-                                <div>
-                                  {expandedMessageId === msg.id ? (
-                                    <ChevronUp className="w-4 h-4 text-neutral-400" />
-                                  ) : (
-                                    <ChevronDown className="w-4 h-4 text-neutral-400" />
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Expanded Message Content Panel */}
-                            {expandedMessageId === msg.id && (
-                              <div className="px-5 pb-5 pt-3 border-t border-neutral-900 bg-neutral-950/60 space-y-4 animate-fade-in">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-sans border-b border-neutral-900 pb-4">
-                                  <div>
-                                    <span className="text-[10px] uppercase font-heading font-bold text-neutral-500 block mb-1">
-                                      Email Address
-                                    </span>
-                                    {msg.buyer_email ? (
-                                      <a href={`mailto:${msg.buyer_email}`} className="text-accent font-bold hover:underline">
-                                        {msg.buyer_email}
-                                      </a>
-                                    ) : (
-                                      <span className="text-neutral-500">Not provided</span>
-                                    )}
-                                  </div>
-                                  <div>
-                                    <span className="text-[10px] uppercase font-heading font-bold text-neutral-500 block mb-1">
-                                      Phone Number
-                                    </span>
-                                    {msg.buyer_phone ? (
-                                      <a href={`tel:${msg.buyer_phone}`} className="text-neutral-300 font-mono hover:text-accent font-bold">
-                                        {msg.buyer_phone}
-                                      </a>
-                                    ) : (
-                                      <span className="text-neutral-500">Not provided</span>
-                                    )}
-                                  </div>
-                                </div>
-
-                                <div className="space-y-1.5">
-                                  <span className="text-[10px] uppercase font-heading font-bold text-neutral-500 block">
-                                    Message Details
+                              <span className="min-w-0">
+                                <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                  <span className={`text-sm ${msg.is_read ? 'font-semibold text-neutral-300' : 'font-bold text-white'}`}>
+                                    {msg.buyer_name}
                                   </span>
-                                  <p className="text-xs text-neutral-300 leading-relaxed font-sans whitespace-pre-line bg-neutral-900 p-4 rounded-sm border border-neutral-800">
-                                    {msg.message}
-                                  </p>
+                                </span>
+                                <span className="mt-1 flex items-center text-[10px] text-accent font-heading font-bold uppercase tracking-wider truncate">
+                                  <CarIcon className="w-3 h-3 mr-1.5 shrink-0" />
+                                  {msg.car_title || 'General showroom inquiry'}
+                                </span>
+                                <span className="mt-2 block text-xs text-neutral-500 leading-relaxed line-clamp-2 sm:line-clamp-1">
+                                  {msg.message}
+                                </span>
+                              </span>
+
+                              <span className="flex items-center justify-end gap-2 sm:gap-3 text-right">
+                                {!msg.is_read && (
+                                  <span className="bg-accent text-neutral-950 font-heading font-bold text-[8px] uppercase tracking-widest px-2 py-1 rounded-sm">
+                                    New
+                                  </span>
+                                )}
+                                <span className="hidden sm:block text-neutral-600 text-[10px] font-mono whitespace-nowrap">
+                                  {new Date(msg.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                                  <span className="block mt-0.5">
+                                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                </span>
+                                {expandedMessageId === msg.id ? (
+                                  <ChevronUp className="w-4 h-4 text-accent" />
+                                ) : (
+                                  <ChevronDown className="w-4 h-4 text-neutral-600" />
+                                )}
+                              </span>
+                            </button>
+
+                            {expandedMessageId === msg.id && (
+                              <div className="px-4 sm:px-5 pb-5 border-t border-neutral-800 animate-fade-in">
+                                <div className="py-4 flex flex-wrap items-center gap-2 border-b border-neutral-800">
+                                  {msg.buyer_email && (
+                                    <a
+                                      href={`mailto:${msg.buyer_email}`}
+                                      className="min-h-9 px-3 bg-neutral-950 border border-neutral-800 hover:border-accent rounded-sm text-xs text-neutral-300 hover:text-accent inline-flex items-center gap-2 transition-colors"
+                                    >
+                                      <Mail className="w-3.5 h-3.5" />
+                                      {msg.buyer_email}
+                                    </a>
+                                  )}
+                                  {msg.buyer_phone && (
+                                    <a
+                                      href={`tel:${msg.buyer_phone}`}
+                                      className="min-h-9 px-3 bg-neutral-950 border border-neutral-800 hover:border-accent rounded-sm text-xs text-neutral-300 hover:text-accent inline-flex items-center gap-2 transition-colors"
+                                    >
+                                      <Phone className="w-3.5 h-3.5" />
+                                      {msg.buyer_phone}
+                                    </a>
+                                  )}
+                                  <span className="sm:ml-auto text-[10px] text-neutral-600 font-mono">
+                                    Received {new Date(msg.created_at).toLocaleString()}
+                                  </span>
                                 </div>
 
-                                {/* Replies History */}
-                                {msg.replies && msg.replies.length > 0 && (
-                                  <div className="space-y-3 pt-3 border-t border-neutral-900">
-                                    <span className="text-[10px] uppercase font-heading font-bold text-neutral-500 block">
-                                      Reply History
+                                <div className="py-5 space-y-5">
+                                  <div className="flex items-start gap-3 max-w-3xl">
+                                    <span className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 text-neutral-300 flex items-center justify-center text-[9px] font-heading font-bold shrink-0">
+                                      {initials || '?'}
                                     </span>
-                                    <div className="space-y-2">
-                                      {msg.replies.map((rep) => (
-                                        <div key={rep.id} className="bg-neutral-900/40 border border-neutral-800/80 p-3 rounded-sm space-y-1.5">
-                                          <div className="flex items-center justify-between text-[10px]">
-                                            <span className="font-heading font-bold text-accent">
-                                              {rep.sender_name} <span className="text-neutral-500 font-normal">({rep.sender_email})</span>
-                                            </span>
-                                            <span className="text-neutral-500 font-mono">
-                                              {new Date(rep.created_at).toLocaleString()}
-                                            </span>
-                                          </div>
-                                          <p className="text-xs text-neutral-300 whitespace-pre-line font-sans">{rep.message}</p>
-                                        </div>
-                                      ))}
+                                    <div className="min-w-0">
+                                      <div className="flex flex-wrap items-baseline gap-x-2 mb-1.5">
+                                        <span className="text-xs font-bold text-white">{msg.buyer_name}</span>
+                                        <span className="text-[9px] uppercase tracking-wider text-neutral-600">Customer</span>
+                                      </div>
+                                      <p className="text-xs text-neutral-300 leading-6 whitespace-pre-line">{msg.message}</p>
                                     </div>
                                   </div>
-                                )}
 
-                                {/* Reply Input Area */}
-                                <div className="space-y-2 pt-3 border-t border-neutral-900">
-                                  <span className="text-[10px] uppercase font-heading font-bold text-neutral-500 block">
-                                    Send Message Reply
-                                  </span>
-                                  <div className="space-y-3">
+                                  {msg.replies?.map(rep => (
+                                    <div key={rep.id} className="flex items-start justify-end gap-3">
+                                      <div className="max-w-3xl min-w-0 text-right">
+                                        <div className="flex flex-wrap justify-end items-baseline gap-x-2 mb-1.5">
+                                          <span className="text-[9px] text-neutral-600 font-mono">
+                                            {new Date(rep.created_at).toLocaleString()}
+                                          </span>
+                                          <span className="text-xs font-bold text-accent">{rep.sender_name}</span>
+                                        </div>
+                                        <p className="inline-block text-left text-xs text-neutral-200 leading-6 whitespace-pre-line bg-neutral-800 border border-neutral-700 px-4 py-3 rounded-sm">
+                                          {rep.message}
+                                        </p>
+                                      </div>
+                                      <span className="w-8 h-8 rounded-full bg-accent text-neutral-950 flex items-center justify-center text-[9px] font-heading font-bold shrink-0">
+                                        {rep.sender_name.split(/\s+/).map(part => part[0]).join('').slice(0, 2).toUpperCase()}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                <div className="pt-4 border-t border-neutral-800">
+                                  <div className="bg-neutral-950 border border-neutral-800 focus-within:border-accent rounded-sm transition-colors">
                                     <textarea
                                       value={replyTexts[msg.id] || ''}
-                                      onChange={(e) => setReplyTexts(prev => ({ ...prev, [msg.id]: e.target.value }))}
-                                      placeholder="Write your professional reply here... (Sends reply and logs who responded)"
-                                      rows={3}
-                                      className="w-full bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm p-3 text-xs font-sans text-neutral-200 outline-none transition-colors resize-none"
+                                      onChange={(event) => setReplyTexts(prev => ({ ...prev, [msg.id]: event.target.value }))}
+                                      placeholder={`Reply to ${msg.buyer_name}...`}
+                                      rows={4}
+                                      maxLength={2000}
+                                      className="w-full bg-transparent p-4 pb-2 text-xs text-neutral-200 placeholder:text-neutral-600 outline-none resize-none"
                                     />
-                                    <div className="flex justify-end">
+                                    <div className="px-3 py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-neutral-800">
+                                      <span className="text-[9px] text-neutral-600">
+                                        {(replyTexts[msg.id] || '').length}/2000
+                                      </span>
                                       <button
                                         onClick={() => handleSendReply(msg.id)}
-                                        disabled={isSendingReply[msg.id]}
-                                        className="bg-accent hover:bg-accent-hover text-neutral-950 font-heading font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-sm transition-colors cursor-pointer flex items-center space-x-2"
+                                        disabled={isSendingReply[msg.id] || !(replyTexts[msg.id] || '').trim()}
+                                        className="w-full sm:w-auto bg-accent hover:bg-accent-hover text-neutral-950 font-heading font-bold text-[10px] uppercase tracking-wider px-5 py-2.5 rounded-sm transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                                       >
+                                        <Send className="w-3.5 h-3.5" />
                                         <span>{isSendingReply[msg.id] ? 'Sending Reply...' : 'Send Reply'}</span>
                                       </button>
                                     </div>
                                   </div>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between pt-2">
-                                  <button
-                                    onClick={() => handleToggleReadMessage(msg.id, msg.is_read)}
-                                    className="text-xs font-heading font-bold uppercase tracking-wider border border-neutral-800 hover:border-accent text-neutral-400 hover:text-accent px-4 py-2 rounded-sm transition-colors cursor-pointer"
-                                  >
-                                    Mark as {msg.is_read ? 'Unread' : 'Read'}
-                                  </button>
-
+                                <div className="flex flex-col-reverse sm:flex-row gap-3 sm:items-center sm:justify-between pt-4">
                                   <button
                                     onClick={() => handleDeleteMessage(msg.id)}
-                                    className="text-xs font-heading font-bold uppercase tracking-wider text-neutral-500 hover:text-red-400 flex items-center space-x-1.5 transition-colors cursor-pointer"
+                                    className="min-h-9 text-[10px] font-heading font-bold uppercase tracking-wider text-neutral-600 hover:text-red-400 flex items-center justify-center sm:justify-start gap-1.5 transition-colors cursor-pointer"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
-                                    <span>Delete Message</span>
+                                    <span>Delete Inquiry</span>
+                                  </button>
+                                  <button
+                                    onClick={() => handleToggleReadMessage(msg.id, msg.is_read)}
+                                    className="min-h-9 text-[10px] font-heading font-bold uppercase tracking-wider border border-neutral-700 hover:border-accent text-neutral-400 hover:text-accent px-4 py-2 rounded-sm transition-colors cursor-pointer"
+                                  >
+                                    Mark as {msg.is_read ? 'Unread' : 'Read'}
                                   </button>
                                 </div>
                               </div>
                             )}
                           </div>
-                        ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -1225,99 +1319,71 @@ export const AdminDashboard: React.FC = () => {
                     </button>
                   </div>
 
-                  <div className="md:hidden space-y-4">
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                     {profiles.map(prof => (
-                      <article key={prof.id} className="bg-neutral-950 border border-neutral-800 rounded-sm p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <h3 className="font-heading font-bold text-white text-sm">{prof.full_name}</h3>
-                            <p className="font-mono text-xs text-neutral-400 mt-1 break-all">{prof.email}</p>
+                      <article key={prof.id} className="bg-neutral-950 border border-neutral-800 rounded-sm overflow-hidden min-w-0">
+                        <div className="p-4 sm:p-5">
+                          <div className="flex items-start gap-3">
+                            <span className="w-10 h-10 bg-neutral-900 border border-neutral-800 rounded-full flex items-center justify-center shrink-0 text-xs font-heading font-bold text-accent">
+                              {prof.full_name
+                                .split(/\s+/)
+                                .filter(Boolean)
+                                .slice(0, 2)
+                                .map(part => part[0])
+                                .join('')
+                                .toUpperCase()}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="font-heading font-bold text-white text-sm break-words">{prof.full_name}</h3>
+                                <span
+                                  className={`text-[8px] uppercase font-heading font-bold tracking-wider px-2 py-1 rounded-sm border shrink-0 ${
+                                    prof.role === 'super_admin'
+                                      ? 'bg-accent/10 text-accent border-accent/30'
+                                      : 'bg-blue-950/50 text-blue-400 border-blue-900/50'
+                                  }`}
+                                >
+                                  {prof.role === 'super_admin' ? 'Super Admin' : 'Sub Admin'}
+                                </span>
+                              </div>
+                              <p className="font-mono text-xs text-neutral-400 mt-1 break-all">{prof.email}</p>
+                            </div>
                           </div>
-                          <span
-                            className={`text-[8px] uppercase font-heading font-bold tracking-wider px-2 py-1 rounded-sm border shrink-0 ${
-                              prof.role === 'super_admin'
-                                ? 'bg-purple-950/50 text-purple-400 border-purple-900/50'
-                                : 'bg-blue-950/50 text-blue-400 border-blue-900/50'
-                            }`}
-                          >
-                            {prof.role === 'super_admin' ? 'Super Admin' : 'Sub Admin'}
-                          </span>
                         </div>
-                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-neutral-800">
+
+                        <div className="px-4 sm:px-5 py-3 bg-neutral-900/35 border-y border-neutral-800 flex flex-wrap items-center justify-between gap-2">
                           <p className="text-[10px] text-neutral-500 font-mono">
                             Added {new Date(prof.created_at).toLocaleDateString()}
                           </p>
-                          {prof.email !== 'helpooclassmate@gmail.com' ? (
+                          <span className="text-[9px] uppercase font-heading font-bold text-neutral-600 tracking-wider">
+                            {prof.role === 'super_admin' ? 'Primary Account' : 'Password Configured'}
+                          </span>
+                        </div>
+
+                        {prof.role !== 'super_admin' ? (
+                          <div className="grid grid-cols-2 divide-x divide-neutral-800">
+                            <button
+                              onClick={() => handleOpenEditProfile(prof)}
+                              className="min-h-11 px-3 text-[10px] font-heading font-bold uppercase tracking-wider text-neutral-300 hover:text-accent hover:bg-neutral-900 flex items-center justify-center gap-2 transition-colors"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                              Edit
+                            </button>
                             <button
                               onClick={() => handleRemoveProfile(prof.id, prof.full_name)}
-                              className="text-[10px] font-heading font-bold uppercase tracking-wider text-neutral-400 hover:text-red-400 flex items-center gap-1.5"
+                              className="min-h-11 px-3 text-[10px] font-heading font-bold uppercase tracking-wider text-neutral-400 hover:text-red-400 hover:bg-red-950/20 flex items-center justify-center gap-2 transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                               Revoke Access
                             </button>
-                          ) : (
-                            <span className="text-[9px] uppercase font-heading font-bold text-neutral-600 tracking-wider">
-                              Primary Admin
-                            </span>
-                          )}
-                        </div>
+                          </div>
+                        ) : (
+                          <div className="min-h-11 px-4 flex items-center justify-center text-[9px] uppercase font-heading font-bold tracking-wider text-neutral-600">
+                            Manage your primary profile in Settings
+                          </div>
+                        )}
                       </article>
                     ))}
-                  </div>
-
-                  <div className="hidden md:block bg-neutral-950 border border-neutral-800 rounded-sm overflow-hidden">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="border-b border-neutral-800 text-[10px] uppercase font-heading font-bold tracking-widest text-neutral-400 bg-neutral-950">
-                          <th className="py-4 px-6">Name</th>
-                          <th className="py-4 px-6">Email Address</th>
-                          <th className="py-4 px-6">Access Role</th>
-                          <th className="py-4 px-6">Credentials</th>
-                          <th className="py-4 px-6">Registered On</th>
-                          <th className="py-4 px-6 text-right">Operations</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-neutral-800 text-xs text-neutral-300">
-                        {profiles.map(prof => (
-                          <tr key={prof.id} className="hover:bg-neutral-900/40 transition-colors">
-                            <td className="py-4 px-6 font-heading font-bold text-white">{prof.full_name}</td>
-                            <td className="py-4 px-6 font-mono text-neutral-400">{prof.email}</td>
-                            <td className="py-4 px-6">
-                              <span
-                                className={`text-[9px] uppercase font-heading font-bold tracking-widest px-2 py-0.5 rounded-sm border ${
-                                  prof.role === 'super_admin'
-                                    ? 'bg-purple-950/50 text-purple-400 border-purple-900/50'
-                                    : 'bg-blue-950/50 text-blue-400 border-blue-900/50'
-                                }`}
-                              >
-                                {prof.role === 'super_admin' ? 'Super Admin' : 'Sub Admin'}
-                              </span>
-                            </td>
-                            <td className="py-4 px-6 text-xs text-neutral-500">
-                              Password configured
-                            </td>
-                            <td className="py-4 px-6 text-neutral-500 font-mono">
-                              {new Date(prof.created_at).toLocaleDateString()}
-                            </td>
-                            <td className="py-4 px-6 text-right">
-                              {prof.email !== 'helpooclassmate@gmail.com' ? (
-                                <button
-                                  onClick={() => handleRemoveProfile(prof.id, prof.full_name)}
-                                  className="p-2 bg-neutral-900 hover:bg-red-950/60 border border-neutral-800 hover:border-red-900/60 text-neutral-400 hover:text-red-400 rounded-sm transition-colors cursor-pointer"
-                                  title="Revoke Admin Access"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              ) : (
-                                <span className="text-[10px] uppercase font-heading font-bold text-neutral-600 tracking-wider">
-                                  System Root
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
                   </div>
                 </div>
               )}
@@ -1497,7 +1563,7 @@ export const AdminDashboard: React.FC = () => {
                 {/* Drag and Drop Image Upload Section */}
                 <div className="sm:col-span-2">
                   <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
-                    Vehicle Images (1600 × 900, 16:9)
+                    Vehicle Images (1600 × 900, 16:9, no gallery limit)
                   </label>
 
                   <div
@@ -1524,7 +1590,7 @@ export const AdminDashboard: React.FC = () => {
                       Drop images here or click to choose files
                     </p>
                     <p className="text-[10px] text-neutral-500 mt-1">
-                      Images are automatically cropped and optimized to 1600 × 900 WebP. The first image becomes the listing cover.
+                      Select as many images as needed. They upload in safe batches and are optimized to 1600 × 900 WebP.
                     </p>
                   </div>
 
@@ -1660,6 +1726,86 @@ export const AdminDashboard: React.FC = () => {
                   className="bg-accent hover:bg-accent-hover text-neutral-950 font-heading font-bold text-xs uppercase tracking-wider px-5 py-2 rounded-sm transition-colors cursor-pointer border border-accent"
                 >
                   Grant Sub-Admin Status
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: SUB-ADMIN EDIT ================= */}
+      {editingProfile && (
+        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/85 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto">
+          <div className="bg-neutral-900 text-neutral-100 w-full max-w-md min-h-full sm:min-h-0 sm:rounded-sm overflow-hidden shadow-2xl relative border border-neutral-800">
+            <div className="bg-neutral-950 p-4 sm:p-6 border-b border-neutral-800 flex justify-between items-center gap-4">
+              <div>
+                <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-white">
+                  Edit Administrator
+                </h3>
+                <p className="text-[10px] text-neutral-500 mt-1">Update account details and access credentials.</p>
+              </div>
+              <button
+                onClick={() => setEditingProfile(null)}
+                className="text-neutral-400 hover:text-white transition-colors"
+                aria-label="Close edit administrator"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditProfileSubmit(onEditProfileSubmit)} className="p-4 sm:p-6 space-y-4">
+              <div>
+                <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
+                  Staff Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  {...editProfileRegister('full_name', { required: true })}
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm py-2.5 px-4 text-xs outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
+                  Staff Email Address *
+                </label>
+                <input
+                  type="email"
+                  required
+                  {...editProfileRegister('email', { required: true })}
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm py-2.5 px-4 text-xs outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  {...editProfileRegister('passcode')}
+                  placeholder="Leave blank to keep the current password"
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm py-2.5 px-4 text-xs outline-none transition-colors"
+                />
+                <p className="text-[10px] text-neutral-600 mt-2">
+                  Only enter a password when this administrator needs a credential reset.
+                </p>
+              </div>
+
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-neutral-800">
+                <button
+                  type="button"
+                  onClick={() => setEditingProfile(null)}
+                  className="px-4 py-2.5 text-neutral-400 hover:text-white text-xs font-heading font-bold uppercase tracking-wider transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-accent hover:bg-accent-hover text-neutral-950 font-heading font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-sm transition-colors border border-accent"
+                >
+                  Save Administrator
                 </button>
               </div>
             </form>
