@@ -8,7 +8,7 @@ export const AdminSettings: React.FC = () => {
 
   const [fullName, setFullName] = useState(user?.full_name || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [passcode, setPasscode] = useState(user?.passcode || '');
+  const [passcode, setPasscode] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,7 +31,8 @@ export const AdminSettings: React.FC = () => {
       });
 
       if (res.ok) {
-        toast.success('Admin Profile Settings updated successfully!');
+        toast.success('Profile settings updated.');
+        setPasscode('');
         await refreshUser();
       } else {
         const err = await res.json();
@@ -99,20 +100,20 @@ export const AdminSettings: React.FC = () => {
           {/* Passcode / Password */}
           <div className="space-y-2">
             <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider">
-              Portal Passcode / Password
+              New Password
             </label>
             <div className="relative">
               <Key className="absolute left-3 top-3 w-4 h-4 text-neutral-500" />
               <input
-                type="text"
+                type="password"
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
-                placeholder="Leave blank or type new passcode (defaults to admin123 if empty)"
+                placeholder="Leave blank to keep your current password"
                 className="w-full bg-neutral-900 border border-neutral-800 focus:border-accent text-neutral-100 placeholder-neutral-600 rounded-sm py-2.5 pl-10 pr-4 text-xs font-sans outline-none transition-colors"
               />
             </div>
             <p className="text-[10px] text-neutral-500 font-sans">
-              Set a strong passcode. It will take effect immediately upon saving.
+              Enter a new password only when you want to change it.
             </p>
           </div>
 

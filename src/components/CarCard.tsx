@@ -74,7 +74,7 @@ export const CarCard: React.FC<CarCardProps> = ({ car, onDetailClick, onMessageC
             </div>
             <span className="flex items-center text-[11px] text-neutral-500">
               <MapPin className="w-3.5 h-3.5 text-neutral-400 mr-1" />
-              {car.location || 'Vancouver, BC'}
+              {car.location || 'Location on request'}
             </span>
           </div>
 

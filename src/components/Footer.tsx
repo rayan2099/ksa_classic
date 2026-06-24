@@ -31,7 +31,7 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
               </span>
             </Link>
             <p className="text-xs text-neutral-500 font-sans leading-relaxed">
-              Bespoke marketplace for legendary classic cars and raw restoration project builds. Curating historical masterpieces and barn-find survivors in beautiful Vancouver, British Columbia.
+              A focused marketplace for collector cars and restoration projects, with clear listings and direct access to the showroom team.
             </p>
           </div>
 
@@ -46,7 +46,7 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
                   onClick={() => onScrollToSection?.('inventory')}
                   className="hover:text-accent transition-colors text-left"
                 >
-                  All Fine Inventory
+                  All Inventory
                 </button>
               </li>
               <li>
@@ -54,7 +54,7 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
                   onClick={() => onScrollToSection?.('classic')}
                   className="hover:text-accent transition-colors text-left"
                 >
-                  Curated Classics
+                  Classic Cars
                 </button>
               </li>
               <li>
@@ -70,7 +70,7 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
                   onClick={() => onScrollToSection?.('sold')}
                   className="hover:text-accent transition-colors text-left"
                 >
-                  Recently Sold Models
+                  Recently Sold
                 </button>
               </li>
             </ul>
@@ -96,18 +96,16 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
           {/* Contact Details Column */}
           <div>
             <h4 className="font-heading text-xs font-bold uppercase tracking-wider text-white mb-6">
-              Headquarters
+              Contact
             </h4>
             <ul className="space-y-3.5 text-xs font-sans">
               <li className="flex items-center">
                 <MapPin className="w-4 h-4 text-accent mr-2.5 flex-shrink-0" />
-                <span>1090 West Georgia St, Vancouver, BC V6E 3V7</span>
+                <span>Private viewings by confirmed appointment</span>
               </li>
               <li className="flex items-center">
                 <Phone className="w-4 h-4 text-accent mr-2.5 flex-shrink-0" />
-                <a href="tel:+16045550199" className="hover:text-white transition-colors">
-                  +1 (604) 555-0199
-                </a>
+                <span>Direct details provided after inquiry</span>
               </li>
               <li className="flex items-center">
                 <Mail className="w-4 h-4 text-accent mr-2.5 flex-shrink-0" />
@@ -123,13 +121,13 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
       {/* Lower Copyright Row */}
       <div className="bg-neutral-950 border-t border-neutral-900 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center text-xs text-neutral-600">
-          <p>© {currentYear} KSA Classic. All Rights Reserved.</p>
-          <div className="flex space-x-6 mt-4 sm:mt-0 font-mono text-[10px]">
+          <p>© {currentYear} KSA Classics. All rights reserved.</p>
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-4 sm:mt-0 font-mono text-[10px]">
             <Link to="/admin/login" className="hover:text-accent transition-colors">
               Employee Access Portal
             </Link>
             <span>•</span>
-            <span className="text-neutral-700">Vancouver, BC, Canada</span>
+            <span className="text-neutral-700">Collector cars & restoration projects</span>
           </div>
         </div>
       </div>

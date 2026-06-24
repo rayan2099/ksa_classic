@@ -19,7 +19,6 @@ import {
   Upload,
   AlertCircle,
   Clock,
-  ExternalLink,
   ChevronDown,
   ChevronUp,
   Filter,
@@ -145,11 +144,11 @@ export const AdminDashboard: React.FC = () => {
       year: new Date().getFullYear(),
       price: '',
       mileage: '',
-      location: 'Vancouver, BC',
+      location: '',
       description: '',
       condition: 'available',
       type: 'classic',
-      contact_phone: '+1 604-555-0199',
+      contact_phone: '',
       images: []
     });
     setIsCarModalOpen(true);
@@ -372,11 +371,11 @@ export const AdminDashboard: React.FC = () => {
       });
 
       if (res.ok) {
-        toast.success('Mockup inquiries generated successfully!');
+        toast.success('Sample inquiries generated.');
         await loadAllData();
       } else {
         const err = await res.json();
-        toast.error(err.error || 'Failed to generate mockup inquiries.');
+        toast.error(err.error || 'Failed to generate sample inquiries.');
       }
     } catch (err: any) {
       toast.error(err.message || 'An error occurred.');
@@ -542,23 +541,23 @@ export const AdminDashboard: React.FC = () => {
       {/* Main Panel */}
       <div className="flex-grow flex flex-col min-w-0">
         {/* Topbar / Header */}
-        <header className="bg-neutral-950 border-b border-neutral-800 h-16 px-6 flex items-center justify-between sticky top-0 z-40">
-          <div className="flex items-center space-x-4">
+        <header className="bg-neutral-950 border-b border-neutral-800 min-h-16 px-3 sm:px-6 py-2 flex items-center justify-between gap-2 sticky top-0 z-40">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <Link
               to="/"
-              className="mr-2 text-neutral-400 hover:text-accent transition-colors flex items-center space-x-1"
+              className="text-neutral-400 hover:text-accent transition-colors flex items-center shrink-0"
               title="Return to Showroom"
             >
               <ArrowLeft className="w-5 h-5 text-accent" />
             </Link>
-            <h1 className="font-heading text-sm font-bold uppercase tracking-wider text-neutral-200">
-              KSA Classic CRM — {activeTab}
+            <h1 className="font-heading text-[11px] sm:text-sm font-bold uppercase tracking-wider text-neutral-200 leading-tight min-w-0">
+              KSA Classics CRM — {activeTab}
             </h1>
 
             {/* Supabase / Local Fallback Database connection badge */}
             {dbStatus && (
               <span
-                className={`text-[10px] uppercase font-bold font-heading px-2 py-0.5 rounded-sm flex items-center space-x-1.5 ${
+                className={`text-[9px] sm:text-[10px] uppercase font-bold font-heading px-2 py-1 rounded-sm flex items-center space-x-1.5 shrink-0 ${
                   dbStatus.status === 'supabase'
                     ? 'bg-emerald-900/45 text-emerald-300 border border-emerald-800'
                     : 'bg-amber-900/45 text-amber-300 border border-amber-800/60'
@@ -566,12 +565,13 @@ export const AdminDashboard: React.FC = () => {
                 title={dbStatus.message}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${dbStatus.status === 'supabase' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`}></span>
-                <span>{dbStatus.status === 'supabase' ? 'Supabase Connected' : 'Local Fallback'}</span>
+                <span className="hidden sm:inline">{dbStatus.status === 'supabase' ? 'Supabase Connected' : 'Local Fallback'}</span>
+                <span className="sm:hidden">{dbStatus.status === 'supabase' ? 'Cloud' : 'Local'}</span>
               </span>
             )}
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             <span className="text-xs text-neutral-400 hidden sm:inline">
               Welcome, <span className="text-white font-bold">{user.full_name}</span> ({user.role})
             </span>
@@ -584,10 +584,11 @@ export const AdminDashboard: React.FC = () => {
             </button>
             <Link
               to="/"
-              className="bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 hover:border-neutral-600 text-white px-3 py-1.5 rounded-sm text-xs font-heading font-bold uppercase tracking-wider flex items-center space-x-1.5 transition-colors"
+              className="bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 hover:border-neutral-600 text-white p-2 sm:px-3 sm:py-1.5 rounded-sm text-xs font-heading font-bold uppercase tracking-wider flex items-center space-x-1.5 transition-colors"
+              aria-label="Return to showroom"
             >
               <ArrowLeft className="w-3.5 h-3.5 text-accent" />
-              <span>Showroom</span>
+              <span className="hidden sm:inline">Showroom</span>
             </Link>
           </div>
         </header>
@@ -649,7 +650,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Dashboard Workspace View Container */}
-        <main className="flex-grow p-6 sm:p-8 overflow-y-auto max-w-7xl w-full mx-auto">
+        <main className="flex-grow p-4 sm:p-8 overflow-y-auto max-w-7xl w-full mx-auto">
           {isDataLoading ? (
             <div className="flex flex-col items-center justify-center py-24 text-neutral-400">
               <RefreshCwIcon className="w-8 h-8 text-accent animate-spin mb-3" />
@@ -730,7 +731,7 @@ export const AdminDashboard: React.FC = () => {
                         onClick={() => setActiveTab('messages')}
                         className="text-[10px] font-heading font-bold uppercase tracking-widest text-accent hover:text-white transition-colors"
                       >
-                        Inquire Inbox →
+                        Open Inbox →
                       </button>
                     </div>
 
@@ -813,7 +814,76 @@ export const AdminDashboard: React.FC = () => {
                       </button>
                     </div>
                   ) : (
-                    <div className="bg-neutral-950 border border-neutral-800 rounded-sm overflow-hidden">
+                    <>
+                    <div className="md:hidden space-y-4">
+                      {cars.map(car => (
+                        <article key={car.id} className="bg-neutral-950 border border-neutral-800 rounded-sm overflow-hidden">
+                          <div className="flex gap-4 p-4">
+                            <div className="w-28 aspect-video bg-neutral-900 rounded-sm overflow-hidden border border-neutral-800 shrink-0">
+                              <img
+                                src={car.images?.[0] || 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=200'}
+                                alt={car.title}
+                                className="w-full h-full object-cover"
+                                referrerPolicy="no-referrer"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                  <h3 className="font-heading font-bold text-white text-sm leading-snug">{car.title}</h3>
+                                  <p className="text-[10px] text-neutral-500 uppercase tracking-wider mt-1">
+                                    {car.year} • {car.make}
+                                  </p>
+                                </div>
+                                <span
+                                  className={`text-[8px] uppercase font-heading font-bold tracking-wider px-2 py-1 rounded-sm shrink-0 ${
+                                    car.condition === 'new_arrival'
+                                      ? 'bg-emerald-950 text-emerald-400 border border-emerald-900/50'
+                                      : car.condition === 'sold'
+                                      ? 'bg-red-950 text-red-400 border border-red-900/50'
+                                      : 'bg-blue-950 text-blue-400 border border-blue-900/50'
+                                  }`}
+                                >
+                                  {car.condition === 'new_arrival' ? 'New' : car.condition === 'sold' ? 'Sold' : 'Available'}
+                                </span>
+                              </div>
+                              <p className="font-heading font-bold text-accent mt-2">
+                                {new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(car.price)}
+                              </p>
+                              <p className="text-[10px] text-neutral-500 mt-1 break-words">
+                                {car.location || 'Location on request'} • {new Intl.NumberFormat('en-CA').format(car.mileage)} km
+                              </p>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-3 border-t border-neutral-800">
+                            <button
+                              onClick={() => handleOpenEditCar(car)}
+                              className="py-3 text-[10px] font-heading font-bold uppercase tracking-wider text-neutral-300 hover:text-accent hover:bg-neutral-900 flex items-center justify-center gap-1.5"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleQuickMarkAsSold(car.id)}
+                              disabled={car.condition === 'sold'}
+                              className="py-3 text-[10px] font-heading font-bold uppercase tracking-wider text-neutral-300 hover:text-emerald-400 hover:bg-neutral-900 disabled:text-neutral-700 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 border-x border-neutral-800"
+                            >
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              Sold
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCar(car.id, car.title)}
+                              className="py-3 text-[10px] font-heading font-bold uppercase tracking-wider text-neutral-300 hover:text-red-400 hover:bg-neutral-900 flex items-center justify-center gap-1.5"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Delete
+                            </button>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+
+                    <div className="hidden md:block bg-neutral-950 border border-neutral-800 rounded-sm overflow-hidden">
                       {/* Responsive Scroll Table container */}
                       <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse min-w-[700px]">
@@ -821,7 +891,7 @@ export const AdminDashboard: React.FC = () => {
                             <tr className="border-b border-neutral-800 text-[10px] uppercase font-heading font-bold tracking-widest text-neutral-400 bg-neutral-950">
                               <th className="py-4 px-6 w-20">Media</th>
                               <th className="py-4 px-6">Model Details</th>
-                              <th className="py-4 px-6">Price CAD</th>
+                              <th className="py-4 px-6">Price</th>
                               <th className="py-4 px-6">Mileage</th>
                               <th className="py-4 px-6">Status</th>
                               <th className="py-4 px-6 text-right">Showroom Operations</th>
@@ -843,7 +913,7 @@ export const AdminDashboard: React.FC = () => {
                                 <td className="py-4 px-6">
                                   <div className="font-heading font-bold text-white text-sm">{car.title}</div>
                                   <div className="text-[10px] text-neutral-400 uppercase tracking-wider mt-0.5">
-                                    {car.year} • {car.make} • {car.location || 'Vancouver, BC'}
+                                    {car.year} • {car.make} • {car.location || 'Location on request'}
                                   </div>
                                 </td>
                                 <td className="py-4 px-6 font-heading font-bold text-accent">
@@ -900,6 +970,7 @@ export const AdminDashboard: React.FC = () => {
                         </table>
                       </div>
                     </div>
+                    </>
                   )}
                 </div>
               )}
@@ -917,12 +988,12 @@ export const AdminDashboard: React.FC = () => {
                         disabled={isGeneratingMock}
                         className="w-fit bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-accent text-accent font-heading font-bold text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-sm transition-all cursor-pointer flex items-center space-x-1"
                       >
-                        <span>{isGeneratingMock ? 'Generating...' : '+ Generate Mock Inquiries'}</span>
+                        <span>{isGeneratingMock ? 'Generating...' : '+ Generate Sample Inquiries'}</span>
                       </button>
                     </div>
 
                     {/* Filter controls */}
-                    <div className="flex space-x-2 bg-neutral-950 p-1 rounded-sm border border-neutral-800 shrink-0">
+                    <div className="grid grid-cols-3 bg-neutral-950 p-1 rounded-sm border border-neutral-800 w-full sm:w-auto shrink-0">
                       <button
                         onClick={() => setMessageFilter('all')}
                         className={`px-4 py-1.5 text-[10px] uppercase tracking-wider font-heading font-bold rounded-sm transition-all ${
@@ -958,7 +1029,7 @@ export const AdminDashboard: React.FC = () => {
                           No inquiries received yet
                         </p>
                         <p className="text-xs text-neutral-600 font-sans">
-                          Click below to seed mockup inquiries and test the replying features.
+                          Generate sample inquiries to review the inbox and reply workflow.
                         </p>
                       </div>
                       <button
@@ -966,7 +1037,7 @@ export const AdminDashboard: React.FC = () => {
                         disabled={isGeneratingMock}
                         className="bg-accent hover:bg-accent-hover text-neutral-950 font-heading font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-sm transition-all cursor-pointer inline-flex items-center space-x-2"
                       >
-                        <span>{isGeneratingMock ? 'Generating Mockup Inquiries...' : 'Generate Mockup Inquiries'}</span>
+                        <span>{isGeneratingMock ? 'Generating Sample Inquiries...' : 'Generate Sample Inquiries'}</span>
                       </button>
                     </div>
                   ) : (
@@ -1112,7 +1183,7 @@ export const AdminDashboard: React.FC = () => {
                                   </div>
                                 </div>
 
-                                <div className="flex items-center justify-between pt-2">
+                                <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between pt-2">
                                   <button
                                     onClick={() => handleToggleReadMessage(msg.id, msg.is_read)}
                                     className="text-xs font-heading font-bold uppercase tracking-wider border border-neutral-800 hover:border-accent text-neutral-400 hover:text-accent px-4 py-2 rounded-sm transition-colors cursor-pointer"
@@ -1154,14 +1225,54 @@ export const AdminDashboard: React.FC = () => {
                     </button>
                   </div>
 
-                  <div className="bg-neutral-950 border border-neutral-800 rounded-sm overflow-hidden">
+                  <div className="md:hidden space-y-4">
+                    {profiles.map(prof => (
+                      <article key={prof.id} className="bg-neutral-950 border border-neutral-800 rounded-sm p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h3 className="font-heading font-bold text-white text-sm">{prof.full_name}</h3>
+                            <p className="font-mono text-xs text-neutral-400 mt-1 break-all">{prof.email}</p>
+                          </div>
+                          <span
+                            className={`text-[8px] uppercase font-heading font-bold tracking-wider px-2 py-1 rounded-sm border shrink-0 ${
+                              prof.role === 'super_admin'
+                                ? 'bg-purple-950/50 text-purple-400 border-purple-900/50'
+                                : 'bg-blue-950/50 text-blue-400 border-blue-900/50'
+                            }`}
+                          >
+                            {prof.role === 'super_admin' ? 'Super Admin' : 'Sub Admin'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-neutral-800">
+                          <p className="text-[10px] text-neutral-500 font-mono">
+                            Added {new Date(prof.created_at).toLocaleDateString()}
+                          </p>
+                          {prof.email !== 'helpooclassmate@gmail.com' ? (
+                            <button
+                              onClick={() => handleRemoveProfile(prof.id, prof.full_name)}
+                              className="text-[10px] font-heading font-bold uppercase tracking-wider text-neutral-400 hover:text-red-400 flex items-center gap-1.5"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Revoke Access
+                            </button>
+                          ) : (
+                            <span className="text-[9px] uppercase font-heading font-bold text-neutral-600 tracking-wider">
+                              Primary Admin
+                            </span>
+                          )}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+
+                  <div className="hidden md:block bg-neutral-950 border border-neutral-800 rounded-sm overflow-hidden">
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="border-b border-neutral-800 text-[10px] uppercase font-heading font-bold tracking-widest text-neutral-400 bg-neutral-950">
                           <th className="py-4 px-6">Name</th>
                           <th className="py-4 px-6">Email Address</th>
                           <th className="py-4 px-6">Access Role</th>
-                          <th className="py-4 px-6">Passcode / Key</th>
+                          <th className="py-4 px-6">Credentials</th>
                           <th className="py-4 px-6">Registered On</th>
                           <th className="py-4 px-6 text-right">Operations</th>
                         </tr>
@@ -1182,8 +1293,8 @@ export const AdminDashboard: React.FC = () => {
                                 {prof.role === 'super_admin' ? 'Super Admin' : 'Sub Admin'}
                               </span>
                             </td>
-                            <td className="py-4 px-6 font-mono text-xs text-accent">
-                              {prof.passcode || 'admin123'}
+                            <td className="py-4 px-6 text-xs text-neutral-500">
+                              Password configured
                             </td>
                             <td className="py-4 px-6 text-neutral-500 font-mono">
                               {new Date(prof.created_at).toLocaleDateString()}
@@ -1221,9 +1332,9 @@ export const AdminDashboard: React.FC = () => {
 
       {/* ================= MODAL: CAR FORM (ADD/EDIT) ================= */}
       {isCarModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-neutral-900 text-neutral-100 w-full max-w-3xl rounded-sm overflow-hidden shadow-2xl relative border border-neutral-800 my-8">
-            <div className="bg-neutral-950 p-6 border-b border-neutral-800 flex justify-between items-center">
+        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/85 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto">
+          <div className="bg-neutral-900 text-neutral-100 w-full max-w-3xl min-h-full sm:min-h-0 sm:rounded-sm overflow-hidden shadow-2xl relative border border-neutral-800 sm:my-8">
+            <div className="bg-neutral-950 p-4 sm:p-6 border-b border-neutral-800 flex justify-between items-center gap-4">
               <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-white">
                 {editingCar ? 'Modify Showroom Registry' : 'New Showroom Registry Listing'}
               </h3>
@@ -1235,7 +1346,7 @@ export const AdminDashboard: React.FC = () => {
               </button>
             </div>
 
-            <form onSubmit={handleCarSubmit(onCarFormSubmit)} className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+            <form onSubmit={handleCarSubmit(onCarFormSubmit)} className="p-4 sm:p-6 space-y-6 sm:max-h-[80vh] overflow-y-auto">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {/* Title */}
                 <div className="sm:col-span-2">
@@ -1289,10 +1400,10 @@ export const AdminDashboard: React.FC = () => {
                   />
                 </div>
 
-                {/* Price CAD */}
+                {/* Price */}
                 <div>
                   <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
-                    Price (CAD) *
+                    Price *
                   </label>
                   <input
                     type="number"
@@ -1318,7 +1429,7 @@ export const AdminDashboard: React.FC = () => {
                 {/* Condition dropdown */}
                 <div>
                   <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
-                    Showroom Condition Registry *
+                    Listing Status *
                   </label>
                   <select
                     {...carRegister('condition', { required: true })}
@@ -1333,7 +1444,7 @@ export const AdminDashboard: React.FC = () => {
                 {/* Vehicle Type dropdown */}
                 <div>
                   <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
-                    Marketplace Vehicle Type *
+                    Vehicle Type *
                   </label>
                   <select
                     {...carRegister('type', { required: true })}
@@ -1347,12 +1458,12 @@ export const AdminDashboard: React.FC = () => {
                 {/* Location */}
                 <div>
                   <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
-                    Dealership Location
+                    Vehicle Location
                   </label>
                   <input
                     type="text"
                     {...carRegister('location')}
-                    placeholder="Vancouver, BC"
+                    placeholder="e.g. City, Country"
                     className="w-full bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm py-2.5 px-4 text-xs font-sans outline-none transition-colors"
                   />
                 </div>
@@ -1360,12 +1471,12 @@ export const AdminDashboard: React.FC = () => {
                 {/* Contact Phone */}
                 <div>
                   <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
-                    Dealership Inquire Phone
+                    Contact Phone
                   </label>
                   <input
                     type="text"
                     {...carRegister('contact_phone')}
-                    placeholder="+1 604-555-0199"
+                    placeholder="Include country code"
                     className="w-full bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm py-2.5 px-4 text-xs font-sans outline-none transition-colors"
                   />
                 </div>
@@ -1373,12 +1484,12 @@ export const AdminDashboard: React.FC = () => {
                 {/* Description */}
                 <div className="sm:col-span-2">
                   <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
-                    Detailed Specification Description
+                    Vehicle Description
                   </label>
                   <textarea
                     rows={4}
                     {...carRegister('description')}
-                    placeholder="Detail restoration status, historical owners, transmission mechanics, and engine logs..."
+                    placeholder="Include condition, restoration history, specifications, documentation, and known issues..."
                     className="w-full bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm py-2.5 px-4 text-xs font-sans outline-none transition-colors resize-none"
                   />
                 </div>
@@ -1386,7 +1497,7 @@ export const AdminDashboard: React.FC = () => {
                 {/* Drag and Drop Image Upload Section */}
                 <div className="sm:col-span-2">
                   <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
-                    Image Gallery Media Upload (Drag & Drop or Click — Up to 10 images)
+                    Vehicle Images (1600 × 900, 16:9)
                   </label>
 
                   <div
@@ -1410,10 +1521,10 @@ export const AdminDashboard: React.FC = () => {
                     />
                     <Upload className="w-8 h-8 mx-auto mb-3 text-accent" />
                     <p className="text-xs font-heading font-bold uppercase tracking-wide text-neutral-200">
-                      Drag & Drop Images here or click to browse files
+                      Drop images here or click to choose files
                     </p>
                     <p className="text-[10px] text-neutral-500 mt-1">
-                      Images are stored locally in the container's uploads folder or uploaded to Supabase. Max 10.
+                      Images are automatically cropped and optimized to 1600 × 900 WebP. The first image becomes the listing cover.
                     </p>
                   </div>
 
@@ -1450,7 +1561,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               {/* Submit panel */}
-              <div className="flex justify-end space-x-3 pt-6 border-t border-neutral-800">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-6 border-t border-neutral-800">
                 <button
                   type="button"
                   onClick={() => setIsCarModalOpen(false)}
@@ -1472,9 +1583,9 @@ export const AdminDashboard: React.FC = () => {
 
       {/* ================= MODAL: SUB-ADMIN INVITE ================= */}
       {isInviteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
-          <div className="bg-neutral-900 text-neutral-100 w-full max-w-md rounded-sm overflow-hidden shadow-2xl relative border border-neutral-800">
-            <div className="bg-neutral-950 p-6 border-b border-neutral-800 flex justify-between items-center">
+        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/85 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto">
+          <div className="bg-neutral-900 text-neutral-100 w-full max-w-md min-h-full sm:min-h-0 sm:rounded-sm overflow-hidden shadow-2xl relative border border-neutral-800">
+            <div className="bg-neutral-950 p-4 sm:p-6 border-b border-neutral-800 flex justify-between items-center gap-4">
               <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-white">
                 Invite Sub-Administrator Access
               </h3>
@@ -1486,7 +1597,7 @@ export const AdminDashboard: React.FC = () => {
               </button>
             </div>
 
-            <form onSubmit={handleInviteSubmit(onInviteFormSubmit)} className="p-6 space-y-4">
+            <form onSubmit={handleInviteSubmit(onInviteFormSubmit)} className="p-4 sm:p-6 space-y-4">
               {/* Name */}
               <div>
                 <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
@@ -1518,24 +1629,25 @@ export const AdminDashboard: React.FC = () => {
               {/* Passcode / Password */}
               <div>
                 <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
-                  Staff Passcode / Password
+                  Temporary Password *
                 </label>
                 <input
-                  type="text"
-                  {...inviteRegister('passcode')}
-                  placeholder="e.g. admin123 (defaults to admin123 if empty)"
+                  type="password"
+                  required
+                  {...inviteRegister('passcode', { required: true })}
+                  placeholder="Create a temporary password"
                   className="w-full bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm py-2.5 px-4 text-xs font-sans outline-none transition-colors"
                 />
               </div>
 
-              {/* Note about local testing */}
+              {/* Access note */}
               <div className="bg-neutral-950 border border-accent/20 rounded-sm p-4 text-[11px] text-neutral-400 leading-relaxed font-sans">
-                <span className="font-bold text-neutral-200 block mb-1">Local Fallback behavior:</span>
-                Once invited, the staff member profile is immediately registered in the database file and can log in with their email and the passcode set above (or the universal fallback <span className="font-mono text-accent">admin123</span> if left empty).
+                <span className="font-bold text-neutral-200 block mb-1">Before granting access</span>
+                Share the temporary password with the staff member through a secure channel and ask them to change it after their first sign-in.
               </div>
 
               {/* Action buttons */}
-              <div className="flex justify-end space-x-3 pt-4 border-t border-neutral-800">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-neutral-800">
                 <button
                   type="button"
                   onClick={() => setIsInviteModalOpen(false)}

@@ -23,7 +23,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
       buyer_name: '',
       buyer_email: '',
       buyer_phone: '',
-      message: `Hi, I am interested in the ${car.year} ${car.title} listed for ${new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(car.price)}. Please let me know its availability and the next steps for a private inquiry.`
+      message: `Hi, I am interested in the ${car.title} listed for ${new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(car.price)}. Please let me know if it is still available and how I can arrange a viewing.`
     }
   });
 
@@ -67,11 +67,11 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
   return (
     <div
       id="message-modal-overlay"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/80 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className="bg-white text-neutral-900 w-full max-w-lg rounded-sm overflow-hidden shadow-2xl relative border-t-4 border-accent"
+        className="bg-white text-neutral-900 w-full max-w-lg min-h-full sm:min-h-0 sm:rounded-sm overflow-hidden shadow-2xl relative border-t-4 border-accent"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -81,13 +81,13 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
               onClick={onClose}
               id="back-message-modal-btn"
               className="bg-neutral-800 hover:bg-neutral-700 text-white p-2 rounded-sm transition-colors border border-neutral-700"
-              title="Back"
+              aria-label="Back to vehicle details"
             >
               <ChevronLeft className="w-4 h-4 text-accent" />
             </button>
             <div>
               <span className="text-[10px] uppercase tracking-wider text-accent font-bold font-heading">
-                Inquire About Vehicle
+                Vehicle Inquiry
               </span>
               <h3 className="text-sm font-heading font-bold uppercase tracking-tight text-neutral-200 mt-1">
                 {car.title}
@@ -116,7 +116,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
                 type="text"
                 {...register('buyer_name', { required: 'Name is required' })}
                 id="message-buyer-name"
-                placeholder="e.g. Robert Vancouver"
+                placeholder="e.g. Robert Smith"
                 className={`w-full bg-neutral-50 border ${
                   errors.buyer_name ? 'border-red-500 focus:border-red-500' : 'border-neutral-200 focus:border-accent'
                 } rounded-sm py-2.5 pl-10 pr-4 text-xs font-sans outline-none transition-colors`}
@@ -140,7 +140,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
                   type="email"
                   {...register('buyer_email')}
                   id="message-buyer-email"
-                  placeholder="e.g. robert@vancouver.ca"
+                  placeholder="e.g. robert@example.com"
                   className="w-full bg-neutral-50 border border-neutral-200 focus:border-accent rounded-sm py-2.5 pl-10 pr-4 text-xs font-sans outline-none transition-colors"
                 />
               </div>
@@ -157,7 +157,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
                   type="tel"
                   {...register('buyer_phone')}
                   id="message-buyer-phone"
-                  placeholder="e.g. 604-555-0100"
+                  placeholder="Include country code"
                   className="w-full bg-neutral-50 border border-neutral-200 focus:border-accent rounded-sm py-2.5 pl-10 pr-4 text-xs font-sans outline-none transition-colors"
                 />
               </div>
@@ -195,12 +195,12 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Sending Secure Inquiry...</span>
+                <span>Sending Inquiry...</span>
               </>
             ) : (
               <>
                 <Send className="w-3.5 h-3.5" />
-                <span>Send Inquiry to KSA Classic</span>
+                <span>Send Vehicle Inquiry</span>
               </>
             )}
           </button>

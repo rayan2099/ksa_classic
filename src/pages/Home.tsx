@@ -122,7 +122,7 @@ export const Home: React.FC = () => {
                 </h2>
                 <div className="h-1 w-12 bg-accent mt-4 mb-6"></div>
                 <p className="text-sm text-neutral-400 font-sans leading-relaxed max-w-lg">
-                  Would you like to schedule a private viewing, arrange bespoke vehicle transport, or submit an acquisition request? Reach out to our advisors in Vancouver, BC.
+                  Schedule a private viewing, ask about transport, or tell us which vehicle you are looking for. Our team will follow up with availability and next steps.
                 </p>
               </div>
 
@@ -130,23 +130,23 @@ export const Home: React.FC = () => {
                 <div className="flex items-start">
                   <MapPin className="w-5 h-5 text-accent mr-4 flex-shrink-0 mt-1" />
                   <div>
-                    <h4 className="font-heading font-bold text-xs uppercase text-neutral-200">Showroom Address</h4>
-                    <p className="text-xs text-neutral-400 mt-1">1090 West Georgia St, Vancouver, BC V6E 3V7</p>
+                    <h4 className="font-heading font-bold text-xs uppercase text-neutral-200">Showroom Viewings</h4>
+                    <p className="text-xs text-neutral-400 mt-1">Available by confirmed appointment</p>
                   </div>
                 </div>
 
                 <div className="flex items-start">
                   <Phone className="w-5 h-5 text-accent mr-4 flex-shrink-0 mt-1" />
                   <div>
-                    <h4 className="font-heading font-bold text-xs uppercase text-neutral-200">Telephone Line</h4>
-                    <p className="text-xs text-neutral-400 mt-1">+1 (604) 555-0199</p>
+                    <h4 className="font-heading font-bold text-xs uppercase text-neutral-200">Direct Contact</h4>
+                    <p className="text-xs text-neutral-400 mt-1">Contact details are shared when your viewing is confirmed</p>
                   </div>
                 </div>
 
                 <div className="flex items-start">
                   <Mail className="w-5 h-5 text-accent mr-4 flex-shrink-0 mt-1" />
                   <div>
-                    <h4 className="font-heading font-bold text-xs uppercase text-neutral-200">General Mailbox</h4>
+                    <h4 className="font-heading font-bold text-xs uppercase text-neutral-200">Email</h4>
                     <p className="text-xs text-neutral-400 mt-1">info@ksaclassic.com</p>
                   </div>
                 </div>
@@ -154,9 +154,9 @@ export const Home: React.FC = () => {
             </div>
 
             {/* Right col: Form contact */}
-            <div className="bg-neutral-950 border border-neutral-800 p-8 rounded-sm shadow-xl relative">
+            <div className="bg-neutral-950 border border-neutral-800 p-5 sm:p-8 rounded-sm shadow-xl relative">
               <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-neutral-200 mb-6 border-b border-neutral-800 pb-4">
-                Showroom Acquisition & Inquiry
+                General Showroom Inquiry
               </h3>
 
               <form onSubmit={handleSubmit(handleGeneralInquire)} className="space-y-5">
@@ -170,7 +170,7 @@ export const Home: React.FC = () => {
                     <input
                       type="text"
                       {...register('name', { required: 'Name is required' })}
-                      placeholder="e.g. Robert Vancouver"
+                      placeholder="e.g. Robert Smith"
                       className={`w-full bg-neutral-900 border ${
                         errors.name ? 'border-red-500 focus:border-red-500' : 'border-neutral-800 focus:border-accent'
                       } rounded-sm py-3 pl-11 pr-4 text-xs font-sans outline-none transition-colors text-white`}
@@ -189,7 +189,7 @@ export const Home: React.FC = () => {
                     <input
                       type="email"
                       {...register('email', { required: 'Email is required' })}
-                      placeholder="e.g. robert@vancouver.ca"
+                      placeholder="e.g. robert@example.com"
                       className={`w-full bg-neutral-900 border ${
                         errors.email ? 'border-red-500 focus:border-red-500' : 'border-neutral-800 focus:border-accent'
                       } rounded-sm py-3 pl-11 pr-4 text-xs font-sans outline-none transition-colors text-white`}
@@ -208,7 +208,7 @@ export const Home: React.FC = () => {
                     <input
                       type="tel"
                       {...register('phone')}
-                      placeholder="e.g. 604-555-0100"
+                      placeholder="Include country code"
                       className="w-full bg-neutral-900 border border-neutral-800 focus:border-accent rounded-sm py-3 pl-11 pr-4 text-xs font-sans outline-none transition-colors text-white"
                     />
                   </div>
@@ -224,7 +224,7 @@ export const Home: React.FC = () => {
                     <textarea
                       rows={4}
                       {...register('message', { required: 'Message is required' })}
-                      placeholder="Share details of what vehicles you are looking to acquire or view..."
+                      placeholder="Tell us which vehicle you would like to view or what you are looking for..."
                       className={`w-full bg-neutral-900 border ${
                         errors.message ? 'border-red-500 focus:border-red-500' : 'border-neutral-800 focus:border-accent'
                       } rounded-sm py-3 pl-11 pr-4 text-xs font-sans outline-none transition-colors resize-none text-white`}
@@ -240,7 +240,7 @@ export const Home: React.FC = () => {
                   className="w-full bg-accent hover:bg-accent-hover text-neutral-950 font-heading font-bold text-xs uppercase tracking-wider py-4 rounded-sm transition-all flex items-center justify-center space-x-2 border border-accent cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>Send Inquire Message</span>
+                  <span>Send Inquiry</span>
                 </button>
               </form>
             </div>

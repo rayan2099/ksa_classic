@@ -92,7 +92,7 @@ export const Inventory: React.FC<InventoryProps> = ({
             The Collection
           </span>
           <h2 className="text-2xl sm:text-4xl font-bold font-heading uppercase text-neutral-900 tracking-tight">
-            Curated Showroom
+            Current Inventory
           </h2>
           <div className="h-1 w-12 bg-accent mx-auto mt-4"></div>
         </div>
@@ -100,7 +100,7 @@ export const Inventory: React.FC<InventoryProps> = ({
         {/* Tab Controls & Search Filter Controls */}
         <div className="flex flex-col xl:flex-row gap-6 xl:items-center xl:justify-between mb-8 border-b border-neutral-200 pb-6">
           {/* Tabs */}
-          <div className="flex space-x-1 bg-neutral-100 p-1 rounded-sm max-w-lg w-full sm:w-auto overflow-x-auto scrollbar-none shrink-0">
+          <div className="grid grid-cols-2 sm:flex gap-1 bg-neutral-100 p-1 rounded-sm max-w-lg w-full sm:w-auto shrink-0">
             <button
               onClick={() => setActiveTab('all')}
               className={`px-4 py-2.5 rounded-sm text-xs uppercase tracking-wider font-heading font-bold whitespace-nowrap transition-all duration-200 ${
@@ -202,7 +202,7 @@ export const Inventory: React.FC<InventoryProps> = ({
               No listings in this category yet.
             </h3>
             <p className="text-xs text-neutral-500 font-sans mt-2 max-w-md mx-auto">
-              We are currently preparing several premium pre-owned vehicles. Please check back later or submit a custom showroom inquiry.
+              No vehicles match these filters. Reset the search or contact us about the model you are looking for.
             </p>
             <button
               onClick={() => {

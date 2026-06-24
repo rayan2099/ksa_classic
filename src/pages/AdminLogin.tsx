@@ -11,7 +11,7 @@ export const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
-      email: 'helpooclassmate@gmail.com',
+      email: '',
       password: ''
     }
   });
@@ -36,22 +36,18 @@ export const AdminLogin: React.FC = () => {
       });
       navigate('/admin');
     } catch (err: any) {
-      toast.error(err.message || 'Invalid credentials. Password hint is admin123.');
+      toast.error(err.message || 'Invalid email or password.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background Decorative Blur */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-neutral-900/40 rounded-full blur-3xl pointer-events-none"></div>
-
+    <div className="min-h-screen bg-neutral-950 flex flex-col justify-center items-center pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Floating Back Link */}
       <Link
         to="/"
-        className="absolute top-8 left-8 flex items-center space-x-2 text-xs font-heading font-bold uppercase tracking-wider text-neutral-400 hover:text-accent transition-colors"
+        className="absolute top-7 left-4 sm:left-8 flex items-center space-x-2 text-xs font-heading font-bold uppercase tracking-wider text-neutral-400 hover:text-accent transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>Return to Showroom</span>
@@ -84,7 +80,7 @@ export const AdminLogin: React.FC = () => {
         </div>
 
         {/* Login Card */}
-        <div className="bg-neutral-900 border border-neutral-800 rounded-sm p-8 shadow-2xl relative">
+        <div className="bg-neutral-900 border border-neutral-800 rounded-sm p-6 sm:p-8 shadow-2xl relative">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email field */}
             <div>
@@ -110,7 +106,7 @@ export const AdminLogin: React.FC = () => {
             {/* Password field */}
             <div>
               <label className="block text-[10px] uppercase font-heading font-bold tracking-wider text-neutral-400 mb-2">
-                Secure Password
+                Password
               </label>
               <div className="relative">
                 <KeyRound className="absolute left-3 top-3 w-4 h-4 text-neutral-500" />
@@ -138,39 +134,17 @@ export const AdminLogin: React.FC = () => {
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Authenticating secure session...</span>
+                  <span>Signing In...</span>
                 </>
               ) : (
                 <>
                   <ShieldCheck className="w-4 h-4" />
-                  <span>Secure Login</span>
+                  <span>Sign In</span>
                 </>
               )}
             </button>
           </form>
 
-          {/* Quick-Test reminder banner */}
-          <div className="mt-8 pt-6 border-t border-neutral-800 text-center">
-            <div className="inline-flex items-start bg-neutral-950/80 border border-accent/20 rounded-sm p-4 text-left">
-              <div className="flex-shrink-0 mt-0.5">
-                <div className="w-2 h-2 bg-accent rounded-full animate-ping mt-1"></div>
-              </div>
-              <div className="ml-3 text-[11px] text-neutral-400 font-sans leading-relaxed">
-                <p className="font-bold font-heading text-neutral-200 uppercase tracking-wider mb-1">
-                  Developer Mode Active:
-                </p>
-                <p>
-                  You can test the admin workspace immediately! Use:
-                </p>
-                <p className="mt-1">
-                  Email: <span className="font-mono text-accent">helpooclassmate@gmail.com</span>
-                </p>
-                <p>
-                  Password: <span className="font-mono text-accent">admin123</span>
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

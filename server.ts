@@ -4,11 +4,12 @@ import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import cookieParser from 'cookie-parser';
 import multer from 'multer';
+import sharp from 'sharp';
 import { createClient } from '@supabase/supabase-js';
 import { Car, Profile, Message, DbState } from './src/types.js';
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
 app.use(cookieParser());
@@ -16,6 +17,9 @@ app.use(cookieParser());
 // Ensure directories exist
 const DATA_DIR = path.join(process.cwd(), 'data');
 const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
+const VEHICLE_IMAGE_WIDTH = 1600;
+const VEHICLE_IMAGE_HEIGHT = 900;
+const VEHICLE_IMAGE_MAX_BYTES = 15 * 1024 * 1024;
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -291,18 +295,20 @@ function saveLocalDb(state: DbState) {
   fs.writeFileSync(DB_FILE, JSON.stringify(state, null, 2));
 }
 
-// Multer Local File Upload Config
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, UPLOADS_DIR);
+// Vehicle uploads are normalized before being persisted.
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: VEHICLE_IMAGE_MAX_BYTES,
+    files: 10
   },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, 'car-' + uniqueSuffix + ext);
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Only image files are supported.'));
+    }
+    cb(null, true);
   }
 });
-const upload = multer({ storage });
 
 // Helper to get authenticated user profile
 const getAuthUser = (req: any): Profile | null => {
@@ -1124,12 +1130,32 @@ app.post('/api/upload', upload.array('files', 10), async (req: any, res) => {
   }
 
   try {
-    const urls = req.files.map((file: any) => {
-      // Return absolute local url path
-      return `/uploads/${file.filename}`;
-    });
+    const files = req.files as Express.Multer.File[];
+    const urls = await Promise.all(files.map(async (file, index) => {
+      const filename = `car-${Date.now()}-${index}-${Math.round(Math.random() * 1E9)}.webp`;
+      const outputPath = path.join(UPLOADS_DIR, filename);
 
-    res.json({ urls });
+      await sharp(file.buffer)
+        .rotate()
+        .resize(VEHICLE_IMAGE_WIDTH, VEHICLE_IMAGE_HEIGHT, {
+          fit: 'cover',
+          position: 'attention'
+        })
+        .webp({ quality: 86 })
+        .toFile(outputPath);
+
+      return `/uploads/${filename}`;
+    }));
+
+    res.json({
+      urls,
+      image_spec: {
+        width: VEHICLE_IMAGE_WIDTH,
+        height: VEHICLE_IMAGE_HEIGHT,
+        format: 'webp',
+        aspect_ratio: '16:9'
+      }
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -1162,4 +1188,3 @@ async function startServer() {
 }
 
 startServer();
-

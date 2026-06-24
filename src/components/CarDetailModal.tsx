@@ -36,11 +36,11 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
   return (
     <div
       id="car-detail-modal-overlay"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/80 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className="relative bg-white text-neutral-900 w-full max-w-4xl rounded-sm overflow-hidden shadow-2xl flex flex-col md:flex-row my-8"
+        className="relative bg-white text-neutral-900 w-full max-w-4xl min-h-full sm:min-h-0 sm:rounded-sm overflow-hidden shadow-2xl flex flex-col md:flex-row sm:my-8"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Back Button */}
@@ -64,7 +64,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
 
         {/* Left Column: Image Slideshow */}
         <div className="w-full md:w-1/2 bg-neutral-950 flex flex-col justify-between relative aspect-video md:aspect-auto">
-          <div className="relative flex-grow flex items-center justify-center min-h-[300px] md:h-full">
+          <div className="relative flex-grow flex items-center justify-center min-h-[220px] sm:min-h-[300px] md:h-full">
             <img
               src={images[activeImageIndex]}
               alt={`${car.title} view ${activeImageIndex + 1}`}
@@ -122,7 +122,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
         </div>
 
         {/* Right Column: Details & CTA */}
-        <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-between overflow-y-auto max-h-[90vh] md:max-h-[600px]">
+        <div className="w-full md:w-1/2 p-5 sm:p-6 md:p-8 flex flex-col justify-between overflow-y-auto md:max-h-[600px]">
           <div>
             <div className="flex items-center space-x-2 mb-2">
               <span className="bg-neutral-100 text-neutral-800 text-[10px] font-bold font-heading px-2 py-0.5 uppercase tracking-wider rounded-sm">
@@ -139,7 +139,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
               )}
               <span className="text-xs text-neutral-500 font-mono flex items-center">
                 <MapPin className="w-3 h-3 mr-1" />
-                {car.location || 'Vancouver, BC'}
+                {car.location || 'Location on request'}
               </span>
             </div>
 
@@ -180,14 +180,14 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
             <div className="mb-6">
               <h4 className="font-heading text-xs font-bold uppercase tracking-wider text-neutral-800 mb-2">Vehicle Profile</h4>
               <p className="text-xs text-neutral-600 leading-relaxed font-sans whitespace-pre-line">
-                {car.description || 'No detailed specifications have been uploaded for this exquisite automobile.'}
+                {car.description || 'Detailed specifications have not been added for this vehicle yet.'}
               </p>
             </div>
           </div>
 
           {/* Action CTAs */}
           <div className="space-y-3 pt-4 border-t border-neutral-100">
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               {car.contact_phone && (
                 <a
                   href={`tel:${car.contact_phone}`}
@@ -210,7 +210,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
 
             <p className="text-[10px] text-center text-neutral-400 flex items-center justify-center">
               <ShieldCheck className="w-3.5 h-3.5 text-accent mr-1" />
-              Secure transaction guaranteed via KSA Classic Vancouver.
+              Our team will confirm availability and viewing details after you inquire.
             </p>
 
             <button
