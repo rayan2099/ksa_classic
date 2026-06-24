@@ -92,20 +92,24 @@ export const Home: React.FC = () => {
   };
 
   return (
-    <div id="showroom-portal" className="min-h-screen flex flex-col justify-between bg-[#F5F5F5] text-[#2C2C2C]">
-      {/* Navbar */}
-      <Navbar onScrollToSection={handleScrollToSection} />
+    <div className="bg-neutral-950 min-h-screen w-full overflow-x-hidden">
+      <div 
+        id="showroom-portal" 
+        className="min-h-screen flex flex-col justify-between bg-[#F5F5F5] text-[#2C2C2C] max-w-[1440px] mx-auto shadow-2xl relative"
+      >
+        {/* Navbar */}
+        <Navbar onScrollToSection={handleScrollToSection} />
 
-      {/* Hero Section */}
-      <Hero onBrowseClick={() => handleScrollToSection('inventory')} />
+        {/* Hero Section */}
+        <Hero onBrowseClick={() => handleScrollToSection('inventory')} />
 
-      {/* Showroom Collections Section */}
-      <Inventory
-        tabRef={inventoryRef}
-        activeSection={activeSection}
-        onCarDetailClick={(car) => setSelectedCarForDetail(car)}
-        onCarMessageClick={(car) => setSelectedCarForMessage(car)}
-      />
+        {/* Showroom Collections Section */}
+        <Inventory
+          tabRef={inventoryRef}
+          activeSection={activeSection}
+          onCarDetailClick={(car) => setSelectedCarForDetail(car)}
+          onCarMessageClick={(car) => setSelectedCarForMessage(car)}
+        />
 
       {/* General Showroom Inquiry Contact Section */}
       <div ref={contactRef} id="contact" className="py-24 bg-neutral-900 text-white border-t border-neutral-800">
@@ -271,5 +275,6 @@ export const Home: React.FC = () => {
         />
       )}
     </div>
+  </div>
   );
 };
