@@ -34,7 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onScrollToSection }) => {
   return (
     <nav
       id="main-navbar"
-      className={`fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[1440px] z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
           ? 'bg-neutral-900/90 backdrop-blur-md border-b border-neutral-800 shadow-lg py-3'
           : 'bg-neutral-950/60 backdrop-blur-sm border-b border-transparent py-5'
