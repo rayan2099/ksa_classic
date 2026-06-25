@@ -241,7 +241,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
         </div>
 
         {isMobile && (
-          <div className="absolute inset-x-0 bottom-[150px] z-20 flex justify-center px-5">
+          <div className="absolute inset-x-0 bottom-[215px] z-20 flex justify-center px-5">
             <button
               onClick={onBrowseClick}
               id="hero-cta-browse"

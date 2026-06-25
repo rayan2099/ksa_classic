@@ -18,6 +18,7 @@ export const mockCars: Car[] = [
       'https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&q=82&w=1600',
       'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&q=82&w=1600'
     ],
+    contact_phone: '+1 604-555-0199',
     created_at: '2026-06-25T00:00:00.000Z'
   },
   {
@@ -36,6 +37,7 @@ export const mockCars: Car[] = [
       'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=82&w=1600',
       'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&q=82&w=1600'
     ],
+    contact_phone: '+1 604-555-0199',
     created_at: '2026-06-24T00:00:00.000Z'
   },
   {
@@ -54,6 +56,7 @@ export const mockCars: Car[] = [
       'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=82&w=1600',
       'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=82&w=1600'
     ],
+    contact_phone: '+1 604-555-0199',
     created_at: '2026-06-23T00:00:00.000Z'
   },
   {
@@ -71,6 +74,7 @@ export const mockCars: Car[] = [
     images: [
       'https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&q=82&w=1600'
     ],
+    contact_phone: '+1 604-555-0199',
     created_at: '2026-06-22T00:00:00.000Z'
   },
   {
@@ -88,6 +92,7 @@ export const mockCars: Car[] = [
     images: [
       'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&q=82&w=1600'
     ],
+    contact_phone: '+1 604-555-0199',
     created_at: '2026-06-21T00:00:00.000Z'
   },
   {
@@ -105,6 +110,7 @@ export const mockCars: Car[] = [
     images: [
       'https://images.unsplash.com/photo-1612466285769-ac9380c5780d?auto=format&fit=crop&q=82&w=1600'
     ],
+    contact_phone: '+1 604-555-0199',
     created_at: '2026-06-20T00:00:00.000Z'
   }
 ];
