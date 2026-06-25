@@ -45,6 +45,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
         throw new Error('Failed to submit message');
       }
 
+      const result = await res.json();
       toast.success("Your message has been sent! We'll be in touch soon.", {
         style: {
           background: '#1A1A1A',
@@ -55,6 +56,9 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
           fontSize: '12px'
         }
       });
+      if (result.email_warning) {
+        toast.error('Your inquiry was received, but the confirmation email could not be delivered.');
+      }
       reset();
       onClose();
     } catch (err: any) {

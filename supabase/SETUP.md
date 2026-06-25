@@ -19,7 +19,7 @@ where email = 'YOUR_ADMIN_EMAIL';
 SUPABASE_URL="https://YOUR_PROJECT.supabase.co"
 SUPABASE_ANON_KEY="YOUR_PUBLISHABLE_OR_ANON_KEY"
 SUPABASE_SERVICE_ROLE_KEY="YOUR_SERVICE_ROLE_KEY"
-APP_URL="https://YOUR_DOMAIN"
+APP_URL="https://www.ksaclassics.online"
 ```
 
 Never expose `SUPABASE_SERVICE_ROLE_KEY` to browser code or commit it to Git.
@@ -37,3 +37,23 @@ Never expose `SUPABASE_SERVICE_ROLE_KEY` to browser code or commit it to Git.
 The Express server performs private operations with the service-role key. Direct
 browser database access is limited to reading showroom inventory.
 
+## Resend Email
+
+If `schema.sql` was installed before email support, run `002_resend_email.sql`
+once in the Supabase SQL Editor.
+
+1. Create a Resend account and add your sending domain.
+2. Add the DNS records Resend provides and wait until the domain is verified.
+3. Create a Resend API key with sending access.
+4. Add these values to local `.env` and Vercel:
+
+```env
+RESEND_API_KEY="re_YOUR_KEY"
+RESEND_FROM_EMAIL="KSA Classics <info@ksaclassics.online>"
+SHOWROOM_EMAIL="info@ksaclassics.online"
+```
+
+`RESEND_FROM_EMAIL` must use a domain verified in Resend. `SHOWROOM_EMAIL` is
+used as the reply-to address. Buyer inquiries are always saved before the
+confirmation email is attempted, and admin replies remain logged if delivery
+fails.

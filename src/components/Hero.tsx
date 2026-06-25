@@ -2,6 +2,8 @@ import React from 'react';
 import { ArrowRight, Sparkles, MapPin, Wrench, ShieldCheck, Trophy } from 'lucide-react';
 // @ts-ignore
 import classicCarSunsetBg from '../assets/images/classic_car_sunset_beach_1782304346164.jpg';
+// @ts-ignore
+import classicCarSunsetMobileBg from '../assets/images/classic_car_sunset_beach_mobile.webp';
 
 interface HeroProps {
   onBrowseClick: () => void;
@@ -37,18 +39,18 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
         {/* Background Image with Rich Multi-Layered Gradients */}
         <div className="absolute inset-0 z-0">
           <img
-            src={classicCarSunsetBg}
+            src={isMobile ? classicCarSunsetMobileBg : classicCarSunsetBg}
             alt="Vintage Classic Car"
             style={isMobile ? {
-              objectFit: 'cover',
-              objectPosition: '70% center',
+              objectFit: 'contain',
+              objectPosition: 'center',
               width: '100%',
               height: '100%',
               position: 'absolute',
               top: 0,
               left: 0
             } : {}}
-            className={isMobile ? "opacity-85" : "w-full h-full object-cover object-right opacity-85 scale-100 transform transition duration-1000"}
+            className={isMobile ? "opacity-90" : "w-full h-full object-cover object-right opacity-85 scale-100 transform transition duration-1000"}
             referrerPolicy="no-referrer"
             onError={(e) => {
               e.currentTarget.src = "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=2000";

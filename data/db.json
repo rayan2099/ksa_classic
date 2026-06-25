@@ -29,7 +29,7 @@
       "price": 345000,
       "mileage": 82000,
       "location": "Vancouver, BC",
-      "description": "An legendary lightweight masterpiece. Finished in Grand Prix White with Viper Green lettering. Matching numbers 2.7L flat-six engine. Meticulously maintained with full historical documentation.",
+      "description": "A legendary lightweight masterpiece. Finished in Grand Prix White with Viper Green lettering. Matching numbers 2.7L flat-six engine. Meticulously maintained with full historical documentation.",
       "condition": "available",
       "images": [
         "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1200"
@@ -141,7 +141,7 @@
       "id": "subadmin-id-1",
       "full_name": "KSA Sub Admin",
       "role": "sub_admin",
-      "email": "subadmin@ksaclassic.com",
+      "email": "subadmin@ksaclassics.online",
       "created_at": "2026-02-01T00:00:00.000Z"
     }
   ],
@@ -179,7 +179,7 @@
         {
           "id": "rep-initial-mock",
           "sender_name": "System Auto-Response",
-          "sender_email": "no-reply@ksaclassic.com",
+          "sender_email": "no-reply@ksaclassics.online",
           "message": "Thank you for your interest in KSA Classics. Our curators are reviewing your inquiry.",
           "created_at": "2026-06-23T19:41:58.748Z"
         }

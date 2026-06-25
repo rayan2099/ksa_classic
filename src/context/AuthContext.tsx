@@ -37,10 +37,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchDbStatus = async () => {
     try {
       const res = await fetch('/api/db-status');
-      if (res.ok) {
-        const data = await res.json();
-        setDbStatus(data);
-      }
+      const data = await res.json();
+      setDbStatus(data);
     } catch (err) {
       console.error('Failed to fetch DB status', err);
     }

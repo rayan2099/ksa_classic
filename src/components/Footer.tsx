@@ -18,7 +18,7 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
           <div className="space-y-6">
             <Link to="/" className="inline-flex items-center space-x-3 group">
               <img
-                src="https://i.imgur.com/5fwPaIG.png"
+                src="/logo.png"
                 alt="KSA Classics Logo"
                 id="footer-logo"
                 className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
@@ -109,8 +109,8 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
               </li>
               <li className="flex items-center">
                 <Mail className="w-4 h-4 text-accent mr-2.5 flex-shrink-0" />
-                <a href="mailto:info@ksaclassic.com" className="hover:text-white transition-colors">
-                  info@ksaclassic.com
+                <a href="mailto:info@ksaclassics.online" className="hover:text-white transition-colors">
+                  info@ksaclassics.online
                 </a>
               </li>
             </ul>

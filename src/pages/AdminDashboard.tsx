@@ -260,6 +260,58 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const optimizeVehicleImage = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      throw new Error(`${file.name} is not a supported image file.`);
+    }
+
+    const bitmap = await createImageBitmap(file);
+    const canvas = document.createElement('canvas');
+    const targetWidth = 1600;
+    const targetHeight = 900;
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+
+    const context = canvas.getContext('2d');
+    if (!context) {
+      bitmap.close();
+      throw new Error('This browser could not prepare the selected image.');
+    }
+
+    const scale = Math.max(targetWidth / bitmap.width, targetHeight / bitmap.height);
+    const sourceWidth = targetWidth / scale;
+    const sourceHeight = targetHeight / scale;
+    const sourceX = (bitmap.width - sourceWidth) / 2;
+    const sourceY = (bitmap.height - sourceHeight) / 2;
+
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = 'high';
+    context.drawImage(
+      bitmap,
+      sourceX,
+      sourceY,
+      sourceWidth,
+      sourceHeight,
+      0,
+      0,
+      targetWidth,
+      targetHeight
+    );
+    bitmap.close();
+
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        result => result ? resolve(result) : reject(new Error('Could not optimize the selected image.')),
+        'image/webp',
+        0.86
+      );
+    });
+
+    return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.webp', {
+      type: 'image/webp'
+    });
+  };
+
   // Image Upload Logic (supports both click and drag & drop)
   const handleFileUpload = async (files: FileList) => {
     if (files.length === 0) return;
@@ -267,13 +319,12 @@ export const AdminDashboard: React.FC = () => {
     setIsUploading(true);
     try {
       const selectedFiles = Array.from(files);
-      const batchSize = 10;
       let updatedUrls = [...uploadedImageUrls];
 
-      for (let start = 0; start < selectedFiles.length; start += batchSize) {
-        const batch = selectedFiles.slice(start, start + batchSize);
+      for (const file of selectedFiles) {
+        const optimizedFile = await optimizeVehicleImage(file);
         const formData = new FormData();
-        batch.forEach((file) => formData.append('files', file));
+        formData.append('files', optimizedFile);
 
         const res = await fetch('/api/upload', {
           method: 'POST',
@@ -370,7 +421,11 @@ export const AdminDashboard: React.FC = () => {
 
       if (res.ok) {
         const updatedMsg = await res.json();
-        toast.success('Reply submitted successfully!');
+        if (updatedMsg.email_warning) {
+          toast.error('Reply saved, but the email could not be delivered.');
+        } else {
+          toast.success('Reply emailed and saved successfully.');
+        }
         setReplyTexts(prev => ({ ...prev, [msgId]: '' }));
         // Instantly update the message in local state
         setMessages(prev => prev.map(m => m.id === msgId ? updatedMsg : m));
@@ -617,13 +672,33 @@ export const AdminDashboard: React.FC = () => {
                 className={`text-[9px] sm:text-[10px] uppercase font-bold font-heading px-2 py-1 rounded-sm flex items-center space-x-1.5 shrink-0 ${
                   dbStatus.status === 'supabase'
                     ? 'bg-emerald-900/45 text-emerald-300 border border-emerald-800'
-                    : 'bg-amber-900/45 text-amber-300 border border-amber-800/60'
+                    : dbStatus.status === 'local_fallback'
+                      ? 'bg-amber-900/45 text-amber-300 border border-amber-800/60'
+                      : 'bg-red-950/60 text-red-300 border border-red-900'
                 }`}
                 title={dbStatus.message}
               >
-                <span className={`w-1.5 h-1.5 rounded-full ${dbStatus.status === 'supabase' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`}></span>
-                <span className="hidden sm:inline">{dbStatus.status === 'supabase' ? 'Supabase Connected' : 'Local Fallback'}</span>
-                <span className="sm:hidden">{dbStatus.status === 'supabase' ? 'Cloud' : 'Local'}</span>
+                <span className={`w-1.5 h-1.5 rounded-full ${
+                  dbStatus.status === 'supabase'
+                    ? 'bg-emerald-400'
+                    : dbStatus.status === 'local_fallback'
+                      ? 'bg-amber-400 animate-pulse'
+                      : 'bg-red-400'
+                }`}></span>
+                <span className="hidden sm:inline">
+                  {dbStatus.status === 'supabase'
+                    ? 'Supabase Connected'
+                    : dbStatus.status === 'local_fallback'
+                      ? 'Local Fallback'
+                      : 'Backend Offline'}
+                </span>
+                <span className="sm:hidden">
+                  {dbStatus.status === 'supabase'
+                    ? 'Cloud'
+                    : dbStatus.status === 'local_fallback'
+                      ? 'Local'
+                      : 'Offline'}
+                </span>
               </span>
             )}
           </div>
@@ -760,7 +835,7 @@ export const AdminDashboard: React.FC = () => {
                     <div className="bg-neutral-950 border border-neutral-800 p-6 rounded-sm flex items-center justify-between">
                       <div>
                         <span className="text-[10px] uppercase font-heading font-bold tracking-wider text-neutral-500 block">
-                          Unread Inquiries
+                          New Inquiries
                         </span>
                         <span className="text-3xl font-heading font-bold text-white block mt-1 relative inline-flex items-center">
                           {unreadMessagesCount}
@@ -1044,7 +1119,7 @@ export const AdminDashboard: React.FC = () => {
                         {messages.length} {messages.length === 1 ? 'inquiry' : 'inquiries'}
                         <span className="mx-2 text-neutral-700">•</span>
                         <span className={unreadMessagesCount > 0 ? 'text-accent font-bold' : ''}>
-                          {unreadMessagesCount} unread
+                          {unreadMessagesCount} new
                         </span>
                       </p>
                     </div>
@@ -1075,7 +1150,7 @@ export const AdminDashboard: React.FC = () => {
                     <div className="grid grid-cols-3 bg-neutral-950 p-1 rounded-sm border border-neutral-800 w-full lg:w-auto shrink-0">
                       {([
                         ['all', `All ${messages.length}`],
-                        ['unread', `Unread ${unreadMessagesCount}`],
+                        ['unread', `New ${unreadMessagesCount}`],
                         ['read', `Read ${messages.length - unreadMessagesCount}`]
                       ] as const).map(([filter, label]) => (
                         <button
@@ -1215,6 +1290,19 @@ export const AdminDashboard: React.FC = () => {
                                   <span className="sm:ml-auto text-[10px] text-neutral-600 font-mono">
                                     Received {new Date(msg.created_at).toLocaleString()}
                                   </span>
+                                  {msg.buyer_email && msg.confirmation_email_status && (
+                                    <span
+                                      className={`text-[9px] uppercase font-heading font-bold tracking-wider ${
+                                        msg.confirmation_email_status === 'sent'
+                                          ? 'text-emerald-400'
+                                          : msg.confirmation_email_status === 'failed'
+                                            ? 'text-red-400'
+                                            : 'text-neutral-600'
+                                      }`}
+                                    >
+                                      Confirmation {msg.confirmation_email_status}
+                                    </span>
+                                  )}
                                 </div>
 
                                 <div className="py-5 space-y-5">
@@ -1239,6 +1327,19 @@ export const AdminDashboard: React.FC = () => {
                                             {new Date(rep.created_at).toLocaleString()}
                                           </span>
                                           <span className="text-xs font-bold text-accent">{rep.sender_name}</span>
+                                          {rep.email_status && (
+                                            <span
+                                              className={`text-[8px] uppercase font-heading font-bold tracking-wider ${
+                                                rep.email_status === 'sent'
+                                                  ? 'text-emerald-400'
+                                                  : rep.email_status === 'failed'
+                                                    ? 'text-red-400'
+                                                    : 'text-neutral-600'
+                                              }`}
+                                            >
+                                              Email {rep.email_status}
+                                            </span>
+                                          )}
                                         </div>
                                         <p className="inline-block text-left text-xs text-neutral-200 leading-6 whitespace-pre-line bg-neutral-800 border border-neutral-700 px-4 py-3 rounded-sm">
                                           {rep.message}
@@ -1289,7 +1390,7 @@ export const AdminDashboard: React.FC = () => {
                                     onClick={() => handleToggleReadMessage(msg.id, msg.is_read)}
                                     className="min-h-9 text-[10px] font-heading font-bold uppercase tracking-wider border border-neutral-700 hover:border-accent text-neutral-400 hover:text-accent px-4 py-2 rounded-sm transition-colors cursor-pointer"
                                   >
-                                    Mark as {msg.is_read ? 'Unread' : 'Read'}
+                                    Mark as {msg.is_read ? 'New' : 'Read'}
                                   </button>
                                 </div>
                               </div>
@@ -1590,7 +1691,7 @@ export const AdminDashboard: React.FC = () => {
                       Drop images here or click to choose files
                     </p>
                     <p className="text-[10px] text-neutral-500 mt-1">
-                      Select as many images as needed. They upload in safe batches and are optimized to 1600 × 900 WebP.
+                      Select as many images as needed. Each file is optimized to 1600 × 900 WebP before upload.
                     </p>
                   </div>
 
@@ -1687,7 +1788,7 @@ export const AdminDashboard: React.FC = () => {
                   type="email"
                   required
                   {...inviteRegister('email')}
-                  placeholder="e.g. dsmith@ksaclassic.com"
+                  placeholder="e.g. dsmith@ksaclassics.online"
                   className="w-full bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm py-2.5 px-4 text-xs font-sans outline-none transition-colors"
                 />
               </div>

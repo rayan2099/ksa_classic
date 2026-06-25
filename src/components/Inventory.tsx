@@ -20,20 +20,25 @@ export const Inventory: React.FC<InventoryProps> = ({
 }) => {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMake, setSelectedMake] = useState('all');
 
   const fetchCars = async () => {
     setLoading(true);
+    setLoadError('');
     try {
       const res = await fetch('/api/cars');
-      if (res.ok) {
-        const data = await res.json();
-        setCars(data);
+      if (!res.ok) {
+        const result = await res.json().catch(() => null);
+        throw new Error(result?.error || 'The showroom inventory is temporarily unavailable.');
       }
+      const data = await res.json();
+      setCars(data);
     } catch (err) {
       console.error('Error fetching cars', err);
+      setLoadError(err instanceof Error ? err.message : 'The showroom inventory is temporarily unavailable.');
     } finally {
       setLoading(false);
     }
@@ -193,6 +198,22 @@ export const Inventory: React.FC<InventoryProps> = ({
                 <div className="h-8 bg-neutral-100 rounded-sm animate-pulse w-full"></div>
               </div>
             ))}
+          </div>
+        ) : loadError ? (
+          <div className="text-center py-16 bg-white border border-neutral-200 rounded-sm shadow-sm max-w-2xl mx-auto px-6">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h3 className="font-heading text-lg font-bold text-neutral-800 uppercase tracking-tight">
+              Showroom temporarily unavailable
+            </h3>
+            <p className="text-xs text-neutral-500 font-sans mt-2 max-w-md mx-auto">
+              {loadError}
+            </p>
+            <button
+              onClick={fetchCars}
+              className="mt-6 text-xs font-heading font-bold uppercase tracking-wider text-accent border border-accent hover:bg-accent hover:text-neutral-950 px-5 py-2.5 rounded-sm transition-all"
+            >
+              Try Again
+            </button>
           </div>
         ) : filteredCars.length === 0 ? (
           /* Empty State */

@@ -7,11 +7,14 @@ import cookieParser from 'cookie-parser';
 import multer from 'multer';
 import sharp from 'sharp';
 import { createClient } from '@supabase/supabase-js';
-import { Car, Profile, Message, DbState } from './src/types.js';
+import { Car, Profile, Message, MessageReply, DbState } from './src/types.js';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+const allowLocalFallback = !isProduction;
 
+app.disable('x-powered-by');
 app.use(express.json());
 app.use(cookieParser());
 
@@ -22,11 +25,13 @@ const VEHICLE_IMAGE_WIDTH = 1600;
 const VEHICLE_IMAGE_HEIGHT = 900;
 const VEHICLE_IMAGE_MAX_BYTES = 15 * 1024 * 1024;
 
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+if (allowLocalFallback) {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  }
 }
 
 // Set up local file storage database paths
@@ -36,6 +41,11 @@ const DB_FILE = path.join(DATA_DIR, 'db.json');
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const resendApiKey = process.env.RESEND_API_KEY || '';
+const resendFromEmail = process.env.RESEND_FROM_EMAIL || '';
+const showroomEmail = process.env.SHOWROOM_EMAIL || 'info@ksaclassics.online';
+const isEmailActive = !!(resendApiKey && resendFromEmail);
+const inquiryAttempts = new Map<string, number[]>();
 const isSupabaseActive = !!(supabaseUrl && supabaseAnonKey && supabaseServiceRoleKey);
 const supabaseClientOptions = {
   auth: {
@@ -50,7 +60,129 @@ const supabase = isSupabaseActive
   ? createClient(supabaseUrl, supabaseServiceRoleKey, supabaseClientOptions)
   : null;
 
-console.log(`Database Connection Status: ${isSupabaseActive ? 'Supabase (Active)' : 'Local Fallback (Active)'}`);
+console.log(`Database Connection Status: ${
+  isSupabaseActive ? 'Supabase (Active)' : allowLocalFallback ? 'Local Fallback (Active)' : 'Not Configured'
+}`);
+console.log(`Email Delivery Status: ${isEmailActive ? 'Resend (Active)' : 'Disabled (Resend credentials missing)'}`);
+
+const escapeHtml = (value: unknown) => String(value ?? '')
+  .replaceAll('&', '&amp;')
+  .replaceAll('<', '&lt;')
+  .replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;')
+  .replaceAll("'", '&#039;');
+
+type OutboundEmail = {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+  replyTo?: string;
+  idempotencyKey: string;
+};
+
+type EmailDeliveryResult =
+  | { sent: true; skipped: false; id: string; error?: never }
+  | { sent: false; skipped: boolean; error: string; id?: never };
+
+const skippedEmailResult = (error: string): EmailDeliveryResult => ({
+  sent: false,
+  skipped: true,
+  error
+});
+
+const sendResendEmail = async (email: OutboundEmail): Promise<EmailDeliveryResult> => {
+  if (!isEmailActive) {
+    return { sent: false, skipped: true, error: 'Resend is not configured.' };
+  }
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json',
+        'Idempotency-Key': email.idempotencyKey
+      },
+      body: JSON.stringify({
+        from: resendFromEmail,
+        to: [email.to],
+        subject: email.subject,
+        html: email.html,
+        text: email.text,
+        reply_to: email.replyTo || showroomEmail,
+        tags: [{ name: 'application', value: 'ksa-classics' }]
+      })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { sent: false, skipped: false, error: result.message || 'Resend rejected the email.' };
+    }
+    return { sent: true, skipped: false, id: result.id as string };
+  } catch (error: any) {
+    return { sent: false, skipped: false, error: error.message || 'Email delivery failed.' };
+  }
+};
+
+const emailShell = (content: string) => `
+<!doctype html>
+<html>
+  <body style="margin:0;background:#111111;color:#f5f5f5;font-family:Arial,sans-serif">
+    <div style="max-width:620px;margin:0 auto;padding:32px 20px">
+      <div style="border-bottom:2px solid #d4af37;padding-bottom:18px;margin-bottom:28px">
+        <strong style="font-size:22px;letter-spacing:1px">KSA <span style="color:#d4af37">CLASSICS</span></strong>
+      </div>
+      ${content}
+      <div style="border-top:1px solid #333;margin-top:32px;padding-top:18px;color:#888;font-size:12px;line-height:1.6">
+        KSA Classics · Collector cars and restoration projects<br>
+        Reply to this email to contact the showroom team.
+      </div>
+    </div>
+  </body>
+</html>`;
+
+const buildInquiryConfirmationEmail = (buyerName: string, carTitle: string, message: string) => ({
+  subject: `We received your inquiry${carTitle ? ` about ${carTitle}` : ''}`,
+  html: emailShell(`
+    <h1 style="font-size:22px;margin:0 0 14px">Thank you, ${escapeHtml(buyerName)}.</h1>
+    <p style="color:#cfcfcf;line-height:1.7;margin:0 0 20px">
+      We have received your showroom inquiry and a member of our team will get back to you shortly.
+    </p>
+    ${carTitle ? `<p style="font-size:13px;color:#d4af37;text-transform:uppercase;letter-spacing:.6px;margin:0 0 8px">${escapeHtml(carTitle)}</p>` : ''}
+    <div style="background:#1a1a1a;border:1px solid #333;padding:18px;color:#d8d8d8;line-height:1.6">
+      ${escapeHtml(message).replaceAll('\n', '<br>')}
+    </div>
+  `),
+  text: `Thank you, ${buyerName}.\n\nWe received your inquiry${carTitle ? ` about ${carTitle}` : ''}. A member of the KSA Classics team will get back to you shortly.\n\nYour message:\n${message}`
+});
+
+const buildAdminReplyEmail = (buyerName: string, carTitle: string, reply: string, senderName: string) => ({
+  subject: `KSA Classics reply${carTitle ? `: ${carTitle}` : ''}`,
+  html: emailShell(`
+    <p style="color:#cfcfcf;line-height:1.7;margin:0 0 18px">Hello ${escapeHtml(buyerName)},</p>
+    ${carTitle ? `<p style="font-size:13px;color:#d4af37;text-transform:uppercase;letter-spacing:.6px;margin:0 0 8px">${escapeHtml(carTitle)}</p>` : ''}
+    <div style="background:#1a1a1a;border-left:3px solid #d4af37;padding:18px;color:#f0f0f0;line-height:1.7">
+      ${escapeHtml(reply).replaceAll('\n', '<br>')}
+    </div>
+    <p style="color:#aaa;margin-top:18px;font-size:13px">Regards,<br>${escapeHtml(senderName)}<br>KSA Classics</p>
+  `),
+  text: `Hello ${buyerName},\n\n${reply}\n\nRegards,\n${senderName}\nKSA Classics`
+});
+
+const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+const isInquiryRateLimited = (req: express.Request) => {
+  const forwardedFor = req.headers['x-forwarded-for'];
+  const clientIp = (Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor?.split(',')[0])
+    || req.ip
+    || 'unknown';
+  const now = Date.now();
+  const windowStart = now - 10 * 60 * 1000;
+  const recentAttempts = (inquiryAttempts.get(clientIp) || []).filter(timestamp => timestamp > windowStart);
+  if (recentAttempts.length >= 5) return true;
+  inquiryAttempts.set(clientIp, [...recentAttempts, now]);
+  return false;
+};
 
 // Seed initial data for local database
 const defaultProfiles: Profile[] = [
@@ -65,7 +197,7 @@ const defaultProfiles: Profile[] = [
     id: 'subadmin-id-1',
     full_name: 'KSA Sub Admin',
     role: 'sub_admin',
-    email: 'subadmin@ksaclassic.com',
+    email: 'subadmin@ksaclassics.online',
     created_at: new Date('2026-02-01').toISOString()
   }
 ];
@@ -100,7 +232,7 @@ const defaultCars: Car[] = [
     price: 345000,
     mileage: 82000,
     location: 'Vancouver, BC',
-    description: 'An legendary lightweight masterpiece. Finished in Grand Prix White with Viper Green lettering. Matching numbers 2.7L flat-six engine. Meticulously maintained with full historical documentation.',
+    description: 'A legendary lightweight masterpiece. Finished in Grand Prix White with Viper Green lettering. Matching numbers 2.7L flat-six engine. Meticulously maintained with full historical documentation.',
     condition: 'available',
     type: 'classic',
     images: ['https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1200'],
@@ -223,7 +355,7 @@ const defaultMessages: Message[] = [
       {
         id: 'rep-initial-mock',
         sender_name: 'System Auto-Response',
-        sender_email: 'no-reply@ksaclassic.com',
+        sender_email: 'no-reply@ksaclassics.online',
         message: 'Thank you for your interest in KSA Classics. Our curators are reviewing your inquiry.',
         created_at: new Date(Date.now() - 1800000).toISOString()
       }
@@ -286,7 +418,7 @@ function getLocalDb(): DbState {
           {
             id: 'rep-initial-mock',
             sender_name: 'System Auto-Response',
-            sender_email: 'no-reply@ksaclassic.com',
+            sender_email: 'no-reply@ksaclassics.online',
             message: 'Thank you for your interest in KSA Classics. Our curators are reviewing your inquiry.',
             created_at: new Date(Date.now() - 1800000).toISOString()
           }
@@ -353,6 +485,7 @@ const getAuthUser = async (req: any): Promise<Profile | null> => {
     return profile || null;
   }
 
+  if (!allowLocalFallback) return null;
   const db = getLocalDb();
   return db.profiles.find(p => p.id === sessionToken) || null;
 };
@@ -360,13 +493,43 @@ const getAuthUser = async (req: any): Promise<Profile | null> => {
 // ================= API ENDPOINTS =================
 
 // Connection Status Endpoint
-app.get('/api/db-status', (req, res) => {
-  res.json({
-    status: isSupabaseActive ? 'supabase' : 'local_fallback',
-    message: isSupabaseActive 
-      ? 'Connected to your active Supabase backend.' 
-      : 'Using premium local storage fallback (Supabase credentials not configured in .env).'
+app.get('/api/db-status', async (_req, res) => {
+  if (isSupabaseActive && supabase) {
+    const { error } = await supabase.from('cars').select('id', { head: true, count: 'exact' });
+    if (!error) {
+      return res.json({
+        status: 'supabase',
+        email: isEmailActive ? 'resend' : 'not_configured',
+        message: 'Connected to the Supabase backend.'
+      });
+    }
+    return res.status(503).json({
+      status: 'error',
+      email: isEmailActive ? 'resend' : 'not_configured',
+      message: 'Supabase credentials are configured, but the database check failed.'
+    });
+  }
+
+  if (allowLocalFallback) {
+    return res.json({
+      status: 'local_fallback',
+      email: isEmailActive ? 'resend' : 'not_configured',
+      message: 'Using local development storage because Supabase is not configured.'
+    });
+  }
+
+  res.status(503).json({
+    status: 'misconfigured',
+    email: isEmailActive ? 'resend' : 'not_configured',
+    message: 'Production backend credentials are incomplete.'
   });
+});
+
+app.use('/api', (_req, res, next) => {
+  if (!isSupabaseActive && !allowLocalFallback) {
+    return res.status(503).json({ error: 'Production backend is not configured.' });
+  }
+  next();
 });
 
 // GET /api/cars (Public)
@@ -380,7 +543,10 @@ app.get('/api/cars', async (req, res) => {
       if (!error && data) {
         return res.json(data);
       }
-      console.warn('Supabase fetch failed, falling back to local database:', error);
+      console.error('Supabase cars fetch failed:', error);
+      if (!allowLocalFallback) {
+        return res.status(502).json({ error: 'Could not load inventory from the database.' });
+      }
     }
     const db = getLocalDb();
     const sortedCars = [...db.cars].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -402,6 +568,13 @@ app.get('/api/cars/:id', async (req, res) => {
         .single();
       if (!error && data) {
         return res.json(data);
+      }
+      if (error?.code === 'PGRST116') {
+        return res.status(404).json({ error: 'Car listing not found' });
+      }
+      console.error('Supabase car fetch failed:', error);
+      if (!allowLocalFallback) {
+        return res.status(502).json({ error: 'Could not load this vehicle from the database.' });
       }
     }
     const db = getLocalDb();
@@ -470,7 +643,10 @@ app.post('/api/cars', async (req, res) => {
       if (!error && data) {
         return res.status(201).json(data);
       }
-      console.warn('Supabase insert failed, inserting locally:', error);
+      console.error('Supabase car insert failed:', error);
+      if (!allowLocalFallback) {
+        return res.status(502).json({ error: 'Could not save the vehicle to the database.' });
+      }
     }
 
     const db = getLocalDb();
@@ -516,7 +692,10 @@ app.put('/api/cars/:id', async (req, res) => {
       if (!error && data) {
         return res.json(data);
       }
-      console.warn('Supabase update failed, updating locally:', error);
+      console.error('Supabase car update failed:', error);
+      if (!allowLocalFallback) {
+        return res.status(502).json({ error: 'Could not update the vehicle in the database.' });
+      }
     }
 
     const db = getLocalDb();
@@ -556,14 +735,12 @@ app.delete('/api/cars/:id', async (req, res) => {
         .delete()
         .eq('id', id);
       if (!error) {
-        // Also delete cascade local messages if they exist
-        const db = getLocalDb();
-        db.messages = db.messages.filter(m => m.car_id !== id);
-        db.cars = db.cars.filter(c => c.id !== id);
-        saveLocalDb(db);
         return res.json({ success: true });
       }
-      console.warn('Supabase delete failed, deleting locally:', error);
+      console.error('Supabase car delete failed:', error);
+      if (!allowLocalFallback) {
+        return res.status(502).json({ error: 'Could not delete the vehicle from the database.' });
+      }
     }
 
     const db = getLocalDb();
@@ -586,19 +763,29 @@ app.delete('/api/cars/:id', async (req, res) => {
 app.post('/api/messages', async (req, res) => {
   const { car_id, buyer_name, buyer_email, buyer_phone, message } = req.body;
 
-  if (!car_id || !buyer_name || !message) {
-    return res.status(400).json({ error: 'Required fields: car_id, buyer_name, message' });
+  if (!buyer_name || !message) {
+    return res.status(400).json({ error: 'Required fields: buyer_name, message' });
+  }
+  if (String(buyer_name).trim().length > 120 || String(message).trim().length > 5000) {
+    return res.status(400).json({ error: 'Inquiry content exceeds the allowed length.' });
+  }
+  if (buyer_email && !isValidEmail(String(buyer_email).trim())) {
+    return res.status(400).json({ error: 'Please enter a valid email address.' });
+  }
+  if (isInquiryRateLimited(req)) {
+    return res.status(429).json({ error: 'Too many inquiries. Please wait a few minutes and try again.' });
   }
 
   const newMessage: Message = {
     id: 'msg-' + Date.now() + '-' + Math.round(Math.random() * 1000),
-    car_id,
-    buyer_name,
-    buyer_email: buyer_email || '',
-    buyer_phone: buyer_phone || '',
-    message,
+    car_id: car_id || null,
+    buyer_name: String(buyer_name).trim(),
+    buyer_email: String(buyer_email || '').trim().toLowerCase(),
+    buyer_phone: String(buyer_phone || '').trim(),
+    message: String(message).trim(),
     is_read: false,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    confirmation_email_status: buyer_email ? 'pending' : 'skipped'
   };
 
   try {
@@ -616,15 +803,71 @@ app.post('/api/messages', async (req, res) => {
         .select()
         .single();
       if (!error && data) {
-        return res.status(201).json(data);
+        const { data: car } = await supabase
+          .from('cars')
+          .select('title')
+          .eq('id', newMessage.car_id)
+          .maybeSingle();
+        const emailContent = buildInquiryConfirmationEmail(
+          newMessage.buyer_name,
+          car?.title || '',
+          newMessage.message
+        );
+        const emailResult = newMessage.buyer_email
+          ? await sendResendEmail({
+              to: newMessage.buyer_email,
+              ...emailContent,
+              idempotencyKey: `inquiry-confirmation/${data.id}`
+            })
+          : skippedEmailResult('Buyer email was not provided.');
+        const emailStatus = emailResult.sent ? 'sent' : emailResult.skipped ? 'skipped' : 'failed';
+
+        const { data: updated } = await supabase
+          .from('messages')
+          .update({
+            confirmation_email_status: emailStatus,
+            confirmation_email_id: emailResult.sent ? emailResult.id : null
+          })
+          .eq('id', data.id)
+          .select()
+          .single();
+
+        return res.status(201).json({
+          ...(updated || data),
+          ...(!emailResult.sent && newMessage.buyer_email ? { email_warning: emailResult.error } : {})
+        });
       }
-      console.warn('Supabase message insert failed, inserting locally:', error);
+      console.error('Supabase message insert failed:', error);
+      if (!allowLocalFallback) {
+        return res.status(502).json({ error: 'Could not submit the inquiry. Please try again shortly.' });
+      }
     }
 
     const db = getLocalDb();
     db.messages.push(newMessage);
     saveLocalDb(db);
-    res.status(201).json(newMessage);
+
+    const car = db.cars.find(item => item.id === newMessage.car_id);
+    const emailContent = buildInquiryConfirmationEmail(
+      newMessage.buyer_name,
+      car?.title || '',
+      newMessage.message
+    );
+    const emailResult = newMessage.buyer_email
+      ? await sendResendEmail({
+          to: newMessage.buyer_email,
+          ...emailContent,
+          idempotencyKey: `inquiry-confirmation/${newMessage.id}`
+        })
+      : skippedEmailResult('Buyer email was not provided.');
+    newMessage.confirmation_email_status = emailResult.sent ? 'sent' : emailResult.skipped ? 'skipped' : 'failed';
+    if (emailResult.sent) newMessage.confirmation_email_id = emailResult.id;
+    saveLocalDb(db);
+
+    res.status(201).json({
+      ...newMessage,
+      ...(!emailResult.sent && newMessage.buyer_email ? { email_warning: emailResult.error } : {})
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -638,8 +881,6 @@ app.get('/api/messages', async (req, res) => {
   }
 
   try {
-    const db = getLocalDb();
-
     if (isSupabaseActive && supabase) {
       const { data: messagesData, error: mError } = await supabase
         .from('messages')
@@ -661,9 +902,13 @@ app.get('/api/messages', async (req, res) => {
         }));
         return res.json(hydrated);
       }
-      console.warn('Supabase messages fetch failed, falling back to local database:', mError);
+      console.error('Supabase messages fetch failed:', mError || cError);
+      if (!allowLocalFallback) {
+        return res.status(502).json({ error: 'Could not load messages from the database.' });
+      }
     }
 
+    const db = getLocalDb();
     const hydratedMessages = db.messages.map(m => {
       const car = db.cars.find(c => c.id === m.car_id);
       return {
@@ -709,7 +954,6 @@ app.post('/api/messages/mock', async (req, res) => {
   ];
 
   try {
-    const db = getLocalDb();
     if (isSupabaseActive && supabase) {
       const { data: availableCars, error: carsError } = await supabase
         .from('cars')
@@ -737,6 +981,7 @@ app.post('/api/messages/mock', async (req, res) => {
       return res.status(201).json({ success: true, count: inserts.length });
     }
 
+    const db = getLocalDb();
     db.messages.push(...mockMessages);
     saveLocalDb(db);
 
@@ -767,7 +1012,10 @@ app.patch('/api/messages/:id/read', async (req, res) => {
       if (!error && data) {
         return res.json(data);
       }
-      console.warn('Supabase update message failed, updating locally:', error);
+      console.error('Supabase message update failed:', error);
+      if (!allowLocalFallback) {
+        return res.status(502).json({ error: 'Could not update the message in the database.' });
+      }
     }
 
     const db = getLocalDb();
@@ -800,18 +1048,56 @@ app.post('/api/messages/:id/reply', async (req, res) => {
 
   try {
     if (isSupabaseActive && supabase) {
-      const { error: replyError } = await supabase
+      const { data: targetMessage, error: targetError } = await supabase
+        .from('messages')
+        .select('id, buyer_name, buyer_email, car_id, car:cars(title)')
+        .eq('id', id)
+        .single();
+      if (targetError || !targetMessage) {
+        return res.status(404).json({ error: 'Message not found.' });
+      }
+
+      const { data: savedReply, error: replyError } = await supabase
         .from('message_replies')
         .insert({
           message_id: id,
           sender_id: admin.id,
           sender_name: admin.full_name,
           sender_email: admin.email,
-          message: message.trim()
-        });
+          message: message.trim(),
+          email_status: targetMessage.buyer_email ? 'pending' : 'skipped'
+        })
+        .select()
+        .single();
       if (replyError) {
         return res.status(400).json({ error: replyError.message });
       }
+
+      const carTitle = Array.isArray(targetMessage.car)
+        ? targetMessage.car[0]?.title || ''
+        : (targetMessage.car as any)?.title || '';
+      const emailContent = buildAdminReplyEmail(
+        targetMessage.buyer_name,
+        carTitle,
+        message.trim(),
+        admin.full_name
+      );
+      const emailResult = targetMessage.buyer_email
+        ? await sendResendEmail({
+            to: targetMessage.buyer_email,
+            ...emailContent,
+            replyTo: admin.email || showroomEmail,
+            idempotencyKey: `admin-reply/${savedReply.id}`
+          })
+        : skippedEmailResult('Buyer email was not provided.');
+
+      await supabase
+        .from('message_replies')
+        .update({
+          email_status: emailResult.sent ? 'sent' : emailResult.skipped ? 'skipped' : 'failed',
+          email_id: emailResult.sent ? emailResult.id : null
+        })
+        .eq('id', savedReply.id);
 
       await supabase
         .from('messages')
@@ -831,7 +1117,8 @@ app.post('/api/messages/:id/reply', async (req, res) => {
         ...data,
         replies: [...(data.replies || [])].sort(
           (a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        )
+        ),
+        ...(!emailResult.sent && targetMessage.buyer_email ? { email_warning: emailResult.error } : {})
       });
     }
 
@@ -846,20 +1133,41 @@ app.post('/api/messages/:id/reply', async (req, res) => {
       targetMsg.replies = [];
     }
 
-    const newReply = {
+    const newReply: MessageReply = {
       id: 'rep-' + Date.now() + '-' + Math.round(Math.random() * 1000),
       sender_name: admin.full_name,
       sender_email: admin.email,
       message,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      email_status: targetMsg.buyer_email ? 'pending' : 'skipped'
     };
 
     targetMsg.replies.push(newReply);
     targetMsg.is_read = true; // Auto mark as read
 
+    const car = db.cars.find(item => item.id === targetMsg.car_id);
+    const emailContent = buildAdminReplyEmail(
+      targetMsg.buyer_name,
+      car?.title || '',
+      message.trim(),
+      admin.full_name
+    );
+    const emailResult = targetMsg.buyer_email
+      ? await sendResendEmail({
+          to: targetMsg.buyer_email,
+          ...emailContent,
+          replyTo: admin.email || showroomEmail,
+          idempotencyKey: `admin-reply/${newReply.id}`
+        })
+      : skippedEmailResult('Buyer email was not provided.');
+    newReply.email_status = emailResult.sent ? 'sent' : emailResult.skipped ? 'skipped' : 'failed';
+    if (emailResult.sent) newReply.email_id = emailResult.id;
     saveLocalDb(db);
 
-    res.status(201).json(targetMsg);
+    res.status(201).json({
+      ...targetMsg,
+      ...(!emailResult.sent && targetMsg.buyer_email ? { email_warning: emailResult.error } : {})
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -881,12 +1189,12 @@ app.delete('/api/messages/:id', async (req, res) => {
         .delete()
         .eq('id', id);
       if (!error) {
-        const db = getLocalDb();
-        db.messages = db.messages.filter(m => m.id !== id);
-        saveLocalDb(db);
         return res.json({ success: true });
       }
-      console.warn('Supabase delete message failed, deleting locally:', error);
+      console.error('Supabase message delete failed:', error);
+      if (!allowLocalFallback) {
+        return res.status(502).json({ error: 'Could not delete the message from the database.' });
+      }
     }
 
     const db = getLocalDb();
@@ -918,6 +1226,10 @@ app.get('/api/profiles', async (req, res) => {
         .select('*');
       if (!error && data) {
         return res.json(data);
+      }
+      console.error('Supabase profiles fetch failed:', error);
+      if (!allowLocalFallback) {
+        return res.status(502).json({ error: 'Could not load administrators from the database.' });
       }
     }
     const db = getLocalDb();
@@ -1396,4 +1708,8 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;

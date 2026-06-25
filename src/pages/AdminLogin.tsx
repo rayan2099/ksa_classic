@@ -60,7 +60,7 @@ export const AdminLogin: React.FC = () => {
             <img
               src="/logo.png"
               alt="KSA Classic"
-              className="h-14 w-auto mx-auto object-contain brightness-0 invert"
+              className="h-16 w-auto mx-auto object-contain"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 const parent = e.currentTarget.parentElement;
@@ -92,7 +92,7 @@ export const AdminLogin: React.FC = () => {
                 <input
                   type="email"
                   {...register('email', { required: 'Administrator email is required' })}
-                  placeholder="e.g. administrator@ksaclassic.com"
+                  placeholder="e.g. administrator@ksaclassics.online"
                   className={`w-full bg-neutral-950 border ${
                     errors.email ? 'border-red-500 focus:border-red-500' : 'border-neutral-800 focus:border-accent'
                   } rounded-sm py-2.5 pl-10 pr-4 text-xs font-sans text-white outline-none transition-colors`}

@@ -31,11 +31,13 @@ export interface MessageReply {
   sender_email: string;
   message: string;
   created_at: string;
+  email_id?: string;
+  email_status?: 'pending' | 'sent' | 'failed' | 'skipped';
 }
 
 export interface Message {
   id: string;
-  car_id: string;
+  car_id: string | null;
   buyer_name: string;
   buyer_email: string;
   buyer_phone: string;
@@ -44,6 +46,9 @@ export interface Message {
   created_at: string;
   car_title?: string; // hydrated on join
   replies?: MessageReply[];
+  confirmation_email_id?: string;
+  confirmation_email_status?: 'pending' | 'sent' | 'failed' | 'skipped';
+  email_warning?: string;
 }
 
 export interface DbState {

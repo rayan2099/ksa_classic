@@ -60,7 +60,7 @@ export const Home: React.FC = () => {
     try {
       // General inquiries are mapped to a dummy or main featured car (e.g. car-id-1)
       const payload = {
-        car_id: 'car-id-1', // Default corvette
+        car_id: null,
         buyer_name: data.name,
         buyer_email: data.email,
         buyer_phone: data.phone,
@@ -74,6 +74,7 @@ export const Home: React.FC = () => {
       });
 
       if (res.ok) {
+        const result = await res.json();
         toast.success("Your message has been sent! We'll be in touch soon.", {
           style: {
             background: '#1A1A1A',
@@ -82,6 +83,9 @@ export const Home: React.FC = () => {
             borderRadius: '2px',
           }
         });
+        if (result.email_warning) {
+          toast.error('Your inquiry was received, but the confirmation email could not be delivered.');
+        }
         reset();
       } else {
         throw new Error();
@@ -147,7 +151,7 @@ export const Home: React.FC = () => {
                   <Mail className="w-5 h-5 text-accent mr-4 flex-shrink-0 mt-1" />
                   <div>
                     <h4 className="font-heading font-bold text-xs uppercase text-neutral-200">Email</h4>
-                    <p className="text-xs text-neutral-400 mt-1">info@ksaclassic.com</p>
+                    <p className="text-xs text-neutral-400 mt-1">info@ksaclassics.online</p>
                   </div>
                 </div>
               </div>

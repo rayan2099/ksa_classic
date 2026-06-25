@@ -1,32 +1,35 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# KSA Classics
 
-# Run and deploy your AI Studio app
+Public classic-car showroom and private administration CRM built with React,
+Express, Supabase, and Resend.
 
-This contains everything you need to run your app locally.
+## Local Development
 
-View your app in AI Studio: https://ai.studio/apps/36e65ff6-0075-4537-8ab6-43508a2c43db
+1. Install dependencies with `npm install`.
+2. Copy `.env.example` to `.env` and fill in the required values.
+3. Run `npm run dev`.
 
-## Run Locally
+## Production Setup
 
-**Prerequisites:**  Node.js
+1. Run `supabase/schema.sql` in the Supabase SQL Editor.
+2. If the schema was installed before email support, also run
+   `supabase/002_resend_email.sql`.
+3. Create the first administrator in Supabase Auth and promote the matching
+   profile to `super_admin` using `supabase/SETUP.md`.
+4. Verify the sending domain in Resend.
+5. Add all values from `.env.example` to the Vercel project for Production and
+   Preview.
+6. Push the repository. Vercel uses `vercel.json` to build the frontend, expose
+   the Express API as serverless functions, and support direct admin routes.
 
+Before launch, confirm these URLs return successfully:
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- `https://www.ksaclassics.online/`
+- `https://www.ksaclassics.online/admin/login`
+- `https://www.ksaclassics.online/api/db-status`
+- `https://www.ksaclassics.online/api/cars`
+- `https://www.ksaclassics.online/robots.txt`
+- `https://www.ksaclassics.online/sitemap.xml`
 
-## Supabase Backend
-
-The complete production database setup is in:
-
-- `supabase/schema.sql` - tables, constraints, indexes, triggers, RLS, sessions, and Storage.
-- `supabase/seed.sql` - optional demo inventory and inquiry.
-- `supabase/SETUP.md` - dashboard, Auth, and Vercel configuration steps.
-
-Run `schema.sql` first, create the initial Supabase Auth user, promote that profile
-to `super_admin`, and then configure `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and
-`SUPABASE_SERVICE_ROLE_KEY` on the server.
+Never expose `SUPABASE_SERVICE_ROLE_KEY` to browser code or commit any `.env`
+file.

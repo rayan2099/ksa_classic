@@ -47,12 +47,15 @@ create table if not exists public.cars (
 
 create table if not exists public.messages (
   id uuid primary key default gen_random_uuid(),
-  car_id uuid not null references public.cars(id) on delete cascade,
+  car_id uuid references public.cars(id) on delete cascade,
   buyer_name text not null check (char_length(buyer_name) between 2 and 120),
   buyer_email citext not null default '',
   buyer_phone text not null default '',
   message text not null check (char_length(message) between 1 and 5000),
   is_read boolean not null default false,
+  confirmation_email_id text,
+  confirmation_email_status text not null default 'pending'
+    check (confirmation_email_status in ('pending', 'sent', 'failed', 'skipped')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -64,6 +67,9 @@ create table if not exists public.message_replies (
   sender_name text not null,
   sender_email citext not null,
   message text not null check (char_length(message) between 1 and 5000),
+  email_id text,
+  email_status text not null default 'pending'
+    check (email_status in ('pending', 'sent', 'failed', 'skipped')),
   created_at timestamptz not null default now()
 );
 
@@ -197,4 +203,3 @@ on storage.objects
 for select
 to public
 using (bucket_id = 'vehicle-images');
-

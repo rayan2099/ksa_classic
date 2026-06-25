@@ -57,7 +57,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onScrollToSection }) => {
           {/* Logo Section */}
           <Link to="/" onClick={() => handleNavClick('hero')} className="flex items-center space-x-1.5 sm:space-x-3 group shrink-0">
             <img
-              src="https://i.imgur.com/5fwPaIG.png"
+              src="/logo.png"
               alt="KSA Classics Logo"
               id="navbar-logo"
               className="w-[40px] h-[40px] sm:h-12 sm:w-auto object-contain transition-transform duration-300 group-hover:scale-105"
