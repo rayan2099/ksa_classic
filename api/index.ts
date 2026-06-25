@@ -1,4 +1,4 @@
-import app from '../server.ts';
+import app from '../server.js';
 
 export default function handler(req: any, res: any) {
   const requestUrl = new URL(req.url || '/', 'http://localhost');
