@@ -4,7 +4,6 @@ import fs from 'fs';
 import crypto from 'crypto';
 import cookieParser from 'cookie-parser';
 import multer from 'multer';
-import sharp from 'sharp';
 import { createClient } from '@supabase/supabase-js';
 import type { Car, Profile, Message, MessageReply, DbState } from './src/types.ts';
 
@@ -37,27 +36,42 @@ if (allowLocalFallback) {
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 
 // Initialize Supabase Client if configured
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabaseUrl = (process.env.SUPABASE_URL || '').trim();
+const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || '').trim();
+const supabaseServiceRoleKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
 const resendApiKey = process.env.RESEND_API_KEY || '';
 const resendFromEmail = process.env.RESEND_FROM_EMAIL || '';
 const showroomEmail = process.env.SHOWROOM_EMAIL || 'info@ksaclassics.online';
 const isEmailActive = !!(resendApiKey && resendFromEmail);
 const inquiryAttempts = new Map<string, number[]>();
-const isSupabaseActive = !!(supabaseUrl && supabaseAnonKey && supabaseServiceRoleKey);
 const supabaseClientOptions = {
   auth: {
     persistSession: false,
     autoRefreshToken: false
   }
 };
-const supabaseAuth = isSupabaseActive
-  ? createClient(supabaseUrl, supabaseAnonKey, supabaseClientOptions)
-  : null;
-const supabase = isSupabaseActive
-  ? createClient(supabaseUrl, supabaseServiceRoleKey, supabaseClientOptions)
-  : null;
+let isSupabaseActive = false;
+let supabaseConfigError = '';
+let supabaseAuth: any = null;
+let supabase: any = null;
+
+if (supabaseUrl && supabaseAnonKey && supabaseServiceRoleKey) {
+  try {
+    const parsedUrl = new URL(supabaseUrl);
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      throw new Error('SUPABASE_URL must use HTTP or HTTPS.');
+    }
+
+    supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, supabaseClientOptions);
+    supabase = createClient(supabaseUrl, supabaseServiceRoleKey, supabaseClientOptions);
+    isSupabaseActive = true;
+  } catch (error: any) {
+    supabaseConfigError = error.message || 'Supabase credentials are invalid.';
+    console.error('Supabase configuration error:', supabaseConfigError);
+  }
+} else {
+  supabaseConfigError = 'One or more required Supabase environment variables are missing.';
+}
 
 console.log(`Database Connection Status: ${
   isSupabaseActive ? 'Supabase (Active)' : allowLocalFallback ? 'Local Fallback (Active)' : 'Not Configured'
@@ -520,13 +534,15 @@ app.get('/api/db-status', async (_req, res) => {
   res.status(503).json({
     status: 'misconfigured',
     email: isEmailActive ? 'resend' : 'not_configured',
-    message: 'Production backend credentials are incomplete.'
+    message: supabaseConfigError || 'Production backend credentials are incomplete.'
   });
 });
 
 app.use('/api', (_req, res, next) => {
   if (!isSupabaseActive && !allowLocalFallback) {
-    return res.status(503).json({ error: 'Production backend is not configured.' });
+    return res.status(503).json({
+      error: supabaseConfigError || 'Production backend is not configured.'
+    });
   }
   next();
 });
@@ -1637,6 +1653,7 @@ app.post('/api/upload', upload.array('files', 10), async (req: any, res) => {
 
   try {
     const files = req.files as Express.Multer.File[];
+    const { default: sharp } = await import('sharp');
     const urls = await Promise.all(files.map(async (file, index) => {
       const filename = `car-${Date.now()}-${index}-${Math.round(Math.random() * 1E9)}.webp`;
       const optimizedImage = await sharp(file.buffer)
