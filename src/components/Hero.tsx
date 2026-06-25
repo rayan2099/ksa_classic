@@ -78,7 +78,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
           <div 
             style={isMobile ? {
               position: 'absolute',
-              top: '15%',
+              top: '10%',
               left: '0',
               right: '0',
               padding: '0 20px',
@@ -93,7 +93,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
               <div
                 style={{
                   background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0) 100%)',
-                  padding: '20px 16px 40px 16px',
+                  padding: '20px 16px 24px 16px',
                   borderRadius: '0',
                   display: 'flex',
                   flexDirection: 'column',
@@ -126,24 +126,23 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
                 {/* Majestic Heading */}
                 <h1
                   style={{
-                    fontSize: '36px',
+                    fontSize: '48px',
                     fontWeight: '900',
-                    lineHeight: '1',
-                    whiteSpace: 'nowrap',
+                    lineHeight: '0.92',
                     margin: 0
                   }}
                 >
-                  <span style={{ color: '#ffffff' }}>KSA </span>
-                  <span style={{ color: '#C9A84C' }}>CLASSICS</span>
+                  <span style={{ color: '#ffffff', display: 'block' }}>KSA</span>
+                  <span style={{ color: '#C9A84C', display: 'block' }}>CLASSICS</span>
                 </h1>
 
                 {/* Responsive Description */}
                 <p
                   style={{
                     fontSize: '12px',
-                    lineHeight: '1.6',
+                    lineHeight: '1.55',
                     color: 'rgba(255,255,255,0.8)',
-                    maxWidth: '75%',
+                    maxWidth: '100%',
                     margin: 0
                   }}
                   className="font-sans tracking-wide"
