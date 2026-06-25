@@ -12,6 +12,20 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const readApiResponse = async (res: Response) => {
+  const contentType = res.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    return res.json();
+  }
+
+  const text = await res.text();
+  throw new Error(
+    res.status >= 500
+      ? 'The server is temporarily unavailable. Please try again shortly.'
+      : text || 'The server returned an unexpected response.'
+  );
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await fetch('/api/auth/me');
       if (res.ok) {
-        const data = await res.json();
+        const data = await readApiResponse(res);
         setUser(data);
       } else {
         setUser(null);
@@ -37,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchDbStatus = async () => {
     try {
       const res = await fetch('/api/db-status');
-      const data = await res.json();
+      const data = await readApiResponse(res);
       setDbStatus(data);
     } catch (err) {
       console.error('Failed to fetch DB status', err);
@@ -57,11 +71,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     if (!res.ok) {
-      const errData = await res.json();
+      const errData = await readApiResponse(res);
       throw new Error(errData.error || 'Authentication failed');
     }
 
-    const profile = await res.json();
+    const profile = await readApiResponse(res);
     setUser(profile);
     return profile;
   };

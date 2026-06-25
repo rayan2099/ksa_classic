@@ -2,12 +2,11 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
-import { createServer as createViteServer } from 'vite';
 import cookieParser from 'cookie-parser';
 import multer from 'multer';
 import sharp from 'sharp';
 import { createClient } from '@supabase/supabase-js';
-import { Car, Profile, Message, MessageReply, DbState } from './src/types.js';
+import type { Car, Profile, Message, MessageReply, DbState } from './src/types.ts';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -1690,6 +1689,7 @@ app.use('/uploads', express.static(UPLOADS_DIR));
 
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
