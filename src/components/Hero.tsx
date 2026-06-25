@@ -43,7 +43,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
             alt="Vintage Classic Car"
             style={isMobile ? {
               objectFit: 'contain',
-              objectPosition: 'center',
+              objectPosition: 'center top',
               width: '100%',
               height: '100%',
               position: 'absolute',
@@ -78,7 +78,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
           <div 
             style={isMobile ? {
               position: 'absolute',
-              top: '10%',
+              top: '15%',
               left: '0',
               right: '0',
               padding: '0 20px',
@@ -151,33 +151,6 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
                   Discover collector cars and restoration projects, from carefully preserved classics to promising builds ready for their next chapter.
                 </p>
 
-                {/* Browse Inventory Button */}
-                <div>
-                  <button
-                    onClick={onBrowseClick}
-                    id="hero-cta-browse"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      backgroundColor: '#C9A84C',
-                      color: '#111111',
-                      fontWeight: '800',
-                      fontSize: '12px',
-                      letterSpacing: '0.12em',
-                      padding: '13px 24px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      textTransform: 'uppercase',
-                      whiteSpace: 'nowrap',
-                      width: 'fit-content'
-                    }}
-                    className="rounded-sm"
-                  >
-                    <span>Browse Inventory</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
               </div>
             ) : (
               <div className="space-y-6">
@@ -268,6 +241,19 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
           )}
         </div>
 
+        {isMobile && (
+          <div className="absolute inset-x-0 bottom-[150px] z-20 flex justify-center px-5">
+            <button
+              onClick={onBrowseClick}
+              id="hero-cta-browse"
+              className="w-full max-w-[270px] bg-[#C9A84C] hover:bg-[#B09038] text-neutral-950 font-heading font-bold text-xs uppercase tracking-widest py-4 px-7 rounded-sm transition-colors flex items-center justify-center gap-2.5 border border-[#C9A84C] shadow-xl shadow-black/40"
+            >
+              <span>Browse Inventory</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Subtle Bottom Accent Bar */}
         <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent/40 to-transparent"></div>
       </div>
@@ -276,9 +262,11 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
         /* Visual Marketplace Metrics - Mobile (completely below the hero container, separate block) */
         <div
           style={{
-            display: 'flex',
-            flexDirection: 'row',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
             width: '100%',
+            boxSizing: 'border-box',
+            overflow: 'hidden',
             backgroundColor: '#1A1A1A',
             borderTop: '2px solid #C9A84C'
           }}
@@ -286,12 +274,8 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
           {/* Metric 1 */}
           <div
             style={{
-              width: '25%',
-              minWidth: '25%',
-              maxWidth: '25%',
-              flexShrink: 0,
-              flexGrow: 0,
-              padding: '14px 8px',
+              minWidth: 0,
+              padding: '14px 6px',
               borderRight: '1px solid rgba(255,255,255,0.1)',
               display: 'flex',
               flexDirection: 'column',
@@ -311,12 +295,8 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
           {/* Metric 2 */}
           <div
             style={{
-              width: '25%',
-              minWidth: '25%',
-              maxWidth: '25%',
-              flexShrink: 0,
-              flexGrow: 0,
-              padding: '14px 8px',
+              minWidth: 0,
+              padding: '14px 6px',
               borderRight: '1px solid rgba(255,255,255,0.1)',
               display: 'flex',
               flexDirection: 'column',
@@ -336,12 +316,8 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
           {/* Metric 3 */}
           <div
             style={{
-              width: '25%',
-              minWidth: '25%',
-              maxWidth: '25%',
-              flexShrink: 0,
-              flexGrow: 0,
-              padding: '14px 8px',
+              minWidth: 0,
+              padding: '14px 6px',
               borderRight: '1px solid rgba(255,255,255,0.1)',
               display: 'flex',
               flexDirection: 'column',
@@ -361,12 +337,8 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
           {/* Metric 4 */}
           <div
             style={{
-              width: '25%',
-              minWidth: '25%',
-              maxWidth: '25%',
-              flexShrink: 0,
-              flexGrow: 0,
-              padding: '14px 8px',
+              minWidth: 0,
+              padding: '14px 6px',
               display: 'flex',
               flexDirection: 'column',
               gap: '4px',
@@ -377,9 +349,9 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
               <div style={{ padding: '2px', backgroundColor: 'rgba(201, 168, 76, 0.1)', borderRadius: '2px', color: '#C9A84C', display: 'flex', alignItems: 'center' }}>
                 <MapPin style={{ width: '14px', height: '14px' }} />
               </div>
-              <span style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>CAN &amp; US</span>
+              <span style={{ fontSize: '12px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>CAN/US</span>
             </div>
-            <p style={{ fontSize: '7px', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Canada &amp; US</p>
+            <p style={{ fontSize: '7px', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Coverage</p>
           </div>
         </div>
       )}

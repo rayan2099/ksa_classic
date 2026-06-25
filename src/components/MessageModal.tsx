@@ -31,8 +31,11 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
     setIsSubmitting(true);
     try {
       const payload = {
-        car_id: car.id,
-        ...data
+        car_id: car.id.startsWith('mock-') ? null : car.id,
+        ...data,
+        message: car.id.startsWith('mock-')
+          ? `[Vehicle Inquiry: ${car.title}] ${data.message}`
+          : data.message
       };
 
       const res = await fetch('/api/messages', {

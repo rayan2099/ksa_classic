@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CarCard } from './CarCard.js';
 import { Car } from '../types.js';
+import { mockCars } from '../data/mockCars.js';
 import { Search, SlidersHorizontal, RefreshCw, AlertCircle } from 'lucide-react';
 
 interface InventoryProps {
@@ -20,25 +21,25 @@ export const Inventory: React.FC<InventoryProps> = ({
 }) => {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState('');
+  const [showingMockCars, setShowingMockCars] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMake, setSelectedMake] = useState('all');
 
   const fetchCars = async () => {
     setLoading(true);
-    setLoadError('');
     try {
       const res = await fetch('/api/cars');
       if (!res.ok) {
-        const result = await res.json().catch(() => null);
-        throw new Error(result?.error || 'The showroom inventory is temporarily unavailable.');
+        throw new Error('Inventory API unavailable.');
       }
-      const data = await res.json();
-      setCars(data);
+      const data = await res.json() as Car[];
+      setCars(data.length > 0 ? data : mockCars);
+      setShowingMockCars(data.length === 0);
     } catch (err) {
       console.error('Error fetching cars', err);
-      setLoadError(err instanceof Error ? err.message : 'The showroom inventory is temporarily unavailable.');
+      setCars(mockCars);
+      setShowingMockCars(true);
     } finally {
       setLoading(false);
     }
@@ -100,6 +101,11 @@ export const Inventory: React.FC<InventoryProps> = ({
             Current Inventory
           </h2>
           <div className="h-1 w-12 bg-accent mx-auto mt-4"></div>
+          {showingMockCars && (
+            <p className="mt-4 text-[10px] uppercase tracking-widest font-heading font-bold text-neutral-400">
+              Preview Collection
+            </p>
+          )}
         </div>
 
         {/* Tab Controls & Search Filter Controls */}
@@ -198,22 +204,6 @@ export const Inventory: React.FC<InventoryProps> = ({
                 <div className="h-8 bg-neutral-100 rounded-sm animate-pulse w-full"></div>
               </div>
             ))}
-          </div>
-        ) : loadError ? (
-          <div className="text-center py-16 bg-white border border-neutral-200 rounded-sm shadow-sm max-w-2xl mx-auto px-6">
-            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h3 className="font-heading text-lg font-bold text-neutral-800 uppercase tracking-tight">
-              Showroom temporarily unavailable
-            </h3>
-            <p className="text-xs text-neutral-500 font-sans mt-2 max-w-md mx-auto">
-              {loadError}
-            </p>
-            <button
-              onClick={fetchCars}
-              className="mt-6 text-xs font-heading font-bold uppercase tracking-wider text-accent border border-accent hover:bg-accent hover:text-neutral-950 px-5 py-2.5 rounded-sm transition-all"
-            >
-              Try Again
-            </button>
           </div>
         ) : filteredCars.length === 0 ? (
           /* Empty State */
