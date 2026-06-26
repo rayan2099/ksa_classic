@@ -15,6 +15,10 @@ const allowLocalFallback = !isProduction;
 app.disable('x-powered-by');
 app.use(express.json());
 app.use(cookieParser());
+app.use('/api', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
 
 // Ensure directories exist
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -44,6 +48,7 @@ const resendFromEmail = process.env.RESEND_FROM_EMAIL || '';
 const showroomEmail = process.env.SHOWROOM_EMAIL || 'info@ksaclassics.online';
 const isEmailActive = !!(resendApiKey && resendFromEmail);
 const inquiryAttempts = new Map<string, number[]>();
+const loginAttempts = new Map<string, number[]>();
 const supabaseClientOptions = {
   auth: {
     persistSession: false,
@@ -184,16 +189,30 @@ const buildAdminReplyEmail = (buyerName: string, carTitle: string, reply: string
 
 const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-const isInquiryRateLimited = (req: express.Request) => {
+const getClientIp = (req: express.Request) => {
   const forwardedFor = req.headers['x-forwarded-for'];
-  const clientIp = (Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor?.split(',')[0])
+  return (Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor?.split(',')[0])
     || req.ip
     || 'unknown';
+};
+
+const isInquiryRateLimited = (req: express.Request) => {
+  const clientIp = getClientIp(req);
   const now = Date.now();
   const windowStart = now - 10 * 60 * 1000;
   const recentAttempts = (inquiryAttempts.get(clientIp) || []).filter(timestamp => timestamp > windowStart);
   if (recentAttempts.length >= 5) return true;
   inquiryAttempts.set(clientIp, [...recentAttempts, now]);
+  return false;
+};
+
+const isLoginRateLimited = (req: express.Request) => {
+  const clientIp = getClientIp(req);
+  const now = Date.now();
+  const windowStart = now - 15 * 60 * 1000;
+  const recentAttempts = (loginAttempts.get(clientIp) || []).filter(timestamp => timestamp > windowStart);
+  if (recentAttempts.length >= 10) return true;
+  loginAttempts.set(clientIp, [...recentAttempts, now]);
   return false;
 };
 
@@ -778,8 +797,8 @@ app.delete('/api/cars/:id', async (req, res) => {
 app.post('/api/messages', async (req, res) => {
   const { car_id, buyer_name, buyer_email, buyer_phone, message } = req.body;
 
-  if (!buyer_name || !message) {
-    return res.status(400).json({ error: 'Required fields: buyer_name, message' });
+  if (!buyer_name || !buyer_email || !message) {
+    return res.status(400).json({ error: 'Name, email address, and message are required.' });
   }
   if (String(buyer_name).trim().length > 120 || String(message).trim().length > 5000) {
     return res.status(400).json({ error: 'Inquiry content exceeds the allowed length.' });
@@ -1477,6 +1496,9 @@ app.post('/api/auth/login', async (req, res) => {
 
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required.' });
+  }
+  if (isLoginRateLimited(req)) {
+    return res.status(429).json({ error: 'Too many login attempts. Please wait 15 minutes and try again.' });
   }
 
   try {

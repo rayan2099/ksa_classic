@@ -195,10 +195,10 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
                   <div className="p-0.5 sm:p-1 bg-[#C9A84C]/10 rounded-sm text-[#C9A84C] shrink-0">
                     <Trophy className="w-[14px] h-[14px] sm:w-5 sm:h-5" />
                   </div>
-                  <span className="text-[15px] sm:text-3xl font-bold font-heading text-white tracking-tight leading-none">120+</span>
+                  <span className="text-[15px] sm:text-2xl font-bold font-heading text-white tracking-tight leading-none">Curated</span>
                 </div>
-                <p className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-300 font-heading font-bold whitespace-nowrap overflow-hidden text-ellipsis">Pristine Classics</p>
-                <p className="hidden sm:block text-[10px] text-neutral-500 font-sans whitespace-nowrap overflow-hidden text-ellipsis">Concours & survivor condition</p>
+                <p className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-300 font-heading font-bold whitespace-nowrap overflow-hidden text-ellipsis">Classic Inventory</p>
+                <p className="hidden sm:block text-[10px] text-neutral-500 font-sans whitespace-nowrap overflow-hidden text-ellipsis">Collector-focused vehicles</p>
               </div>
 
               {/* Metric 2 */}
@@ -207,10 +207,10 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
                   <div className="p-0.5 sm:p-1 bg-[#C9A84C]/10 rounded-sm text-[#C9A84C] shrink-0">
                     <Wrench className="w-[14px] h-[14px] sm:w-5 sm:h-5" />
                   </div>
-                  <span className="text-[15px] sm:text-3xl font-bold font-heading text-white tracking-tight leading-none">85+</span>
+                  <span className="text-[15px] sm:text-2xl font-bold font-heading text-white tracking-tight leading-none">Restoration</span>
                 </div>
-                <p className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-300 font-heading font-bold whitespace-nowrap overflow-hidden text-ellipsis">Project Builds</p>
-                <p className="hidden sm:block text-[10px] text-neutral-500 font-sans whitespace-nowrap overflow-hidden text-ellipsis">Barn-finds & restorations</p>
+                <p className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-300 font-heading font-bold whitespace-nowrap overflow-hidden text-ellipsis">Project Cars</p>
+                <p className="hidden sm:block text-[10px] text-neutral-500 font-sans whitespace-nowrap overflow-hidden text-ellipsis">Builds at varied stages</p>
               </div>
 
               {/* Metric 3 */}
@@ -219,10 +219,10 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
                   <div className="p-0.5 sm:p-1 bg-[#C9A84C]/10 rounded-sm text-[#C9A84C] shrink-0">
                     <ShieldCheck className="w-[14px] h-[14px] sm:w-5 sm:h-5" />
                   </div>
-                  <span className="text-[15px] sm:text-3xl font-bold font-heading text-white tracking-tight leading-none">100%</span>
+                  <span className="text-[15px] sm:text-2xl font-bold font-heading text-white tracking-tight leading-none">Reviewed</span>
                 </div>
-                <p className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-300 font-heading font-bold whitespace-nowrap overflow-hidden text-ellipsis">Verified Listings</p>
-                <p className="hidden sm:block text-[10px] text-neutral-500 font-sans whitespace-nowrap overflow-hidden text-ellipsis">Reviewed vehicle details</p>
+                <p className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-300 font-heading font-bold whitespace-nowrap overflow-hidden text-ellipsis">Listing Details</p>
+                <p className="hidden sm:block text-[10px] text-neutral-500 font-sans whitespace-nowrap overflow-hidden text-ellipsis">Clear vehicle information</p>
               </div>
 
               {/* Metric 4 */}
@@ -231,10 +231,10 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
                   <div className="p-0.5 sm:p-1 bg-[#C9A84C]/10 rounded-sm text-[#C9A84C] shrink-0">
                     <MapPin className="w-[14px] h-[14px] sm:w-5 sm:h-5" />
                   </div>
-                  <span className="text-[15px] sm:text-3xl font-bold font-heading text-white tracking-tight leading-none">Canada &amp; US</span>
+                  <span className="text-[15px] sm:text-2xl font-bold font-heading text-white tracking-tight leading-none">By Appointment</span>
                 </div>
-                <p className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-300 font-heading font-bold whitespace-nowrap overflow-hidden text-ellipsis">Canada &amp; US Wide</p>
-                <p className="hidden sm:block text-[10px] text-neutral-500 font-sans whitespace-nowrap overflow-hidden text-ellipsis">Viewings &amp; transport support</p>
+                <p className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-300 font-heading font-bold whitespace-nowrap overflow-hidden text-ellipsis">Private Viewings</p>
+                <p className="hidden sm:block text-[10px] text-neutral-500 font-sans whitespace-nowrap overflow-hidden text-ellipsis">Flexible scheduling support</p>
               </div>
             </div>
           )}
@@ -286,9 +286,9 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
               <div style={{ padding: '2px', backgroundColor: 'rgba(201, 168, 76, 0.1)', borderRadius: '2px', color: '#C9A84C', display: 'flex', alignItems: 'center' }}>
                 <Trophy style={{ width: '14px', height: '14px' }} />
               </div>
-              <span style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>120+</span>
+              <span style={{ fontSize: '11px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>Curated</span>
             </div>
-            <p style={{ fontSize: '7px', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Pristine</p>
+            <p style={{ fontSize: '7px', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Classics</p>
           </div>
 
           {/* Metric 2 */}
@@ -307,7 +307,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
               <div style={{ padding: '2px', backgroundColor: 'rgba(201, 168, 76, 0.1)', borderRadius: '2px', color: '#C9A84C', display: 'flex', alignItems: 'center' }}>
                 <Wrench style={{ width: '14px', height: '14px' }} />
               </div>
-              <span style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>85+</span>
+              <span style={{ fontSize: '11px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>Restoration</span>
             </div>
             <p style={{ fontSize: '7px', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Projects</p>
           </div>
@@ -328,7 +328,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
               <div style={{ padding: '2px', backgroundColor: 'rgba(201, 168, 76, 0.1)', borderRadius: '2px', color: '#C9A84C', display: 'flex', alignItems: 'center' }}>
                 <ShieldCheck style={{ width: '14px', height: '14px' }} />
               </div>
-              <span style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>100%</span>
+              <span style={{ fontSize: '11px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>Reviewed</span>
             </div>
             <p style={{ fontSize: '7px', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Verified</p>
           </div>
@@ -348,9 +348,9 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
               <div style={{ padding: '2px', backgroundColor: 'rgba(201, 168, 76, 0.1)', borderRadius: '2px', color: '#C9A84C', display: 'flex', alignItems: 'center' }}>
                 <MapPin style={{ width: '14px', height: '14px' }} />
               </div>
-              <span style={{ fontSize: '12px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>CAN/US</span>
+              <span style={{ fontSize: '11px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>Private</span>
             </div>
-            <p style={{ fontSize: '7px', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Coverage</p>
+            <p style={{ fontSize: '7px', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Viewings</p>
           </div>
         </div>
       )}

@@ -57,6 +57,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
         <button
           onClick={onClose}
           id="close-detail-modal-btn"
+          aria-label="Close vehicle details"
           className="absolute top-4 right-4 z-30 bg-neutral-900/85 hover:bg-neutral-800 text-white p-2 rounded-full transition-colors border border-neutral-700 shadow-lg"
         >
           <X className="w-5 h-5" />
@@ -77,12 +78,14 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
               <>
                 <button
                   onClick={prevImage}
+                  aria-label={`Previous image of ${car.title}`}
                   className="absolute left-3 bg-black/50 hover:bg-black/75 text-white p-1.5 rounded-full transition-colors z-20"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
                   onClick={nextImage}
+                  aria-label={`Next image of ${car.title}`}
                   className="absolute right-3 bg-black/50 hover:bg-black/75 text-white p-1.5 rounded-full transition-colors z-20"
                 >
                   <ChevronRight className="w-5 h-5" />
@@ -110,6 +113,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
                 <button
                   key={idx}
                   onClick={() => setActiveImageIndex(idx)}
+                  aria-label={`Show image ${idx + 1} of ${car.title}`}
                   className={`relative flex-shrink-0 w-16 h-12 rounded-sm overflow-hidden border-2 transition-all ${
                     idx === activeImageIndex ? 'border-accent opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
                   }`}

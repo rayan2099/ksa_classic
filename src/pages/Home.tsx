@@ -192,7 +192,13 @@ export const Home: React.FC = () => {
                     <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-neutral-500" />
                     <input
                       type="email"
-                      {...register('email', { required: 'Email is required' })}
+                      {...register('email', {
+                        required: 'Email is required',
+                        pattern: {
+                          value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                          message: 'Enter a valid email address'
+                        }
+                      })}
                       placeholder="e.g. robert@example.com"
                       className={`w-full bg-neutral-900 border ${
                         errors.email ? 'border-red-500 focus:border-red-500' : 'border-neutral-800 focus:border-accent'
@@ -246,6 +252,9 @@ export const Home: React.FC = () => {
                   <Send className="w-3.5 h-3.5" />
                   <span>Send Inquiry</span>
                 </button>
+                <p className="text-[10px] text-center text-neutral-500 leading-relaxed">
+                  By submitting, you agree that KSA Classics may contact you about this inquiry.
+                </p>
               </form>
             </div>
           </div>

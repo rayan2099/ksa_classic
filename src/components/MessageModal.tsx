@@ -139,18 +139,29 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
             {/* Email */}
             <div>
               <label className="block text-[10px] font-heading uppercase font-bold text-neutral-500 tracking-wider mb-1.5">
-                Email Address
+                Email Address *
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 w-4 h-4 text-neutral-400" />
                 <input
                   type="email"
-                  {...register('buyer_email')}
+                  {...register('buyer_email', {
+                    required: 'Email is required so our showroom team can reply.',
+                    pattern: {
+                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      message: 'Enter a valid email address.'
+                    }
+                  })}
                   id="message-buyer-email"
                   placeholder="e.g. robert@example.com"
-                  className="w-full bg-neutral-50 border border-neutral-200 focus:border-accent rounded-sm py-2.5 pl-10 pr-4 text-xs font-sans outline-none transition-colors"
+                  className={`w-full bg-neutral-50 border ${
+                    errors.buyer_email ? 'border-red-500 focus:border-red-500' : 'border-neutral-200 focus:border-accent'
+                  } rounded-sm py-2.5 pl-10 pr-4 text-xs font-sans outline-none transition-colors`}
                 />
               </div>
+              {errors.buyer_email && (
+                <p className="text-[10px] text-red-500 mt-1">{errors.buyer_email.message}</p>
+              )}
             </div>
 
             {/* Phone */}
@@ -211,6 +222,9 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
               </>
             )}
           </button>
+          <p className="text-[10px] text-center text-neutral-400 leading-relaxed">
+            By submitting, you agree that KSA Classics may contact you about this inquiry.
+          </p>
         </form>
       </div>
     </div>

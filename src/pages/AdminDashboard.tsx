@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { Car, Profile, Message } from '../types.js';
 import { AdminSettings } from '../components/AdminSettings.js';
+import { mockCars } from '../data/mockCars.js';
 
 type ActiveTab = 'dashboard' | 'cars' | 'messages' | 'users' | 'settings';
 
@@ -48,6 +49,7 @@ export const AdminDashboard: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
+  const [isImportingPreview, setIsImportingPreview] = useState(false);
 
   // Car Form Modal States
   const [isCarModalOpen, setIsCarModalOpen] = useState(false);
@@ -228,6 +230,50 @@ export const AdminDashboard: React.FC = () => {
       }
     } catch (err) {
       toast.error('Could not delete listing.');
+    }
+  };
+
+  const handleImportPreviewCollection = async () => {
+    setIsImportingPreview(true);
+    let importedCount = 0;
+
+    try {
+      for (const car of mockCars) {
+        const res = await fetch('/api/cars', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: car.title,
+            make: car.make,
+            model: car.model,
+            year: car.year,
+            price: car.price,
+            mileage: car.mileage,
+            location: car.location,
+            description: car.description,
+            condition: car.condition,
+            type: car.type,
+            images: car.images,
+            contact_phone: car.contact_phone
+          })
+        });
+
+        if (!res.ok) {
+          const error = await res.json().catch(() => null);
+          throw new Error(error?.error || 'Could not import the preview collection.');
+        }
+        importedCount += 1;
+      }
+
+      toast.success(`${importedCount} preview listings added to the showroom.`);
+      await loadAllData();
+    } catch (err: any) {
+      if (importedCount > 0) {
+        await loadAllData();
+      }
+      toast.error(err.message || 'Could not import the preview collection.');
+    } finally {
+      setIsImportingPreview(false);
     }
   };
 
@@ -930,17 +976,34 @@ export const AdminDashboard: React.FC = () => {
                   </div>
 
                   {cars.length === 0 ? (
-                    <div className="text-center py-20 bg-neutral-950 border border-neutral-800 rounded-sm">
+                    <div className="text-center py-16 px-6 bg-neutral-950 border border-neutral-800 rounded-sm">
                       <CarIcon className="w-12 h-12 text-neutral-800 mx-auto mb-4" />
                       <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-neutral-400">
                         No vehicles listed
                       </h3>
-                      <button
-                        onClick={handleOpenAddCar}
-                        className="mt-4 text-xs font-heading font-bold uppercase text-accent hover:text-white border border-accent hover:bg-accent/10 px-4 py-2 rounded-sm"
-                      >
-                        Add First Listing
-                      </button>
+                      <p className="text-xs text-neutral-600 mt-2 max-w-md mx-auto">
+                        Create the first listing manually or import the polished preview collection for a client demonstration.
+                      </p>
+                      <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+                        <button
+                          onClick={handleOpenAddCar}
+                          className="w-full sm:w-auto text-xs font-heading font-bold uppercase text-accent hover:text-white border border-accent hover:bg-accent/10 px-4 py-2.5 rounded-sm"
+                        >
+                          Add First Listing
+                        </button>
+                        <button
+                          onClick={handleImportPreviewCollection}
+                          disabled={isImportingPreview}
+                          className="w-full sm:w-auto text-xs font-heading font-bold uppercase text-neutral-950 bg-accent hover:bg-accent-hover disabled:opacity-60 disabled:cursor-not-allowed border border-accent px-4 py-2.5 rounded-sm flex items-center justify-center gap-2"
+                        >
+                          {isImportingPreview ? (
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <FileCheck className="w-3.5 h-3.5" />
+                          )}
+                          <span>{isImportingPreview ? 'Importing...' : 'Import Preview Collection'}</span>
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <>
