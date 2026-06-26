@@ -21,7 +21,6 @@ export const Inventory: React.FC<InventoryProps> = ({
 }) => {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showingMockCars, setShowingMockCars] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMake, setSelectedMake] = useState('all');
@@ -35,11 +34,9 @@ export const Inventory: React.FC<InventoryProps> = ({
       }
       const data = await res.json() as Car[];
       setCars(data.length > 0 ? data : mockCars);
-      setShowingMockCars(data.length === 0);
     } catch (err) {
       console.error('Error fetching cars', err);
       setCars(mockCars);
-      setShowingMockCars(true);
     } finally {
       setLoading(false);
     }
@@ -101,11 +98,6 @@ export const Inventory: React.FC<InventoryProps> = ({
             Current Inventory
           </h2>
           <div className="h-1 w-12 bg-accent mx-auto mt-4"></div>
-          {showingMockCars && (
-            <p className="mt-4 text-[10px] uppercase tracking-widest font-heading font-bold text-neutral-400">
-              Preview Collection
-            </p>
-          )}
         </div>
 
         {/* Tab Controls & Search Filter Controls */}
