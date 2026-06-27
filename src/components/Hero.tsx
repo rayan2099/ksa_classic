@@ -147,7 +147,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
                   }}
                   className="font-sans tracking-wide"
                 >
-                  Discover collector cars and restoration projects, from carefully preserved classics to promising builds ready for their next chapter.
+                  Explore classic and collectible cars, from carefully preserved icons to restoration projects selected for serious enthusiasts and collectors.
                 </p>
 
               </div>
@@ -168,7 +168,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
 
                 {/* Responsive Description */}
                 <p className="max-w-2xl text-[10px] sm:text-base md:text-lg text-neutral-300 font-sans tracking-wide leading-relaxed">
-                  Discover collector cars and restoration projects, from carefully preserved classics to promising builds ready for their next chapter.
+                  Explore classic and collectible cars, from carefully preserved icons to restoration projects selected for serious enthusiasts and collectors.
                 </p>
 
                 {/* Action Call to Actions */}
