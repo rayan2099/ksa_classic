@@ -200,7 +200,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
                   className="flex-1 flex items-center justify-center space-x-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 py-3.5 rounded-sm text-xs font-heading font-bold uppercase tracking-wider transition-colors"
                 >
                   <Phone className="w-4 h-4 text-accent" />
-                  <span>Call Dealership</span>
+                  <span>Call</span>
                 </a>
               )}
 
