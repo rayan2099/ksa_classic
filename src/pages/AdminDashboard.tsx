@@ -1054,10 +1054,10 @@ export const AdminDashboard: React.FC = () => {
                                 </span>
                               </div>
                               <p className="font-heading font-bold text-accent mt-2">
-                                {new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(car.price)}
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(car.price)}
                               </p>
                               <p className="text-[10px] text-neutral-500 mt-1 break-words">
-                                {car.location || 'Location on request'} • {new Intl.NumberFormat('en-CA').format(car.mileage)} km
+                                {car.location || 'Location on request'} • {new Intl.NumberFormat('en-US').format(car.mileage)} km
                               </p>
                             </div>
                           </div>
@@ -1123,10 +1123,10 @@ export const AdminDashboard: React.FC = () => {
                                   </div>
                                 </td>
                                 <td className="py-4 px-6 font-heading font-bold text-accent">
-                                  {new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(car.price)}
+                                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(car.price)}
                                 </td>
                                 <td className="py-4 px-6 font-mono text-neutral-400">
-                                  {new Intl.NumberFormat('en-CA').format(car.mileage)} km
+                                  {new Intl.NumberFormat('en-US').format(car.mileage)} km
                                 </td>
                                 <td className="py-4 px-6">
                                   <span
@@ -1694,8 +1694,9 @@ export const AdminDashboard: React.FC = () => {
                     {...carRegister('type', { required: true })}
                     className="w-full bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm py-2.5 px-4 text-xs font-sans outline-none transition-colors cursor-pointer font-sans"
                   >
-                    <option value="classic">Classic Icon</option>
+                    <option value="classic">Collectible Car</option>
                     <option value="project">Restoration Project</option>
+                    <option value="motorbike">Motor Bike</option>
                   </select>
                 </div>
 

@@ -36,6 +36,9 @@ export const Home: React.FC = () => {
     } else if (sectionId === 'project') {
       inventoryRef.current?.scrollIntoView({ behavior: 'smooth' });
       setActiveSection('project');
+    } else if (sectionId === 'motorbike') {
+      inventoryRef.current?.scrollIntoView({ behavior: 'smooth' });
+      setActiveSection('motorbike');
     } else if (sectionId === 'sold') {
       inventoryRef.current?.scrollIntoView({ behavior: 'smooth' });
       setActiveSection('sold');
@@ -143,7 +146,7 @@ export const Home: React.FC = () => {
                   <Phone className="w-5 h-5 text-accent mr-4 flex-shrink-0 mt-1" />
                   <div>
                     <h4 className="font-heading font-bold text-xs uppercase text-neutral-200">Direct Contact</h4>
-                    <p className="text-xs text-neutral-400 mt-1">Contact details are shared when your viewing is confirmed</p>
+                    <p className="text-xs text-neutral-400 mt-1">+1 (604) 644-6632</p>
                   </div>
                 </div>
 

@@ -23,7 +23,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
       buyer_name: '',
       buyer_email: '',
       buyer_phone: '',
-      message: `Hi, I am interested in the ${car.title} listed for ${new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(car.price)}. Please let me know if it is still available and how I can arrange a viewing.`
+      message: `Hi, I am interested in the ${car.title} listed for ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(car.price)}. Please let me know if it is still available and how I can arrange a viewing.`
     }
   });
 

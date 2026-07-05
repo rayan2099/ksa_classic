@@ -110,13 +110,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onScrollToSection }) => {
                 onClick={() => handleNavClick('classic')}
                 className="font-heading text-[9px] sm:text-xs tracking-[0.03em] sm:tracking-wider text-neutral-300 hover:text-accent font-semibold uppercase transition-colors"
               >
-                Classics
+                Collectibles
               </button>
               <button
                 onClick={() => handleNavClick('project')}
                 className="font-heading text-[9px] sm:text-xs tracking-[0.03em] sm:tracking-wider text-neutral-300 hover:text-accent font-semibold uppercase transition-colors"
               >
                 Projects
+              </button>
+              <button
+                onClick={() => handleNavClick('motorbike')}
+                className="font-heading text-[9px] sm:text-xs tracking-[0.03em] sm:tracking-wider text-neutral-300 hover:text-accent font-semibold uppercase transition-colors"
+              >
+                Motor Bikes
               </button>
               <button
                 onClick={() => handleNavClick('sold')}
@@ -169,13 +175,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onScrollToSection }) => {
               onClick={() => handleNavClick('classic')}
               className="text-left font-heading text-sm tracking-wider text-neutral-200 hover:text-accent font-semibold uppercase transition-colors"
             >
-              Classics
+              Collectibles
             </button>
             <button
               onClick={() => handleNavClick('project')}
               className="text-left font-heading text-sm tracking-wider text-neutral-200 hover:text-accent font-semibold uppercase transition-colors"
             >
               Projects
+            </button>
+            <button
+              onClick={() => handleNavClick('motorbike')}
+              className="text-left font-heading text-sm tracking-wider text-neutral-200 hover:text-accent font-semibold uppercase transition-colors"
+            >
+              Motor Bikes
             </button>
             <button
               onClick={() => handleNavClick('sold')}

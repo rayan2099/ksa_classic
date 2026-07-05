@@ -42,6 +42,9 @@ browser database access is limited to reading showroom inventory.
 If `schema.sql` was installed before email support, run `002_resend_email.sql`
 once in the Supabase SQL Editor.
 
+If your schema was installed before motor bike listings were added, run
+`003_motorbike_type.sql` once in the Supabase SQL Editor.
+
 1. Create a Resend account and add your sending domain.
 2. Add the DNS records Resend provides and wait until the domain is verified.
 3. Create a Resend API key with sending access.

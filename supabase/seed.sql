@@ -23,7 +23,7 @@ values
     'https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&q=80&w=1600',
     'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&q=80&w=1600'
   ],
-  '+1 604-555-0199',
+  '+1 (604) 644-6632',
   now()
 ),
 (
@@ -41,7 +41,7 @@ values
   array[
     'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1600'
   ],
-  '+1 604-555-0199',
+  '+1 (604) 644-6632',
   now() - interval '1 day'
 ),
 (
@@ -59,8 +59,27 @@ values
   array[
     'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=1600'
   ],
-  '+1 604-555-0199',
+  '+1 (604) 644-6632',
   now() - interval '2 days'
+),
+(
+  '44444444-4444-4444-8444-444444444444',
+  '1975 BMW R90S',
+  'BMW',
+  'R90S',
+  1975,
+  28000,
+  26000,
+  'Vancouver, BC',
+  'Collector-grade R90S finished in Daytona Orange with documented service history and preserved original details.',
+  'available',
+  'motorbike',
+  array[
+    'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&q=80&w=1600',
+    'https://images.unsplash.com/photo-1558980664-10e7170b5df9?auto=format&fit=crop&q=80&w=1600'
+  ],
+  '+1 (604) 644-6632',
+  now() - interval '3 days'
 )
 on conflict (id) do update
 set title = excluded.title,
@@ -83,10 +102,9 @@ select
   '11111111-1111-4111-8111-111111111111',
   'John Doe',
   'john.doe@example.com',
-  '604-555-9011',
+  '+1 (604) 644-6632',
   'Is the 1967 Corvette still available? I would like to schedule a private viewing.',
   false
 where not exists (
   select 1 from public.messages where buyer_email = 'john.doe@example.com'
 );
-

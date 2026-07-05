@@ -11,7 +11,7 @@ interface InventoryProps {
   activeSection?: string;
 }
 
-type TabType = 'all' | 'classic' | 'project' | 'sold';
+type TabType = 'all' | 'classic' | 'project' | 'motorbike' | 'sold';
 type PriceRange = 'all' | 'under-50000' | '50000-150000' | '150000-300000' | 'over-300000';
 type YearRange = 'all' | 'pre-1960' | '1960-1969' | '1970-1979' | '1980-plus';
 type AvailabilityFilter = 'all' | 'new_arrival' | 'available' | 'sold';
@@ -58,6 +58,8 @@ export const Inventory: React.FC<InventoryProps> = ({
       setActiveTab('classic');
     } else if (activeSection === 'project') {
       setActiveTab('project');
+    } else if (activeSection === 'motorbike') {
+      setActiveTab('motorbike');
     } else if (activeSection === 'sold') {
       setActiveTab('sold');
     } else {
@@ -110,14 +112,16 @@ export const Inventory: React.FC<InventoryProps> = ({
   // Filters logic:
   // Tab Filters:
   // 'all' -> non-sold cars
-  // 'classic' -> available classic cars
+  // 'classic' -> available collectible cars
   // 'project' -> available project cars
+  // 'motorbike' -> available motor bikes
   // 'sold' -> recently sold cars
   const filteredCars = cars.filter((car) => {
     // Tab Filter
     if (activeTab === 'all' && selectedAvailability !== 'sold' && car.condition === 'sold') return false;
     if (activeTab === 'classic' && (car.condition === 'sold' || car.type !== 'classic')) return false;
     if (activeTab === 'project' && (car.condition === 'sold' || car.type !== 'project')) return false;
+    if (activeTab === 'motorbike' && (car.condition === 'sold' || car.type !== 'motorbike')) return false;
     if (activeTab === 'sold' && car.condition !== 'sold') return false;
 
     // Search query
@@ -178,7 +182,7 @@ export const Inventory: React.FC<InventoryProps> = ({
                   : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
-              Classic Icons
+              Collectibles
             </button>
             <button
               onClick={() => setActiveTab('project')}
@@ -189,6 +193,16 @@ export const Inventory: React.FC<InventoryProps> = ({
               }`}
             >
               Project Builds
+            </button>
+            <button
+              onClick={() => setActiveTab('motorbike')}
+              className={`px-4 py-2.5 rounded-sm text-xs uppercase tracking-wider font-heading font-bold whitespace-nowrap transition-all duration-200 ${
+                activeTab === 'motorbike'
+                  ? 'bg-neutral-900 text-white shadow-sm'
+                  : 'text-neutral-500 hover:text-neutral-900'
+              }`}
+            >
+              Motor Bikes
             </button>
             <button
               onClick={() => setActiveTab('sold')}

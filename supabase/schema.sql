@@ -37,7 +37,7 @@ create table if not exists public.cars (
   condition text not null default 'available'
     check (condition in ('new_arrival', 'available', 'sold')),
   type text not null default 'classic'
-    check (type in ('classic', 'project')),
+    check (type in ('classic', 'project', 'motorbike')),
   images text[] not null default '{}',
   contact_phone text not null default '',
   created_by uuid references public.profiles(id) on delete set null,

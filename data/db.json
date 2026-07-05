@@ -9,14 +9,14 @@
       "price": 129000,
       "mileage": 45000,
       "location": "Vancouver, BC",
-      "description": "Stunning numbers-matching 1967 Stingray in Tuxedo Black. Features a 427/435hp V8 engine with a 4-speed manual transmission. Fully restored to absolute concours standards. A true classic collector's dream.",
+      "description": "Stunning numbers-matching 1967 Stingray in Tuxedo Black. Features a 427/435hp V8 engine with a 4-speed manual transmission. Fully restored to absolute concours standards. A true collectible icon.",
       "condition": "available",
       "images": [
         "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1200",
         "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&q=80&w=1200",
         "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&q=80&w=1200"
       ],
-      "contact_phone": "+1 604-555-0199",
+      "contact_phone": "+1 (604) 644-6632",
       "created_at": "2026-06-23T19:37:58.420Z",
       "type": "classic"
     },
@@ -34,7 +34,7 @@
       "images": [
         "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1200"
       ],
-      "contact_phone": "+1 604-555-0199",
+      "contact_phone": "+1 (604) 644-6632",
       "created_at": "2026-06-22T19:37:58.420Z",
       "type": "classic"
     },
@@ -52,7 +52,7 @@
       "images": [
         "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=1200"
       ],
-      "contact_phone": "+1 604-555-0199",
+      "contact_phone": "+1 (604) 644-6632",
       "created_at": "2026-06-21T19:37:58.420Z",
       "type": "classic"
     },
@@ -70,7 +70,7 @@
       "images": [
         "https://images.unsplash.com/photo-1612466285769-ac9380c5780d?auto=format&fit=crop&q=80&w=1200"
       ],
-      "contact_phone": "+1 604-555-0199",
+      "contact_phone": "+1 (604) 644-6632",
       "created_at": "2026-06-20T19:37:58.420Z",
       "type": "classic"
     },
@@ -89,7 +89,7 @@
       "images": [
         "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=1200"
       ],
-      "contact_phone": "+1 604-555-0199",
+      "contact_phone": "+1 (604) 644-6632",
       "created_at": "2026-06-19T19:44:10.066Z"
     },
     {
@@ -107,7 +107,7 @@
       "images": [
         "https://images.unsplash.com/photo-1616422285623-13ff0162193c?auto=format&fit=crop&q=80&w=1200"
       ],
-      "contact_phone": "+1 604-555-0199",
+      "contact_phone": "+1 (604) 644-6632",
       "created_at": "2026-06-18T19:44:10.066Z"
     },
     {
@@ -125,8 +125,27 @@
       "images": [
         "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=1200"
       ],
-      "contact_phone": "+1 604-555-0199",
+      "contact_phone": "+1 (604) 644-6632",
       "created_at": "2026-06-17T19:44:10.066Z"
+    },
+    {
+      "id": "car-id-8",
+      "title": "1975 BMW R90S",
+      "make": "BMW",
+      "model": "R90S",
+      "year": 1975,
+      "price": 28000,
+      "mileage": 26000,
+      "location": "Vancouver, BC",
+      "description": "Collector-grade BMW R90S finished in Daytona Orange. Matching numbers, documented service history, and carefully preserved original details make it a standout motor bike for serious collectors.",
+      "condition": "available",
+      "type": "motorbike",
+      "images": [
+        "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&q=80&w=1200",
+        "https://images.unsplash.com/photo-1558980664-10e7170b5df9?auto=format&fit=crop&q=80&w=1200"
+      ],
+      "contact_phone": "+1 (604) 644-6632",
+      "created_at": "2026-06-16T19:44:10.066Z"
     }
   ],
   "profiles": [
@@ -151,7 +170,7 @@
       "car_id": "car-id-1",
       "buyer_name": "John Doe",
       "buyer_email": "john.doe@example.com",
-      "buyer_phone": "604-555-9011",
+      "buyer_phone": "+1 (604) 644-6632",
       "message": "Hi, is this 1967 Corvette still available? I would like to schedule a private viewing this Saturday. I have my financing pre-arranged.",
       "is_read": false,
       "created_at": "2026-06-23T18:37:58.420Z"

@@ -9,7 +9,7 @@ export interface Car {
   location: string;
   description: string;
   condition: 'new_arrival' | 'available' | 'sold';
-  type?: 'classic' | 'project';
+  type?: 'classic' | 'project' | 'motorbike';
   images: string[];
   contact_phone?: string;
   created_at: string;

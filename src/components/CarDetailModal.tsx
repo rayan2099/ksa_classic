@@ -11,13 +11,13 @@ interface CarDetailModalProps {
 export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, onOpenInquiry }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  const formattedPrice = new Intl.NumberFormat('en-CA', {
+  const formattedPrice = new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CAD',
+    currency: 'USD',
     maximumFractionDigits: 0
   }).format(car.price);
 
-  const formattedMileage = new Intl.NumberFormat('en-CA').format(car.mileage) + ' km';
+  const formattedMileage = new Intl.NumberFormat('en-US').format(car.mileage) + ' km';
 
   const images = car.images && car.images.length > 0 
     ? car.images 
@@ -134,11 +134,13 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
               </span>
               {car.type && (
                 <span className={`text-[10px] font-bold font-heading px-2.5 py-0.5 uppercase tracking-wider rounded-sm ${
-                  car.type === 'project' 
-                    ? 'bg-amber-50 text-amber-800 border border-amber-200' 
+                  car.type === 'project'
+                    ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                    : car.type === 'motorbike'
+                    ? 'bg-sky-50 text-sky-800 border border-sky-200'
                     : 'bg-neutral-950 text-accent border border-neutral-800'
                 }`}>
-                  {car.type === 'project' ? 'Project Build' : 'Classic Icon'}
+                  {car.type === 'project' ? 'Project Build' : car.type === 'motorbike' ? 'Motor Bike' : 'Collectible Icon'}
                 </span>
               )}
               <span className="text-xs text-neutral-500 font-mono flex items-center">

@@ -40,7 +40,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
         <div className="absolute inset-0 z-0">
           <img
             src={isMobile ? classicCarSunsetMobileBg : classicCarSunsetBg}
-            alt="Vintage Classic Car"
+            alt="Collectible vehicle at sunset"
             style={isMobile ? {
               objectFit: 'contain',
               objectPosition: 'center top',
@@ -119,7 +119,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
                 >
                   <Sparkles className="w-3.5 h-3.5 text-[#C9A84C] animate-pulse" />
                   <span className="text-[8px] uppercase tracking-widest text-neutral-200 font-bold font-heading">
-                    Classic &amp; Project Car Marketplace
+                    Collectibles &amp; Specialty Automotive Marketplace
                   </span>
                 </div>
 
@@ -147,7 +147,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
                   }}
                   className="font-sans tracking-wide"
                 >
-                  Explore classic and collectible cars, from carefully preserved icons to restoration projects selected for serious enthusiasts and collectors.
+                  Explore collectible cars, motor bikes, and restoration projects selected for serious enthusiasts and collectors.
                 </p>
 
               </div>
@@ -157,7 +157,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
                 <div className="inline-flex items-center space-x-2 bg-neutral-900/80 backdrop-blur-md border border-[#C9A84C]/30 rounded-full px-4 py-1.5 shadow-lg shadow-black/35">
                   <Sparkles className="w-3.5 h-3.5 text-[#C9A84C] animate-pulse" />
                   <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-200 font-bold font-heading">
-                    Classic &amp; Project Car Marketplace
+                    Collectibles &amp; Specialty Automotive Marketplace
                   </span>
                 </div>
 
@@ -168,7 +168,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
 
                 {/* Responsive Description */}
                 <p className="max-w-2xl text-[10px] sm:text-base md:text-lg text-neutral-300 font-sans tracking-wide leading-relaxed">
-                  Explore classic and collectible cars, from carefully preserved icons to restoration projects selected for serious enthusiasts and collectors.
+                  Explore collectible cars, motor bikes, and restoration projects selected for serious enthusiasts and collectors.
                 </p>
 
                 {/* Action Call to Actions */}
@@ -197,7 +197,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
                   </div>
                   <span className="text-[15px] sm:text-2xl font-bold font-heading text-white tracking-tight leading-none">Curated</span>
                 </div>
-                <p className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-300 font-heading font-bold whitespace-nowrap overflow-hidden text-ellipsis">Classic Inventory</p>
+                <p className="text-[7px] sm:text-[10px] uppercase tracking-wider text-neutral-300 font-heading font-bold whitespace-nowrap overflow-hidden text-ellipsis">Collectibles</p>
                 <p className="hidden sm:block text-[10px] text-neutral-500 font-sans whitespace-nowrap overflow-hidden text-ellipsis">Collector-focused vehicles</p>
               </div>
 
@@ -288,7 +288,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
               </div>
               <span style={{ fontSize: '11px', fontWeight: '700', color: '#ffffff', lineHeight: '1', whiteSpace: 'nowrap' }}>Curated</span>
             </div>
-            <p style={{ fontSize: '7px', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Classics</p>
+            <p style={{ fontSize: '7px', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Collectibles</p>
           </div>
 
           {/* Metric 2 */}

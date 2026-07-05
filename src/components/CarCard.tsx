@@ -60,19 +60,19 @@ export const CarCard: React.FC<CarCardProps> = ({ car, onDetailClick, onMessageC
     onDetailClick(car);
   };
 
-  const formattedPrice = new Intl.NumberFormat('en-CA', {
+  const formattedPrice = new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'CAD',
+    currency: 'USD',
     maximumFractionDigits: 0
   }).format(car.price);
 
-  const formattedMileage = new Intl.NumberFormat('en-CA').format(car.mileage) + ' km';
+  const formattedMileage = new Intl.NumberFormat('en-US').format(car.mileage) + ' km';
 
   const shortDescription = car.description 
     ? car.description.length > 100 
       ? car.description.slice(0, 97) + '...'
       : car.description
-    : 'No description provided for this classic model.';
+    : 'No description provided for this collectible vehicle.';
 
   return (
     <div
@@ -165,11 +165,13 @@ export const CarCard: React.FC<CarCardProps> = ({ car, onDetailClick, onMessageC
               </span>
               {car.type && (
                 <span className={`text-[8px] font-heading font-bold uppercase px-1.5 py-0.5 rounded-sm ${
-                  car.type === 'project' 
-                    ? 'bg-amber-100 text-amber-800 border border-amber-200' 
+                  car.type === 'project'
+                    ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                    : car.type === 'motorbike'
+                    ? 'bg-sky-100 text-sky-800 border border-sky-200'
                     : 'bg-neutral-900 text-accent border border-neutral-800'
                 }`}>
-                  {car.type === 'project' ? 'Project' : 'Classic'}
+                  {car.type === 'project' ? 'Project' : car.type === 'motorbike' ? 'Motor Bike' : 'Collectible'}
                 </span>
               )}
             </div>

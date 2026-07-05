@@ -153,7 +153,7 @@ const emailShell = (content: string) => `
       </div>
       ${content}
       <div style="border-top:1px solid #333;margin-top:32px;padding-top:18px;color:#888;font-size:12px;line-height:1.6">
-        KSA Collection · Collector cars and restoration projects<br>
+        KSA Collection · Collectible cars, motor bikes, and restoration projects<br>
         Reply to this email to contact the showroom team.
       </div>
     </div>
@@ -245,7 +245,7 @@ const defaultCars: Car[] = [
     price: 129000,
     mileage: 45000,
     location: 'Vancouver, BC',
-    description: 'Stunning numbers-matching 1967 Stingray in Tuxedo Black. Features a 427/435hp V8 engine with a 4-speed manual transmission. Fully restored to absolute concours standards. A true classic collector\'s dream.',
+    description: 'Stunning numbers-matching 1967 Stingray in Tuxedo Black. Features a 427/435hp V8 engine with a 4-speed manual transmission. Fully restored to absolute concours standards. A true collectible icon.',
     condition: 'new_arrival',
     type: 'classic',
     images: [
@@ -253,7 +253,7 @@ const defaultCars: Car[] = [
       'https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&q=80&w=1200',
       'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&q=80&w=1200'
     ],
-    contact_phone: '+1 604-555-0199',
+    contact_phone: '+1 (604) 644-6632',
     created_at: new Date().toISOString()
   },
   {
@@ -269,7 +269,7 @@ const defaultCars: Car[] = [
     condition: 'available',
     type: 'classic',
     images: ['https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1200'],
-    contact_phone: '+1 604-555-0199',
+    contact_phone: '+1 (604) 644-6632',
     created_at: new Date(Date.now() - 86400000).toISOString()
   },
   {
@@ -285,7 +285,7 @@ const defaultCars: Car[] = [
     condition: 'available',
     type: 'classic',
     images: ['https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=1200'],
-    contact_phone: '+1 604-555-0199',
+    contact_phone: '+1 (604) 644-6632',
     created_at: new Date(Date.now() - 172800000).toISOString()
   },
   {
@@ -301,7 +301,7 @@ const defaultCars: Car[] = [
     condition: 'sold',
     type: 'classic',
     images: ['https://images.unsplash.com/photo-1612466285769-ac9380c5780d?auto=format&fit=crop&q=80&w=1200'],
-    contact_phone: '+1 604-555-0199',
+    contact_phone: '+1 (604) 644-6632',
     created_at: new Date(Date.now() - 259200000).toISOString()
   },
   {
@@ -317,7 +317,7 @@ const defaultCars: Car[] = [
     condition: 'available',
     type: 'project',
     images: ['https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=1200'],
-    contact_phone: '+1 604-555-0199',
+    contact_phone: '+1 (604) 644-6632',
     created_at: new Date(Date.now() - 345600000).toISOString()
   },
   {
@@ -333,7 +333,7 @@ const defaultCars: Car[] = [
     condition: 'new_arrival',
     type: 'project',
     images: ['https://images.unsplash.com/photo-1616422285623-13ff0162193c?auto=format&fit=crop&q=80&w=1200'],
-    contact_phone: '+1 604-555-0199',
+    contact_phone: '+1 (604) 644-6632',
     created_at: new Date(Date.now() - 432000000).toISOString()
   },
   {
@@ -349,8 +349,27 @@ const defaultCars: Car[] = [
     condition: 'available',
     type: 'project',
     images: ['https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=1200'],
-    contact_phone: '+1 604-555-0199',
+    contact_phone: '+1 (604) 644-6632',
     created_at: new Date(Date.now() - 518400000).toISOString()
+  },
+  {
+    id: 'car-id-8',
+    title: '1975 BMW R90S',
+    make: 'BMW',
+    model: 'R90S',
+    year: 1975,
+    price: 28000,
+    mileage: 26000,
+    location: 'Vancouver, BC',
+    description: 'Collector-grade BMW R90S finished in Daytona Orange. Matching numbers, documented service history, and carefully preserved original details make it a standout motor bike for serious collectors.',
+    condition: 'available',
+    type: 'motorbike',
+    images: [
+      'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&q=80&w=1200',
+      'https://images.unsplash.com/photo-1558980664-10e7170b5df9?auto=format&fit=crop&q=80&w=1200'
+    ],
+    contact_phone: '+1 (604) 644-6632',
+    created_at: new Date(Date.now() - 604800000).toISOString()
   }
 ];
 
@@ -360,7 +379,7 @@ const defaultMessages: Message[] = [
     car_id: 'car-id-1',
     buyer_name: 'John Doe',
     buyer_email: 'john.doe@example.com',
-    buyer_phone: '604-555-9011',
+    buyer_phone: '+1 (604) 644-6632',
     message: 'Hi, is this 1967 Corvette still available? I would like to schedule a private viewing this Saturday. I have my financing pre-arranged.',
     is_read: false,
     created_at: new Date(Date.now() - 3600000).toISOString()

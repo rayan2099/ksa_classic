@@ -31,7 +31,7 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
               </span>
             </Link>
             <p className="text-xs text-neutral-500 font-sans leading-relaxed">
-              A focused marketplace for collector cars and restoration projects, with clear listings and direct access to the showroom team.
+              Kingdom Speciality Automotive: a focused marketplace for collectible cars, motor bikes, and restoration projects with direct access to the showroom team.
             </p>
           </div>
 
@@ -54,7 +54,15 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
                   onClick={() => onScrollToSection?.('classic')}
                   className="hover:text-accent transition-colors text-left"
                 >
-                  Classic Cars
+                  Collectible Cars
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onScrollToSection?.('motorbike')}
+                  className="hover:text-accent transition-colors text-left"
+                >
+                  Motor Bikes
                 </button>
               </li>
               <li>
@@ -105,7 +113,9 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
               </li>
               <li className="flex items-center">
                 <Phone className="w-4 h-4 text-accent mr-2.5 flex-shrink-0" />
-                <span>Direct details provided after inquiry</span>
+                <a href="tel:+16046446632" className="hover:text-white transition-colors">
+                  +1 (604) 644-6632
+                </a>
               </li>
               <li className="flex items-center">
                 <Mail className="w-4 h-4 text-accent mr-2.5 flex-shrink-0" />
@@ -127,7 +137,7 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
               Employee Access Portal
             </Link>
             <span>•</span>
-            <span className="text-neutral-700">Collector cars & restoration projects</span>
+            <span className="text-neutral-700">Kingdom Speciality Automotive</span>
           </div>
         </div>
       </div>
