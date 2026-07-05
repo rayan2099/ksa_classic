@@ -55,6 +55,8 @@ export const AdminDashboard: React.FC = () => {
   // Car Form Modal States
   const [isCarModalOpen, setIsCarModalOpen] = useState(false);
   const [editingCar, setEditingCar] = useState<Car | null>(null);
+  const [isSavingCar, setIsSavingCar] = useState(false);
+  const isSavingCarRef = React.useRef(false);
 
   // Message View States
   const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
@@ -279,6 +281,11 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const onCarFormSubmit = async (data: any) => {
+    if (isSavingCarRef.current) return;
+
+    isSavingCarRef.current = true;
+    setIsSavingCar(true);
+
     const finalData = {
       ...data,
       images: uploadedImageUrls
@@ -304,6 +311,9 @@ export const AdminDashboard: React.FC = () => {
       }
     } catch (err: any) {
       toast.error(err.message || 'Error saving listing details.');
+    } finally {
+      isSavingCarRef.current = false;
+      setIsSavingCar(false);
     }
   };
 
@@ -1804,15 +1814,17 @@ export const AdminDashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsCarModalOpen(false)}
+                  disabled={isSavingCar}
                   className="px-5 py-2.5 text-neutral-400 hover:text-white text-xs font-heading font-bold uppercase tracking-wider transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-accent hover:bg-accent-hover text-neutral-950 font-heading font-bold text-xs uppercase tracking-wider px-6 py-2.5 rounded-sm transition-colors cursor-pointer border border-accent"
+                  disabled={isSavingCar}
+                  className="bg-accent hover:bg-accent-hover disabled:bg-neutral-700 disabled:border-neutral-700 disabled:text-neutral-400 disabled:cursor-not-allowed text-neutral-950 font-heading font-bold text-xs uppercase tracking-wider px-6 py-2.5 rounded-sm transition-colors cursor-pointer border border-accent"
                 >
-                  {editingCar ? 'Save Registry Modifications' : 'Publish Showroom Listing'}
+                  {isSavingCar ? 'Saving Listing...' : editingCar ? 'Save Registry Modifications' : 'Publish Showroom Listing'}
                 </button>
               </div>
             </form>
