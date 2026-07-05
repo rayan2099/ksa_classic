@@ -69,7 +69,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
             <img
               src={images[activeImageIndex]}
               alt={`${car.title} view ${activeImageIndex + 1}`}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               referrerPolicy="no-referrer"
             />
 
