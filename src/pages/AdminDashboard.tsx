@@ -37,6 +37,7 @@ import { AdminSettings } from '../components/AdminSettings.js';
 import { mockCars } from '../data/mockCars.js';
 
 type ActiveTab = 'dashboard' | 'cars' | 'messages' | 'users' | 'settings';
+const BULK_IMAGE_UPLOAD_BATCH_SIZE = 20;
 
 export const AdminDashboard: React.FC = () => {
   const { user, logout, loading, dbStatus } = useAuth();
@@ -367,10 +368,13 @@ export const AdminDashboard: React.FC = () => {
       const selectedFiles = Array.from(files);
       let updatedUrls = [...uploadedImageUrls];
 
-      for (const file of selectedFiles) {
-        const optimizedFile = await optimizeVehicleImage(file);
+      for (let index = 0; index < selectedFiles.length; index += BULK_IMAGE_UPLOAD_BATCH_SIZE) {
+        const batch = selectedFiles.slice(index, index + BULK_IMAGE_UPLOAD_BATCH_SIZE);
+        const optimizedFiles = await Promise.all(batch.map((file) => optimizeVehicleImage(file)));
         const formData = new FormData();
-        formData.append('files', optimizedFile);
+        optimizedFiles.forEach((optimizedFile) => {
+          formData.append('files', optimizedFile);
+        });
 
         const res = await fetch('/api/upload', {
           method: 'POST',
@@ -1746,7 +1750,12 @@ export const AdminDashboard: React.FC = () => {
                       id="media-upload-input"
                       multiple
                       accept="image/*"
-                      onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          handleFileUpload(e.target.files);
+                          e.target.value = '';
+                        }
+                      }}
                       className="hidden"
                     />
                     <Upload className="w-8 h-8 mx-auto mb-3 text-accent" />
@@ -1754,7 +1763,7 @@ export const AdminDashboard: React.FC = () => {
                       Drop images here or click to choose files
                     </p>
                     <p className="text-[10px] text-neutral-500 mt-1">
-                      Select as many images as needed. Each file is optimized to 1600 × 900 WebP before upload.
+                      Select or drop images in bulk. Large selections are optimized and uploaded in safe batches.
                     </p>
                   </div>
 

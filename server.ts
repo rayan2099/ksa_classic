@@ -26,6 +26,7 @@ const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
 const VEHICLE_IMAGE_WIDTH = 1600;
 const VEHICLE_IMAGE_HEIGHT = 900;
 const VEHICLE_IMAGE_MAX_BYTES = 15 * 1024 * 1024;
+const VEHICLE_IMAGE_UPLOAD_BATCH_LIMIT = 25;
 
 if (allowLocalFallback) {
   if (!fs.existsSync(DATA_DIR)) {
@@ -481,7 +482,7 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: VEHICLE_IMAGE_MAX_BYTES,
-    files: 10
+    files: VEHICLE_IMAGE_UPLOAD_BATCH_LIMIT
   },
   fileFilter: (_req, file, cb) => {
     if (!file.mimetype.startsWith('image/')) {
@@ -1662,8 +1663,8 @@ app.post('/api/auth/logout', async (req, res) => {
   res.json({ success: true });
 });
 
-// POST /api/upload (The client sends unlimited galleries in safe batches of 10.)
-app.post('/api/upload', upload.array('files', 10), async (req: any, res) => {
+// POST /api/upload (The client sends unlimited galleries in safe batches.)
+app.post('/api/upload', upload.array('files', VEHICLE_IMAGE_UPLOAD_BATCH_LIMIT), async (req: any, res) => {
   const admin = await getAuthUser(req);
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized upload' });
