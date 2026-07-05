@@ -709,7 +709,7 @@ export const AdminDashboard: React.FC = () => {
               <ArrowLeft className="w-5 h-5 text-accent" />
             </Link>
             <h1 className="font-heading text-[11px] sm:text-sm font-bold uppercase tracking-wider text-neutral-200 leading-tight min-w-0">
-              KSA Collections CRM — {activeTab}
+              KSA Collection CRM — {activeTab}
             </h1>
 
             {/* Supabase / Local Fallback Database connection badge */}

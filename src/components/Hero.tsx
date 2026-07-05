@@ -133,7 +133,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
                   }}
                 >
                   <span style={{ color: '#ffffff', display: 'block' }}>KSA</span>
-                  <span style={{ color: '#C9A84C', display: 'block', fontSize: '0.86em' }}>COLLECTIONS</span>
+                  <span style={{ color: '#C9A84C', display: 'block', fontSize: '0.86em' }}>COLLECTION</span>
                 </h1>
 
                 {/* Responsive Description */}
@@ -163,7 +163,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
 
                 {/* Majestic Heading */}
                 <h1 className="text-3xl sm:text-7xl md:text-8xl font-bold font-heading text-white uppercase tracking-tight leading-[1.05] sm:leading-[0.95]">
-                  KSA <span className="text-[#C9A84C] text-glow">COLLECTIONS</span>
+                  KSA <span className="text-[#C9A84C] text-glow">COLLECTION</span>
                 </h1>
 
                 {/* Responsive Description */}

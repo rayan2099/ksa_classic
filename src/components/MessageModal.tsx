@@ -223,7 +223,7 @@ export const MessageModal: React.FC<MessageModalProps> = ({ car, onClose }) => {
             )}
           </button>
           <p className="text-[10px] text-center text-neutral-400 leading-relaxed">
-            By submitting, you agree that KSA Collections may contact you about this inquiry.
+            By submitting, you agree that KSA Collection may contact you about this inquiry.
           </p>
         </form>
       </div>

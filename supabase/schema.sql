@@ -1,4 +1,4 @@
--- KSA Collections: complete Supabase database schema
+-- KSA Collection: complete Supabase database schema
 -- Run this file in Supabase Dashboard > SQL Editor.
 
 create extension if not exists citext;

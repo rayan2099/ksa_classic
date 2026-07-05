@@ -59,7 +59,7 @@ export const AdminLogin: React.FC = () => {
           <Link to="/" className="inline-block">
             <img
               src="/logo.png"
-              alt="KSA Collections"
+              alt="KSA Collection"
               className="h-16 w-auto mx-auto object-contain"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
@@ -67,7 +67,7 @@ export const AdminLogin: React.FC = () => {
                 if (parent) {
                   const span = document.createElement('span');
                   span.className = 'font-heading text-2xl font-bold tracking-widest text-white';
-                  span.innerText = 'KSA COLLECTIONS';
+                  span.innerText = 'KSA COLLECTION';
                   parent.appendChild(span);
                 }
               }}

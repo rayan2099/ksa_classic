@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onScrollToSection }) => {
           <Link to="/" onClick={() => handleNavClick('hero')} className="flex items-center space-x-1.5 sm:space-x-3 group shrink-0">
             <img
               src="/logo.png"
-              alt="KSA Collections Logo"
+              alt="KSA Collection Logo"
               id="navbar-logo"
               className="w-[40px] h-[40px] sm:h-12 sm:w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               onError={(e) => {
@@ -68,11 +68,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onScrollToSection }) => {
             {isMobile ? (
               <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                 <span style={{ color: '#ffffff', fontSize: '16px', fontWeight: '700', whiteSpace: 'nowrap' }}>KSA </span>
-                <span style={{ color: '#C9A84C', fontSize: '15px', fontWeight: '700', whiteSpace: 'nowrap', marginLeft: '4px' }}>COLLECTIONS</span>
+                <span style={{ color: '#C9A84C', fontSize: '15px', fontWeight: '700', whiteSpace: 'nowrap', marginLeft: '4px' }}>COLLECTION</span>
               </div>
             ) : (
               <span className="font-heading text-[13px] sm:text-xl font-bold tracking-widest text-white group-hover:text-accent transition-colors">
-                KSA <span className="text-accent">COLLECTIONS</span>
+                KSA <span className="text-accent">COLLECTION</span>
               </span>
             )}
           </Link>

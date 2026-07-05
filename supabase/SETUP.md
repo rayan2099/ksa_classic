@@ -9,7 +9,7 @@
 ```sql
 update public.profiles
 set role = 'super_admin',
-    full_name = 'KSA Collections Admin'
+    full_name = 'KSA Collection Admin'
 where email = 'YOUR_ADMIN_EMAIL';
 ```
 
@@ -49,7 +49,7 @@ once in the Supabase SQL Editor.
 
 ```env
 RESEND_API_KEY="re_YOUR_KEY"
-RESEND_FROM_EMAIL="KSA Collections <info@ksacollections.com>"
+RESEND_FROM_EMAIL="KSA Collection <info@ksacollections.com>"
 SHOWROOM_EMAIL="info@ksacollections.com"
 ```
 

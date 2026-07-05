@@ -1,4 +1,4 @@
-# KSA Collections
+# KSA Collection
 
 Public classic-car showroom and private administration CRM built with React,
 Express, Supabase, and Resend.
