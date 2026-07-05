@@ -1,4 +1,4 @@
-# KSA Classics
+# KSA Collections
 
 Public classic-car showroom and private administration CRM built with React,
 Express, Supabase, and Resend.
@@ -24,12 +24,12 @@ Express, Supabase, and Resend.
 
 Before launch, confirm these URLs return successfully:
 
-- `https://www.ksaclassics.online/`
-- `https://www.ksaclassics.online/admin/login`
-- `https://www.ksaclassics.online/api/db-status`
-- `https://www.ksaclassics.online/api/cars`
-- `https://www.ksaclassics.online/robots.txt`
-- `https://www.ksaclassics.online/sitemap.xml`
+- `https://www.ksacollections.com/`
+- `https://www.ksacollections.com/admin/login`
+- `https://www.ksacollections.com/api/db-status`
+- `https://www.ksacollections.com/api/cars`
+- `https://www.ksacollections.com/robots.txt`
+- `https://www.ksacollections.com/sitemap.xml`
 
 Never expose `SUPABASE_SERVICE_ROLE_KEY` to browser code or commit any `.env`
 file.

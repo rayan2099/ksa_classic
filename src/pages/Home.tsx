@@ -151,7 +151,7 @@ export const Home: React.FC = () => {
                   <Mail className="w-5 h-5 text-accent mr-4 flex-shrink-0 mt-1" />
                   <div>
                     <h4 className="font-heading font-bold text-xs uppercase text-neutral-200">Email</h4>
-                    <p className="text-xs text-neutral-400 mt-1">info@ksaclassics.online</p>
+                    <p className="text-xs text-neutral-400 mt-1">info@ksacollections.com</p>
                   </div>
                 </div>
               </div>
@@ -253,7 +253,7 @@ export const Home: React.FC = () => {
                   <span>Send Inquiry</span>
                 </button>
                 <p className="text-[10px] text-center text-neutral-500 leading-relaxed">
-                  By submitting, you agree that KSA Classics may contact you about this inquiry.
+                  By submitting, you agree that KSA Collections may contact you about this inquiry.
                 </p>
               </form>
             </div>

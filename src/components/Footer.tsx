@@ -19,7 +19,7 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
             <Link to="/" className="inline-flex items-center space-x-3 group">
               <img
                 src="/logo.png"
-                alt="KSA Classics Logo"
+                alt="KSA Collections Logo"
                 id="footer-logo"
                 className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                 onError={(e) => {
@@ -27,7 +27,7 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
                 }}
               />
               <span className="font-heading text-lg font-bold tracking-widest text-white">
-                KSA <span className="text-accent">CLASSICS</span>
+                KSA <span className="text-accent">COLLECTIONS</span>
               </span>
             </Link>
             <p className="text-xs text-neutral-500 font-sans leading-relaxed">
@@ -109,8 +109,8 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
               </li>
               <li className="flex items-center">
                 <Mail className="w-4 h-4 text-accent mr-2.5 flex-shrink-0" />
-                <a href="mailto:info@ksaclassics.online" className="hover:text-white transition-colors">
-                  info@ksaclassics.online
+                <a href="mailto:info@ksacollections.com" className="hover:text-white transition-colors">
+                  info@ksacollections.com
                 </a>
               </li>
             </ul>
@@ -121,7 +121,7 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
       {/* Lower Copyright Row */}
       <div className="bg-neutral-950 border-t border-neutral-900 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center text-xs text-neutral-600">
-          <p>© {currentYear} KSA Classics. All rights reserved.</p>
+          <p>© {currentYear} KSA Collections. All rights reserved.</p>
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-4 sm:mt-0 font-mono text-[10px]">
             <Link to="/admin/login" className="hover:text-accent transition-colors">
               Employee Access Portal

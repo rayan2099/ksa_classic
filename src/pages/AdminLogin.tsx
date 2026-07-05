@@ -59,7 +59,7 @@ export const AdminLogin: React.FC = () => {
           <Link to="/" className="inline-block">
             <img
               src="/logo.png"
-              alt="KSA Classic"
+              alt="KSA Collections"
               className="h-16 w-auto mx-auto object-contain"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
@@ -67,7 +67,7 @@ export const AdminLogin: React.FC = () => {
                 if (parent) {
                   const span = document.createElement('span');
                   span.className = 'font-heading text-2xl font-bold tracking-widest text-white';
-                  span.innerText = 'KSA CLASSIC';
+                  span.innerText = 'KSA COLLECTIONS';
                   parent.appendChild(span);
                 }
               }}
@@ -92,7 +92,7 @@ export const AdminLogin: React.FC = () => {
                 <input
                   type="email"
                   {...register('email', { required: 'Administrator email is required' })}
-                  placeholder="e.g. administrator@ksaclassics.online"
+                  placeholder="e.g. administrator@ksacollections.com"
                   className={`w-full bg-neutral-950 border ${
                     errors.email ? 'border-red-500 focus:border-red-500' : 'border-neutral-800 focus:border-accent'
                   } rounded-sm py-2.5 pl-10 pr-4 text-xs font-sans text-white outline-none transition-colors`}

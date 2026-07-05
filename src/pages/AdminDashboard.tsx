@@ -709,7 +709,7 @@ export const AdminDashboard: React.FC = () => {
               <ArrowLeft className="w-5 h-5 text-accent" />
             </Link>
             <h1 className="font-heading text-[11px] sm:text-sm font-bold uppercase tracking-wider text-neutral-200 leading-tight min-w-0">
-              KSA Classics CRM — {activeTab}
+              KSA Collections CRM — {activeTab}
             </h1>
 
             {/* Supabase / Local Fallback Database connection badge */}
@@ -1851,7 +1851,7 @@ export const AdminDashboard: React.FC = () => {
                   type="email"
                   required
                   {...inviteRegister('email')}
-                  placeholder="e.g. dsmith@ksaclassics.online"
+                  placeholder="e.g. dsmith@ksacollections.com"
                   className="w-full bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm py-2.5 px-4 text-xs font-sans outline-none transition-colors"
                 />
               </div>

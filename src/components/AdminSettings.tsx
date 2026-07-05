@@ -88,7 +88,7 @@ export const AdminSettings: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g. admin@ksaclassics.com"
+                placeholder="e.g. admin@ksacollections.com"
                 className="w-full bg-neutral-900 border border-neutral-800 focus:border-accent text-neutral-100 placeholder-neutral-600 rounded-sm py-2.5 pl-10 pr-4 text-xs font-sans outline-none transition-colors"
               />
             </div>

@@ -45,7 +45,7 @@ const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || '').trim();
 const supabaseServiceRoleKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
 const resendApiKey = process.env.RESEND_API_KEY || '';
 const resendFromEmail = process.env.RESEND_FROM_EMAIL || '';
-const showroomEmail = process.env.SHOWROOM_EMAIL || 'info@ksaclassics.online';
+const showroomEmail = process.env.SHOWROOM_EMAIL || 'info@ksacollections.com';
 const isEmailActive = !!(resendApiKey && resendFromEmail);
 const inquiryAttempts = new Map<string, number[]>();
 const loginAttempts = new Map<string, number[]>();
@@ -129,7 +129,7 @@ const sendResendEmail = async (email: OutboundEmail): Promise<EmailDeliveryResul
         html: email.html,
         text: email.text,
         reply_to: email.replyTo || showroomEmail,
-        tags: [{ name: 'application', value: 'ksa-classics' }]
+        tags: [{ name: 'application', value: 'ksa-collections' }]
       })
     });
     const result = await response.json().catch(() => ({}));
@@ -148,11 +148,11 @@ const emailShell = (content: string) => `
   <body style="margin:0;background:#111111;color:#f5f5f5;font-family:Arial,sans-serif">
     <div style="max-width:620px;margin:0 auto;padding:32px 20px">
       <div style="border-bottom:2px solid #d4af37;padding-bottom:18px;margin-bottom:28px">
-        <strong style="font-size:22px;letter-spacing:1px">KSA <span style="color:#d4af37">CLASSICS</span></strong>
+        <strong style="font-size:22px;letter-spacing:1px">KSA <span style="color:#d4af37">COLLECTIONS</span></strong>
       </div>
       ${content}
       <div style="border-top:1px solid #333;margin-top:32px;padding-top:18px;color:#888;font-size:12px;line-height:1.6">
-        KSA Classics · Collector cars and restoration projects<br>
+        KSA Collections · Collector cars and restoration projects<br>
         Reply to this email to contact the showroom team.
       </div>
     </div>
@@ -171,20 +171,20 @@ const buildInquiryConfirmationEmail = (buyerName: string, carTitle: string, mess
       ${escapeHtml(message).replaceAll('\n', '<br>')}
     </div>
   `),
-  text: `Thank you, ${buyerName}.\n\nWe received your inquiry${carTitle ? ` about ${carTitle}` : ''}. A member of the KSA Classics team will get back to you shortly.\n\nYour message:\n${message}`
+  text: `Thank you, ${buyerName}.\n\nWe received your inquiry${carTitle ? ` about ${carTitle}` : ''}. A member of the KSA Collections team will get back to you shortly.\n\nYour message:\n${message}`
 });
 
 const buildAdminReplyEmail = (buyerName: string, carTitle: string, reply: string, senderName: string) => ({
-  subject: `KSA Classics reply${carTitle ? `: ${carTitle}` : ''}`,
+  subject: `KSA Collections reply${carTitle ? `: ${carTitle}` : ''}`,
   html: emailShell(`
     <p style="color:#cfcfcf;line-height:1.7;margin:0 0 18px">Hello ${escapeHtml(buyerName)},</p>
     ${carTitle ? `<p style="font-size:13px;color:#d4af37;text-transform:uppercase;letter-spacing:.6px;margin:0 0 8px">${escapeHtml(carTitle)}</p>` : ''}
     <div style="background:#1a1a1a;border-left:3px solid #d4af37;padding:18px;color:#f0f0f0;line-height:1.7">
       ${escapeHtml(reply).replaceAll('\n', '<br>')}
     </div>
-    <p style="color:#aaa;margin-top:18px;font-size:13px">Regards,<br>${escapeHtml(senderName)}<br>KSA Classics</p>
+    <p style="color:#aaa;margin-top:18px;font-size:13px">Regards,<br>${escapeHtml(senderName)}<br>KSA Collections</p>
   `),
-  text: `Hello ${buyerName},\n\n${reply}\n\nRegards,\n${senderName}\nKSA Classics`
+  text: `Hello ${buyerName},\n\n${reply}\n\nRegards,\n${senderName}\nKSA Collections`
 });
 
 const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -220,16 +220,16 @@ const isLoginRateLimited = (req: express.Request) => {
 const defaultProfiles: Profile[] = [
   {
     id: 'admin-id-1',
-    full_name: 'KSA Classic Admin',
+    full_name: 'KSA Collections Admin',
     role: 'super_admin',
-    email: 'helpooclassmate@gmail.com',
+    email: 'bihad1991@gmail.com',
     created_at: new Date('2026-01-01').toISOString()
   },
   {
     id: 'subadmin-id-1',
     full_name: 'KSA Sub Admin',
     role: 'sub_admin',
-    email: 'subadmin@ksaclassics.online',
+    email: 'subadmin@ksacollections.com',
     created_at: new Date('2026-02-01').toISOString()
   }
 ];
@@ -387,8 +387,8 @@ const defaultMessages: Message[] = [
       {
         id: 'rep-initial-mock',
         sender_name: 'System Auto-Response',
-        sender_email: 'no-reply@ksaclassics.online',
-        message: 'Thank you for your interest in KSA Classics. Our curators are reviewing your inquiry.',
+        sender_email: 'no-reply@ksacollections.com',
+        message: 'Thank you for your interest in KSA Collections. Our curators are reviewing your inquiry.',
         created_at: new Date(Date.now() - 1800000).toISOString()
       }
     ]
@@ -450,8 +450,8 @@ function getLocalDb(): DbState {
           {
             id: 'rep-initial-mock',
             sender_name: 'System Auto-Response',
-            sender_email: 'no-reply@ksaclassics.online',
-            message: 'Thank you for your interest in KSA Classics. Our curators are reviewing your inquiry.',
+            sender_email: 'no-reply@ksacollections.com',
+            message: 'Thank you for your interest in KSA Collections. Our curators are reviewing your inquiry.',
             created_at: new Date(Date.now() - 1800000).toISOString()
           }
         ]

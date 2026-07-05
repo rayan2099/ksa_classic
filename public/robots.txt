@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /api
 
-Sitemap: https://www.ksaclassics.online/sitemap.xml
+Sitemap: https://www.ksacollections.com/sitemap.xml

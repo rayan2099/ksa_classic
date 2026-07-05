@@ -132,16 +132,16 @@
   "profiles": [
     {
       "id": "admin-id-1",
-      "full_name": "KSA Classic Admin",
+      "full_name": "KSA Collections Admin",
       "role": "super_admin",
-      "email": "helpooclassmate@gmail.com",
+      "email": "bihad1991@gmail.com",
       "created_at": "2026-01-01T00:00:00.000Z"
     },
     {
       "id": "subadmin-id-1",
       "full_name": "KSA Sub Admin",
       "role": "sub_admin",
-      "email": "subadmin@ksaclassics.online",
+      "email": "subadmin@ksacollections.com",
       "created_at": "2026-02-01T00:00:00.000Z"
     }
   ],
@@ -179,8 +179,8 @@
         {
           "id": "rep-initial-mock",
           "sender_name": "System Auto-Response",
-          "sender_email": "no-reply@ksaclassics.online",
-          "message": "Thank you for your interest in KSA Classics. Our curators are reviewing your inquiry.",
+          "sender_email": "no-reply@ksacollections.com",
+          "message": "Thank you for your interest in KSA Collections. Our curators are reviewing your inquiry.",
           "created_at": "2026-06-23T19:41:58.748Z"
         }
       ]

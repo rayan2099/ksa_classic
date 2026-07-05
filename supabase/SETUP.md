@@ -9,7 +9,7 @@
 ```sql
 update public.profiles
 set role = 'super_admin',
-    full_name = 'KSA Classic Admin'
+    full_name = 'KSA Collections Admin'
 where email = 'YOUR_ADMIN_EMAIL';
 ```
 
@@ -19,7 +19,7 @@ where email = 'YOUR_ADMIN_EMAIL';
 SUPABASE_URL="https://YOUR_PROJECT.supabase.co"
 SUPABASE_ANON_KEY="YOUR_PUBLISHABLE_OR_ANON_KEY"
 SUPABASE_SERVICE_ROLE_KEY="YOUR_SERVICE_ROLE_KEY"
-APP_URL="https://www.ksaclassics.online"
+APP_URL="https://www.ksacollections.com"
 ```
 
 Never expose `SUPABASE_SERVICE_ROLE_KEY` to browser code or commit it to Git.
@@ -49,8 +49,8 @@ once in the Supabase SQL Editor.
 
 ```env
 RESEND_API_KEY="re_YOUR_KEY"
-RESEND_FROM_EMAIL="KSA Classics <info@ksaclassics.online>"
-SHOWROOM_EMAIL="info@ksaclassics.online"
+RESEND_FROM_EMAIL="KSA Collections <info@ksacollections.com>"
+SHOWROOM_EMAIL="info@ksacollections.com"
 ```
 
 `RESEND_FROM_EMAIL` must use a domain verified in Resend. `SHOWROOM_EMAIL` is
