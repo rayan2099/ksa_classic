@@ -37,7 +37,7 @@ import { AdminSettings } from '../components/AdminSettings.js';
 import { mockCars } from '../data/mockCars.js';
 
 type ActiveTab = 'dashboard' | 'cars' | 'messages' | 'users' | 'settings';
-const BULK_IMAGE_UPLOAD_BATCH_SIZE = 20;
+const BULK_IMAGE_UPLOAD_BATCH_SIZE = 4;
 
 export const AdminDashboard: React.FC = () => {
   const { user, logout, loading, dbStatus } = useAuth();
@@ -322,7 +322,38 @@ export const AdminDashboard: React.FC = () => {
       throw new Error(`${file.name} is not a supported image file.`);
     }
 
-    const bitmap = await createImageBitmap(file);
+    let bitmap: ImageBitmap;
+    try {
+      bitmap = await createImageBitmap(file);
+    } catch {
+      bitmap = await new Promise<ImageBitmap>((resolve, reject) => {
+        const image = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        image.onload = async () => {
+          try {
+            const fallbackCanvas = document.createElement('canvas');
+            fallbackCanvas.width = image.naturalWidth;
+            fallbackCanvas.height = image.naturalHeight;
+            const fallbackContext = fallbackCanvas.getContext('2d');
+            if (!fallbackContext) {
+              reject(new Error(`Could not prepare ${file.name}.`));
+              return;
+            }
+            fallbackContext.drawImage(image, 0, 0);
+            resolve(await createImageBitmap(fallbackCanvas));
+          } catch (err) {
+            reject(err);
+          } finally {
+            URL.revokeObjectURL(objectUrl);
+          }
+        };
+        image.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error(`${file.name} could not be read. Try saving it as JPG or PNG and uploading again.`));
+        };
+        image.src = objectUrl;
+      });
+    }
     const canvas = document.createElement('canvas');
     const targetWidth = 1600;
     const targetHeight = 900;
@@ -335,24 +366,26 @@ export const AdminDashboard: React.FC = () => {
       throw new Error('This browser could not prepare the selected image.');
     }
 
-    const scale = Math.max(targetWidth / bitmap.width, targetHeight / bitmap.height);
-    const sourceWidth = targetWidth / scale;
-    const sourceHeight = targetHeight / scale;
-    const sourceX = (bitmap.width - sourceWidth) / 2;
-    const sourceY = (bitmap.height - sourceHeight) / 2;
+    const scale = Math.min(targetWidth / bitmap.width, targetHeight / bitmap.height);
+    const drawWidth = bitmap.width * scale;
+    const drawHeight = bitmap.height * scale;
+    const drawX = (targetWidth - drawWidth) / 2;
+    const drawY = (targetHeight - drawHeight) / 2;
 
     context.imageSmoothingEnabled = true;
     context.imageSmoothingQuality = 'high';
+    context.fillStyle = '#111111';
+    context.fillRect(0, 0, targetWidth, targetHeight);
     context.drawImage(
       bitmap,
-      sourceX,
-      sourceY,
-      sourceWidth,
-      sourceHeight,
       0,
       0,
-      targetWidth,
-      targetHeight
+      bitmap.width,
+      bitmap.height,
+      drawX,
+      drawY,
+      drawWidth,
+      drawHeight
     );
     bitmap.close();
 
@@ -369,6 +402,11 @@ export const AdminDashboard: React.FC = () => {
     });
   };
 
+  const getUploadErrorMessage = async (response: Response) => {
+    const payload = await response.json().catch(() => null);
+    return payload?.error || payload?.details || `Upload failed with status ${response.status}.`;
+  };
+
   // Image Upload Logic (supports both click and drag & drop)
   const handleFileUpload = async (files: FileList) => {
     if (files.length === 0) return;
@@ -377,32 +415,61 @@ export const AdminDashboard: React.FC = () => {
     try {
       const selectedFiles = Array.from(files);
       let updatedUrls = [...uploadedImageUrls];
+      let uploadedCount = 0;
+      const failedUploads: string[] = [];
 
       for (let index = 0; index < selectedFiles.length; index += BULK_IMAGE_UPLOAD_BATCH_SIZE) {
         const batch = selectedFiles.slice(index, index + BULK_IMAGE_UPLOAD_BATCH_SIZE);
-        const optimizedFiles = await Promise.all(batch.map((file) => optimizeVehicleImage(file)));
+        const optimizedResults = await Promise.allSettled(batch.map((file) => optimizeVehicleImage(file)));
+        const optimizedFiles = optimizedResults.flatMap((result, resultIndex) => {
+          if (result.status === 'fulfilled') return [result.value];
+          failedUploads.push(batch[resultIndex]?.name || `Image ${index + resultIndex + 1}`);
+          return [];
+        });
+
+        if (optimizedFiles.length === 0) continue;
+
         const formData = new FormData();
         optimizedFiles.forEach((optimizedFile) => {
           formData.append('files', optimizedFile);
         });
 
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData
-        });
+        try {
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+          });
 
-        if (!res.ok) {
-          const error = await res.json().catch(() => null);
-          throw new Error(error?.error || 'Failed to upload image assets.');
+          if (!res.ok) {
+            throw new Error(await getUploadErrorMessage(res));
+          }
+
+          const result = await res.json();
+          const successfulUrls = Array.isArray(result.urls) ? result.urls : [];
+          const failedNames = Array.isArray(result.failed)
+            ? result.failed.map((failure: any) => failure?.name || 'Image')
+            : [];
+
+          failedUploads.push(...failedNames);
+          if (successfulUrls.length > 0) {
+            updatedUrls = [...updatedUrls, ...successfulUrls];
+            uploadedCount += successfulUrls.length;
+            setUploadedImageUrls(updatedUrls);
+            setCarValue('images', updatedUrls);
+          }
+        } catch (err: any) {
+          failedUploads.push(...optimizedFiles.map((file) => file.name));
+          console.error('Image upload batch failed', err);
         }
-
-        const result = await res.json();
-        updatedUrls = [...updatedUrls, ...result.urls];
-        setUploadedImageUrls(updatedUrls);
-        setCarValue('images', updatedUrls);
       }
 
-      toast.success(`${selectedFiles.length} image(s) uploaded successfully.`);
+      if (uploadedCount > 0 && failedUploads.length > 0) {
+        toast.success(`${uploadedCount} image(s) uploaded. ${failedUploads.length} could not be uploaded.`);
+      } else if (uploadedCount > 0) {
+        toast.success(`${uploadedCount} image(s) uploaded successfully.`);
+      } else {
+        throw new Error('No images could be uploaded. Try fewer images at once, or use JPG/PNG files under 15 MB.');
+      }
     } catch (err: any) {
       toast.error(err.message || 'Failed to upload image assets.');
     } finally {

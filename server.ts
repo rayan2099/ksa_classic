@@ -27,6 +27,7 @@ const VEHICLE_IMAGE_WIDTH = 1600;
 const VEHICLE_IMAGE_HEIGHT = 900;
 const VEHICLE_IMAGE_MAX_BYTES = 15 * 1024 * 1024;
 const VEHICLE_IMAGE_UPLOAD_BATCH_LIMIT = 25;
+const VEHICLE_IMAGE_BUCKET = 'vehicle-images';
 
 if (allowLocalFallback) {
   if (!fs.existsSync(DATA_DIR)) {
@@ -510,6 +511,23 @@ const upload = multer({
     cb(null, true);
   }
 });
+
+const handleVehicleUpload = upload.array('files', VEHICLE_IMAGE_UPLOAD_BATCH_LIMIT);
+
+async function ensureVehicleImagesBucket() {
+  if (!isSupabaseActive || !supabase) return;
+
+  const { error: getError } = await supabase.storage.getBucket(VEHICLE_IMAGE_BUCKET);
+  if (!getError) return;
+
+  const { error: createError } = await supabase.storage.createBucket(VEHICLE_IMAGE_BUCKET, {
+    public: true
+  });
+
+  if (createError && !/already exists/i.test(createError.message || '')) {
+    throw createError;
+  }
+}
 
 const hashSessionToken = (token: string) => crypto.createHash('sha256').update(token).digest('hex');
 
@@ -1683,7 +1701,17 @@ app.post('/api/auth/logout', async (req, res) => {
 });
 
 // POST /api/upload (The client sends unlimited galleries in safe batches.)
-app.post('/api/upload', upload.array('files', VEHICLE_IMAGE_UPLOAD_BATCH_LIMIT), async (req: any, res) => {
+app.post('/api/upload', (req: any, res: any, next: any) => {
+  handleVehicleUpload(req, res, (err: any) => {
+    if (!err) return next();
+
+    const status = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
+    const message = err.code === 'LIMIT_FILE_SIZE'
+      ? 'One image is too large. Upload images under 15 MB each.'
+      : err.message || 'Could not read the uploaded image files.';
+    return res.status(status).json({ error: message });
+  });
+}, async (req: any, res) => {
   const admin = await getAuthUser(req);
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized upload' });
@@ -1696,38 +1724,66 @@ app.post('/api/upload', upload.array('files', VEHICLE_IMAGE_UPLOAD_BATCH_LIMIT),
   try {
     const files = req.files as Express.Multer.File[];
     const { default: sharp } = await import('sharp');
-    const urls = await Promise.all(files.map(async (file, index) => {
+    await ensureVehicleImagesBucket();
+
+    const uploads = await Promise.all(files.map(async (file, index) => {
       const filename = `car-${Date.now()}-${index}-${Math.round(Math.random() * 1E9)}.webp`;
-      const optimizedImage = await sharp(file.buffer)
-        .rotate()
-        .resize(VEHICLE_IMAGE_WIDTH, VEHICLE_IMAGE_HEIGHT, {
-          fit: 'cover',
-          position: 'attention'
-        })
-        .webp({ quality: 86 })
-        .toBuffer();
+      try {
+        const optimizedImage = await sharp(file.buffer)
+          .rotate()
+          .resize(VEHICLE_IMAGE_WIDTH, VEHICLE_IMAGE_HEIGHT, {
+            fit: 'contain',
+            background: '#111111'
+          })
+          .webp({ quality: 86 })
+          .toBuffer();
 
-      if (isSupabaseActive && supabase) {
-        const objectPath = `cars/${filename}`;
-        const { error } = await supabase.storage
-          .from('vehicle-images')
-          .upload(objectPath, optimizedImage, {
-            contentType: 'image/webp',
-            cacheControl: '31536000',
-            upsert: false
-          });
-        if (error) throw error;
+        if (isSupabaseActive && supabase) {
+          const objectPath = `cars/${filename}`;
+          const { error } = await supabase.storage
+            .from(VEHICLE_IMAGE_BUCKET)
+            .upload(objectPath, optimizedImage, {
+              contentType: 'image/webp',
+              cacheControl: '31536000',
+              upsert: false
+            });
+          if (error) throw error;
 
-        return supabase.storage.from('vehicle-images').getPublicUrl(objectPath).data.publicUrl;
+          return {
+            url: supabase.storage.from(VEHICLE_IMAGE_BUCKET).getPublicUrl(objectPath).data.publicUrl
+          };
+        }
+
+        const outputPath = path.join(UPLOADS_DIR, filename);
+        fs.writeFileSync(outputPath, optimizedImage);
+        return { url: `/uploads/${filename}` };
+      } catch (err: any) {
+        console.error(`Upload failed for ${file.originalname}:`, err);
+        return {
+          name: file.originalname,
+          error: err.message || 'Could not process this image.'
+        };
       }
-
-      const outputPath = path.join(UPLOADS_DIR, filename);
-      fs.writeFileSync(outputPath, optimizedImage);
-      return `/uploads/${filename}`;
     }));
 
-    res.json({
+    const urls = uploads.flatMap((uploadResult: any) => uploadResult.url ? [uploadResult.url] : []);
+    const failed = uploads
+      .filter((uploadResult: any) => !uploadResult.url)
+      .map((uploadResult: any) => ({
+        name: uploadResult.name,
+        error: uploadResult.error
+      }));
+
+    if (urls.length === 0) {
+      return res.status(422).json({
+        error: failed[0]?.error || 'No images could be uploaded.',
+        failed
+      });
+    }
+
+    res.status(failed.length > 0 ? 207 : 200).json({
       urls,
+      failed,
       image_spec: {
         width: VEHICLE_IMAGE_WIDTH,
         height: VEHICLE_IMAGE_HEIGHT,
