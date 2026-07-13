@@ -60,7 +60,7 @@ export const AdminLogin: React.FC = () => {
             <img
               src="/logo.svg"
               alt="KSA Collection"
-              className="h-16 w-auto mx-auto object-contain"
+              className="h-24 w-auto mx-auto object-contain"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 const parent = e.currentTarget.parentElement;

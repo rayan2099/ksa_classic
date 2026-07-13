@@ -45,7 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onScrollToSection }) => {
     <nav
       id="main-navbar"
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isMobile && isMobileMenuOpen ? 'h-auto pb-4' : 'h-[56px] overflow-hidden'
+        isMobile && isMobileMenuOpen ? 'h-auto pb-4' : 'h-[68px] overflow-hidden'
       } ${
         isScrolled || isMobileMenuOpen
           ? 'bg-neutral-900/95 backdrop-blur-md border-b border-neutral-800 shadow-lg'
@@ -53,14 +53,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onScrollToSection }) => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 h-full">
-         <div className="flex items-center justify-between h-[56px]">
+         <div className="flex items-center justify-between h-[68px]">
           {/* Logo Section */}
           <Link to="/" onClick={() => handleNavClick('hero')} className="flex items-center space-x-1.5 sm:space-x-3 group shrink-0">
             <img
               src="/logo.svg"
               alt="KSA Collection Logo"
               id="navbar-logo"
-              className="w-[40px] h-[40px] sm:h-12 sm:w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              className="w-[58px] h-[58px] sm:w-[64px] sm:h-[64px] object-contain transition-transform duration-300 group-hover:scale-105"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
               }}

@@ -21,7 +21,7 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
                 src="/logo.svg"
                 alt="KSA Collection Logo"
                 id="footer-logo"
-                className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                className="h-16 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                 }}

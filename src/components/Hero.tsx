@@ -34,7 +34,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
         className={isMobile ? "" : "relative min-h-screen flex flex-col justify-between bg-neutral-950 overflow-hidden"}
       >
         {/* Spacer to start below the fixed 56px navbar */}
-        <div className="h-[56px] shrink-0" />
+        <div className="h-[68px] shrink-0" />
 
         {/* Background Image with Rich Multi-Layered Gradients */}
         <div className="absolute inset-0 z-0">
