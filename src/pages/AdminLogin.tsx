@@ -58,7 +58,7 @@ export const AdminLogin: React.FC = () => {
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
             <img
-              src="/logo.png"
+              src="/logo.svg"
               alt="KSA Collection"
               className="h-16 w-auto mx-auto object-contain"
               onError={(e) => {

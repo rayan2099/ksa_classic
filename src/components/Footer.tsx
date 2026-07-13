@@ -18,7 +18,7 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
           <div className="space-y-6">
             <Link to="/" className="inline-flex items-center space-x-3 group">
               <img
-                src="/logo.png"
+                src="/logo.svg"
                 alt="KSA Collection Logo"
                 id="footer-logo"
                 className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
