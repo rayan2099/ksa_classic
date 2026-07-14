@@ -25,9 +25,10 @@ const DATA_DIR = path.join(process.cwd(), 'data');
 const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads');
 const VEHICLE_IMAGE_WIDTH = 1600;
 const VEHICLE_IMAGE_HEIGHT = 900;
-const VEHICLE_IMAGE_MAX_BYTES = 15 * 1024 * 1024;
+const VEHICLE_IMAGE_MAX_BYTES = 25 * 1024 * 1024;
 const VEHICLE_IMAGE_UPLOAD_BATCH_LIMIT = 25;
 const VEHICLE_IMAGE_BUCKET = 'vehicle-images';
+const IMAGE_FILE_EXTENSION_PATTERN = /\.(jpe?g|png|webp|gif|heic|heif)$/i;
 
 if (allowLocalFallback) {
   if (!fs.existsSync(DATA_DIR)) {
@@ -505,7 +506,10 @@ const upload = multer({
     files: VEHICLE_IMAGE_UPLOAD_BATCH_LIMIT
   },
   fileFilter: (_req, file, cb) => {
-    if (!file.mimetype.startsWith('image/')) {
+    const hasImageMimeType = file.mimetype.startsWith('image/');
+    const hasImageExtension = IMAGE_FILE_EXTENSION_PATTERN.test(file.originalname || '');
+
+    if (!hasImageMimeType && !hasImageExtension) {
       return cb(new Error('Only image files are supported.'));
     }
     cb(null, true);
@@ -1707,7 +1711,7 @@ app.post('/api/upload', (req: any, res: any, next: any) => {
 
     const status = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
     const message = err.code === 'LIMIT_FILE_SIZE'
-      ? 'One image is too large. Upload images under 15 MB each.'
+      ? 'One image is too large. Upload images under 25 MB each.'
       : err.message || 'Could not read the uploaded image files.';
     return res.status(status).json({ error: message });
   });
