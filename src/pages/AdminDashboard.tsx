@@ -38,6 +38,7 @@ import { mockCars } from '../data/mockCars.js';
 
 type ActiveTab = 'dashboard' | 'cars' | 'messages' | 'users' | 'settings';
 const BULK_IMAGE_UPLOAD_BATCH_SIZE = 4;
+const MAX_BULK_IMAGE_SELECTION = 100;
 
 export const AdminDashboard: React.FC = () => {
   const { user, logout, loading, dbStatus } = useAuth();
@@ -74,6 +75,7 @@ export const AdminDashboard: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
 
   const { register: carRegister, handleSubmit: handleCarSubmit, reset: resetCarForm, setValue: setCarValue, watch: watchCarForm } = useForm();
   const { register: inviteRegister, handleSubmit: handleInviteSubmit, reset: resetInviteForm } = useForm();
@@ -412,14 +414,21 @@ export const AdminDashboard: React.FC = () => {
     if (files.length === 0) return;
 
     setIsUploading(true);
+    setUploadProgress({ current: 0, total: Math.min(files.length, MAX_BULK_IMAGE_SELECTION) });
     try {
-      const selectedFiles = Array.from(files);
+      const allSelectedFiles = Array.from(files);
+      const selectedFiles = allSelectedFiles.slice(0, MAX_BULK_IMAGE_SELECTION);
+      if (allSelectedFiles.length > MAX_BULK_IMAGE_SELECTION) {
+        toast.error(`Only the first ${MAX_BULK_IMAGE_SELECTION} images were selected. Please upload the remaining images in a second import.`);
+      }
+
       let updatedUrls = [...uploadedImageUrls];
       let uploadedCount = 0;
       const failedUploads: string[] = [];
 
       for (let index = 0; index < selectedFiles.length; index += BULK_IMAGE_UPLOAD_BATCH_SIZE) {
         const batch = selectedFiles.slice(index, index + BULK_IMAGE_UPLOAD_BATCH_SIZE);
+        setUploadProgress({ current: index, total: selectedFiles.length });
         const optimizedResults = await Promise.allSettled(batch.map((file) => optimizeVehicleImage(file)));
         const optimizedFiles = optimizedResults.flatMap((result, resultIndex) => {
           if (result.status === 'fulfilled') return [result.value];
@@ -461,6 +470,7 @@ export const AdminDashboard: React.FC = () => {
           failedUploads.push(...optimizedFiles.map((file) => file.name));
           console.error('Image upload batch failed', err);
         }
+        setUploadProgress({ current: Math.min(index + batch.length, selectedFiles.length), total: selectedFiles.length });
       }
 
       if (uploadedCount > 0 && failedUploads.length > 0) {
@@ -474,6 +484,7 @@ export const AdminDashboard: React.FC = () => {
       toast.error(err.message || 'Failed to upload image assets.');
     } finally {
       setIsUploading(false);
+      setUploadProgress({ current: 0, total: 0 });
     }
   };
 
@@ -1809,7 +1820,7 @@ export const AdminDashboard: React.FC = () => {
                 {/* Drag and Drop Image Upload Section */}
                 <div className="sm:col-span-2">
                   <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
-                    Vehicle Images (1600 × 900, 16:9, no gallery limit)
+                    Vehicle Images (up to 100 per import, no gallery limit)
                   </label>
 
                   <div
@@ -1841,15 +1852,27 @@ export const AdminDashboard: React.FC = () => {
                       Drop images here or click to choose files
                     </p>
                     <p className="text-[10px] text-neutral-500 mt-1">
-                      Select or drop images in bulk. Large selections are optimized and uploaded in safe batches.
+                      Select up to 100 images at once. The system optimizes and uploads them safely in the background.
                     </p>
                   </div>
 
                   {/* Uploading loading spinner */}
                   {isUploading && (
-                    <div className="flex items-center justify-center space-x-2 text-xs text-accent mt-3">
-                      <RefreshCwIcon className="w-4 h-4 animate-spin" />
-                      <span>Uploading media files...</span>
+                    <div className="mt-3 rounded-sm border border-accent/30 bg-accent/10 px-3 py-2">
+                      <div className="flex items-center justify-center space-x-2 text-xs text-accent">
+                        <RefreshCwIcon className="w-4 h-4 animate-spin" />
+                        <span>
+                          Uploading images {uploadProgress.total > 0 ? `${uploadProgress.current}/${uploadProgress.total}` : ''}
+                        </span>
+                      </div>
+                      {uploadProgress.total > 0 && (
+                        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
+                          <div
+                            className="h-full rounded-full bg-accent transition-all duration-300"
+                            style={{ width: `${Math.max(4, Math.round((uploadProgress.current / uploadProgress.total) * 100))}%` }}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
 
