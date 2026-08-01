@@ -66,7 +66,7 @@ export const CarCard: React.FC<CarCardProps> = ({ car, onDetailClick, onMessageC
     maximumFractionDigits: 0
   }).format(car.price);
 
-  const formattedMileage = new Intl.NumberFormat('en-US').format(car.mileage) + ' km';
+  const formattedMileage = `${new Intl.NumberFormat('en-US').format(car.mileage)} ${car.mileage_unit === 'mi' ? 'mi' : 'km'}`;
 
   const shortDescription = car.description 
     ? car.description.length > 100 

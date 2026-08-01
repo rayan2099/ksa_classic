@@ -444,11 +444,14 @@ function getLocalDb(): DbState {
       parsed.cars = mergedCars;
     }
 
-    // Backfill 'type' if missing
+    // Backfill 'type' and mileage unit if missing
     parsed.cars = parsed.cars.map((car: any) => {
       if (!car.type) {
         const match = defaultCars.find(dc => dc.id === car.id);
         car.type = match?.type || (car.title.toLowerCase().includes('project') ? 'project' : 'classic');
+      }
+      if (car.mileage_unit !== 'mi' && car.mileage_unit !== 'km') {
+        car.mileage_unit = 'km';
       }
       return car;
     });
@@ -671,7 +674,7 @@ app.post('/api/cars', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized access. Please log in.' });
   }
 
-  const { title, make, model, year, price, mileage, location, description, condition, type, images, contact_phone } = req.body;
+  const { title, make, model, year, price, mileage, mileage_unit, location, description, condition, type, images, contact_phone } = req.body;
 
   if (!title || !make || !model || !year || !price || !mileage) {
     return res.status(400).json({ error: 'Required fields: Title, Make, Model, Year, Price, Mileage' });
@@ -685,6 +688,7 @@ app.post('/api/cars', async (req, res) => {
     year: Number(year),
     price: Number(price),
     mileage: Number(mileage),
+    mileage_unit: mileage_unit === 'mi' ? 'mi' : 'km',
     location: location || 'Vancouver, BC',
     description: description || '',
     condition: condition || 'available',
@@ -706,6 +710,7 @@ app.post('/api/cars', async (req, res) => {
           year: newCar.year,
           price: newCar.price,
           mileage: newCar.mileage,
+          mileage_unit: newCar.mileage_unit,
           location: newCar.location,
           description: newCar.description,
           condition: newCar.condition,
@@ -755,6 +760,7 @@ app.put('/api/cars/:id', async (req, res) => {
           year: Number(updates.year),
           price: Number(updates.price),
           mileage: Number(updates.mileage),
+          mileage_unit: updates.mileage_unit === 'mi' ? 'mi' : 'km',
           location: updates.location,
           description: updates.description,
           condition: updates.condition,
@@ -786,6 +792,7 @@ app.put('/api/cars/:id', async (req, res) => {
       year: updates.year ? Number(updates.year) : db.cars[index].year,
       price: updates.price ? Number(updates.price) : db.cars[index].price,
       mileage: updates.mileage ? Number(updates.mileage) : db.cars[index].mileage,
+      mileage_unit: updates.mileage_unit === 'mi' ? 'mi' : (updates.mileage_unit === 'km' ? 'km' : db.cars[index].mileage_unit || 'km'),
     };
 
     saveLocalDb(db);

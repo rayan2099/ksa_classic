@@ -5,7 +5,8 @@ export interface Car {
   model: string;
   year: number;
   price: number;
-  mileage: number; // in km
+  mileage: number;
+  mileage_unit?: 'km' | 'mi';
   location: string;
   description: string;
   condition: 'new_arrival' | 'available' | 'sold';

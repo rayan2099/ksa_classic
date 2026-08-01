@@ -32,6 +32,7 @@ create table if not exists public.cars (
   year integer not null check (year between 1886 and 2100),
   price numeric(14, 2) not null check (price >= 0),
   mileage integer not null default 0 check (mileage >= 0),
+  mileage_unit text not null default 'km' check (mileage_unit in ('km', 'mi')),
   location text not null default 'Location on request',
   description text not null default '',
   condition text not null default 'available'

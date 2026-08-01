@@ -38,6 +38,8 @@ import { AdminSettings } from '../components/AdminSettings.js';
 import { mockCars } from '../data/mockCars.js';
 
 type ActiveTab = 'dashboard' | 'cars' | 'messages' | 'users' | 'settings';
+const formatMileage = (mileage: number, unit: Car['mileage_unit'] = 'km') =>
+  `${new Intl.NumberFormat('en-US').format(mileage)} ${unit === 'mi' ? 'mi' : 'km'}`;
 const BULK_IMAGE_UPLOAD_BATCH_SIZE = 1;
 const MAX_BULK_IMAGE_SELECTION = 100;
 const IMAGE_FILE_EXTENSION_PATTERN = /\.(jpe?g|png|webp|gif|heic|heif)$/i;
@@ -174,6 +176,7 @@ export const AdminDashboard: React.FC = () => {
       year: new Date().getFullYear(),
       price: '',
       mileage: '',
+      mileage_unit: 'km',
       location: '',
       description: '',
       condition: 'available',
@@ -194,6 +197,7 @@ export const AdminDashboard: React.FC = () => {
       year: car.year,
       price: car.price,
       mileage: car.mileage,
+      mileage_unit: car.mileage_unit || 'km',
       location: car.location,
       description: car.description,
       condition: car.condition,
@@ -257,6 +261,7 @@ export const AdminDashboard: React.FC = () => {
             year: car.year,
             price: car.price,
             mileage: car.mileage,
+            mileage_unit: car.mileage_unit || 'km',
             location: car.location,
             description: car.description,
             condition: car.condition,
@@ -1194,7 +1199,7 @@ export const AdminDashboard: React.FC = () => {
                                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(car.price)}
                               </p>
                               <p className="text-[10px] text-neutral-500 mt-1 break-words">
-                                {car.location || 'Location on request'} • {new Intl.NumberFormat('en-US').format(car.mileage)} km
+                                {car.location || 'Location on request'} • {formatMileage(car.mileage, car.mileage_unit)}
                               </p>
                             </div>
                           </div>
@@ -1263,7 +1268,7 @@ export const AdminDashboard: React.FC = () => {
                                   {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(car.price)}
                                 </td>
                                 <td className="py-4 px-6 font-mono text-neutral-400">
-                                  {new Intl.NumberFormat('en-US').format(car.mileage)} km
+                                  {formatMileage(car.mileage, car.mileage_unit)}
                                 </td>
                                 <td className="py-4 px-6">
                                   <span
@@ -1797,14 +1802,24 @@ export const AdminDashboard: React.FC = () => {
                 {/* Mileage */}
                 <div>
                   <label className="block text-[10px] uppercase font-heading font-bold text-neutral-400 tracking-wider mb-2">
-                    Odometer Mileage (km) *
+                    Odometer Mileage *
                   </label>
-                  <input
-                    type="number"
-                    {...carRegister('mileage', { required: true })}
-                    placeholder="e.g. 45000"
-                    className="w-full bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm py-2.5 px-4 text-xs font-sans outline-none transition-colors font-mono"
-                  />
+                  <div className="grid grid-cols-[1fr_86px] gap-2">
+                    <input
+                      type="number"
+                      {...carRegister('mileage', { required: true })}
+                      placeholder="e.g. 45000"
+                      className="w-full bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm py-2.5 px-4 text-xs font-sans outline-none transition-colors font-mono"
+                    />
+                    <select
+                      {...carRegister('mileage_unit', { required: true })}
+                      className="w-full bg-neutral-950 border border-neutral-800 focus:border-accent rounded-sm py-2.5 px-3 text-xs font-heading font-bold uppercase outline-none transition-colors cursor-pointer"
+                      aria-label="Mileage unit"
+                    >
+                      <option value="km">km</option>
+                      <option value="mi">mi</option>
+                    </select>
+                  </div>
                 </div>
 
                 {/* Condition dropdown */}
