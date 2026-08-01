@@ -29,6 +29,7 @@ import {
   RefreshCw,
   Settings,
   ArrowLeft,
+  ArrowRight,
   Send,
   Inbox
 } from 'lucide-react';
@@ -77,6 +78,7 @@ export const AdminDashboard: React.FC = () => {
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
+  const [draggedImageIndex, setDraggedImageIndex] = useState<number | null>(null);
 
   const { register: carRegister, handleSubmit: handleCarSubmit, reset: resetCarForm, setValue: setCarValue, watch: watchCarForm } = useForm();
   const { register: inviteRegister, handleSubmit: handleInviteSubmit, reset: resetInviteForm } = useForm();
@@ -533,6 +535,39 @@ export const AdminDashboard: React.FC = () => {
     const updated = uploadedImageUrls.filter((_, idx) => idx !== indexToRemove);
     setUploadedImageUrls(updated);
     setCarValue('images', updated);
+  };
+
+  const applyImageOrder = (nextUrls: string[]) => {
+    setUploadedImageUrls(nextUrls);
+    setCarValue('images', nextUrls);
+  };
+
+  const handleMoveImage = (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= uploadedImageUrls.length || fromIndex === toIndex) return;
+
+    const updated = [...uploadedImageUrls];
+    const [movedImage] = updated.splice(fromIndex, 1);
+    updated.splice(toIndex, 0, movedImage);
+    applyImageOrder(updated);
+  };
+
+  const handleMakePrimaryImage = (imageIndex: number) => {
+    handleMoveImage(imageIndex, 0);
+  };
+
+  const handleImageDragStart = (imageIndex: number) => {
+    setDraggedImageIndex(imageIndex);
+  };
+
+  const handleImageDragOver = (event: React.DragEvent, targetIndex: number) => {
+    event.preventDefault();
+    if (draggedImageIndex === null || draggedImageIndex === targetIndex) return;
+    handleMoveImage(draggedImageIndex, targetIndex);
+    setDraggedImageIndex(targetIndex);
+  };
+
+  const handleImageDragEnd = () => {
+    setDraggedImageIndex(null);
   };
 
   // ================= MESSAGE ACTIONS =================
@@ -1902,23 +1937,92 @@ export const AdminDashboard: React.FC = () => {
 
                   {/* Uploaded Previews List */}
                   {uploadedImageUrls.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4">
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between gap-3 mb-2">
+                        <p className="text-[10px] uppercase tracking-wider text-neutral-500 font-heading font-bold">
+                          Image order
+                        </p>
+                        <p className="text-[10px] text-neutral-500">
+                          First image displays first on the listing card and carousel.
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                       {uploadedImageUrls.map((url, idx) => (
-                        <div key={idx} className="relative aspect-video bg-neutral-950 rounded-sm overflow-hidden border border-neutral-800 group">
+                        <div
+                          key={`${url}-${idx}`}
+                          draggable
+                          onDragStart={() => handleImageDragStart(idx)}
+                          onDragOver={(event) => handleImageDragOver(event, idx)}
+                          onDragEnd={handleImageDragEnd}
+                          className={`relative aspect-video bg-neutral-950 rounded-sm overflow-hidden border group ${
+                            idx === 0 ? 'border-accent shadow-[0_0_0_1px_rgba(201,168,76,0.35)]' : 'border-neutral-800'
+                          } ${draggedImageIndex === idx ? 'opacity-60' : ''}`}
+                        >
                           <img src={url} alt={`Media Preview ${idx + 1}`} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                          <div className="absolute top-1 left-1 flex items-center gap-1">
+                            <span className="bg-neutral-950/85 text-white text-[9px] font-mono px-1.5 py-0.5 rounded-sm">
+                              {idx + 1}
+                            </span>
+                            {idx === 0 && (
+                              <span className="bg-accent text-neutral-950 text-[8px] font-heading font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm">
+                                Primary
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="absolute inset-x-1 bottom-1 grid grid-cols-3 gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMoveImage(idx, idx - 1);
+                              }}
+                              disabled={idx === 0}
+                              className="bg-neutral-950/85 hover:bg-neutral-900 disabled:opacity-35 disabled:hover:bg-neutral-950/85 text-white h-7 rounded-sm flex items-center justify-center transition-colors"
+                              title="Move earlier"
+                            >
+                              <ArrowLeft className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMakePrimaryImage(idx);
+                              }}
+                              disabled={idx === 0}
+                              className="bg-accent/95 hover:bg-accent disabled:bg-neutral-950/85 disabled:text-white disabled:opacity-35 text-neutral-950 h-7 rounded-sm text-[9px] font-heading font-bold uppercase transition-colors"
+                              title="Make primary image"
+                            >
+                              First
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMoveImage(idx, idx + 1);
+                              }}
+                              disabled={idx === uploadedImageUrls.length - 1}
+                              className="bg-neutral-950/85 hover:bg-neutral-900 disabled:opacity-35 disabled:hover:bg-neutral-950/85 text-white h-7 rounded-sm flex items-center justify-center transition-colors"
+                              title="Move later"
+                            >
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleRemoveImage(idx);
                             }}
-                            className="absolute top-1 right-1 bg-neutral-950/80 hover:bg-red-600 text-white p-1 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                            className="absolute top-1 right-1 bg-neutral-950/80 hover:bg-red-600 text-white p-1 rounded-full transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                             title="Remove Image"
                           >
                             <X className="w-3 h-3" />
                           </button>
                         </div>
                       ))}
+                      </div>
                     </div>
                   )}
                 </div>

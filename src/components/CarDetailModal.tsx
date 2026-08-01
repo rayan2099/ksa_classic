@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, Phone, Mail, MapPin, Gauge, ShieldCheck, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { Car } from '../types.js';
 
@@ -10,6 +10,7 @@ interface CarDetailModalProps {
 
 export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, onOpenInquiry }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
 
   const formattedPrice = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -23,14 +24,46 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
     ? car.images 
     : ['https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1200'];
 
+  useEffect(() => {
+    setActiveImageIndex(0);
+    touchStartX.current = null;
+  }, [car.id]);
+
+  const goToNextImage = () => {
+    setActiveImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const goToPreviousImage = () => {
+    setActiveImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
   const nextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setActiveImageIndex((prev) => (prev + 1) % images.length);
+    goToNextImage();
   };
 
   const prevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setActiveImageIndex((prev) => (prev - 1 + images.length) % images.length);
+    goToPreviousImage();
+  };
+
+  const handleTouchStart = (event: React.TouchEvent) => {
+    touchStartX.current = event.touches[0]?.clientX ?? null;
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent) => {
+    if (touchStartX.current === null || images.length < 2) return;
+
+    const endX = event.changedTouches[0]?.clientX ?? touchStartX.current;
+    const distance = endX - touchStartX.current;
+    touchStartX.current = null;
+
+    if (Math.abs(distance) < 45) return;
+    if (distance > 0) {
+      goToPreviousImage();
+    } else {
+      goToNextImage();
+    }
   };
 
   return (
@@ -65,7 +98,11 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, onClose, on
 
         {/* Left Column: Image Slideshow */}
         <div className="w-full md:w-1/2 bg-neutral-950 flex flex-col justify-between relative aspect-video md:aspect-auto">
-          <div className="relative flex-grow flex items-center justify-center min-h-[220px] sm:min-h-[300px] md:h-full">
+          <div
+            className="relative flex-grow flex items-center justify-center min-h-[220px] sm:min-h-[300px] md:h-full touch-pan-y"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <img
               src={images[activeImageIndex]}
               alt={`${car.title} view ${activeImageIndex + 1}`}
