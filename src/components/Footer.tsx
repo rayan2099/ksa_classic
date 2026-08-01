@@ -31,7 +31,7 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
               </span>
             </Link>
             <p className="text-xs text-neutral-500 font-sans leading-relaxed">
-              Kingdom Speciality Automotive: a focused marketplace for collectible cars, motor bikes, and restoration projects with direct access to the showroom team.
+              Kingdom Speciality Automotive Collections: a focused marketplace for collectible cars, motor bikes, and restoration projects with direct access to the showroom team.
             </p>
           </div>
 
@@ -137,7 +137,7 @@ export const Footer: React.FC<FooterProps> = ({ onScrollToSection }) => {
               Employee Access Portal
             </Link>
             <span>•</span>
-            <span className="text-neutral-700">Kingdom Speciality Automotive</span>
+            <span className="text-neutral-700">Kingdom Speciality Automotive Collections</span>
           </div>
         </div>
       </div>

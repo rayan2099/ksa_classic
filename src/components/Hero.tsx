@@ -119,7 +119,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
                 >
                   <Sparkles className="w-3.5 h-3.5 text-[#C9A84C] animate-pulse" />
                   <span className="text-[8px] uppercase tracking-widest text-neutral-200 font-bold font-heading">
-                    Kingdom Speciality Automotive
+                    Kingdom Speciality Automotive Collections
                   </span>
                 </div>
 
@@ -157,7 +157,7 @@ export const Hero: React.FC<HeroProps> = ({ onBrowseClick }) => {
                 <div className="inline-flex items-center space-x-2 bg-neutral-900/80 backdrop-blur-md border border-[#C9A84C]/30 rounded-full px-4 py-1.5 shadow-lg shadow-black/35">
                   <Sparkles className="w-3.5 h-3.5 text-[#C9A84C] animate-pulse" />
                   <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-neutral-200 font-bold font-heading">
-                    Kingdom Speciality Automotive
+                    Kingdom Speciality Automotive Collections
                   </span>
                 </div>
 
