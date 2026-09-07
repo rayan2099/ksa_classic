@@ -556,8 +556,9 @@ export const AdminDashboard: React.FC = () => {
     applyImageOrder(updated);
   };
 
-  const handleMakePrimaryImage = (imageIndex: number) => {
-    handleMoveImage(imageIndex, 0);
+  const handleSetImagePosition = (fromIndex: number, nextPosition: number) => {
+    const toIndex = Math.min(Math.max(nextPosition - 1, 0), uploadedImageUrls.length - 1);
+    handleMoveImage(fromIndex, toIndex);
   };
 
   const handleImageDragStart = (imageIndex: number) => {
@@ -1955,10 +1956,10 @@ export const AdminDashboard: React.FC = () => {
                     <div className="mt-4">
                       <div className="flex items-center justify-between gap-3 mb-2">
                         <p className="text-[10px] uppercase tracking-wider text-neutral-500 font-heading font-bold">
-                          Image order
+                          Numbered display order
                         </p>
                         <p className="text-[10px] text-neutral-500">
-                          First image displays first on the listing card and carousel.
+                          #1 is the cover image. Drag, use arrows, or choose a number before saving.
                         </p>
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
@@ -1975,17 +1976,17 @@ export const AdminDashboard: React.FC = () => {
                         >
                           <img src={url} alt={`Media Preview ${idx + 1}`} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                           <div className="absolute top-1 left-1 flex items-center gap-1">
-                            <span className="bg-neutral-950/85 text-white text-[9px] font-mono px-1.5 py-0.5 rounded-sm">
-                              {idx + 1}
+                            <span className="bg-neutral-950/90 text-white text-[11px] font-heading font-bold px-2 py-1 rounded-sm border border-white/15 shadow-lg">
+                              #{idx + 1}
                             </span>
                             {idx === 0 && (
                               <span className="bg-accent text-neutral-950 text-[8px] font-heading font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm">
-                                Primary
+                                Cover
                               </span>
                             )}
                           </div>
 
-                          <div className="absolute inset-x-1 bottom-1 grid grid-cols-3 gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                          <div className="absolute inset-x-1 bottom-1 grid grid-cols-[28px_1fr_28px] gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                             <button
                               type="button"
                               onClick={(e) => {
@@ -1998,18 +1999,20 @@ export const AdminDashboard: React.FC = () => {
                             >
                               <ArrowLeft className="w-3.5 h-3.5" />
                             </button>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleMakePrimaryImage(idx);
-                              }}
-                              disabled={idx === 0}
-                              className="bg-accent/95 hover:bg-accent disabled:bg-neutral-950/85 disabled:text-white disabled:opacity-35 text-neutral-950 h-7 rounded-sm text-[9px] font-heading font-bold uppercase transition-colors"
-                              title="Make primary image"
+                            <select
+                              aria-label={`Set image ${idx + 1} display position`}
+                              value={idx + 1}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => handleSetImagePosition(idx, Number(e.target.value))}
+                              className="min-w-0 bg-accent/95 hover:bg-accent text-neutral-950 h-7 rounded-sm text-[10px] font-heading font-bold uppercase text-center transition-colors cursor-pointer"
+                              title="Choose display order"
                             >
-                              First
-                            </button>
+                              {uploadedImageUrls.map((_, orderIdx) => (
+                                <option key={orderIdx + 1} value={orderIdx + 1}>
+                                  #{orderIdx + 1}
+                                </option>
+                              ))}
+                            </select>
                             <button
                               type="button"
                               onClick={(e) => {
